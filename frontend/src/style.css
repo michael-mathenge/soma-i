@@ -1,0 +1,204 @@
+:root {
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    sans-serif;
+  color: #18312d;
+  background: #f7f8f5;
+  font-synthesis: none;
+  line-height: 1.5;
+  font-weight: 400;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+a {
+  color: #075e54;
+  text-underline-offset: 0.18em;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #ef9d28;
+  outline-offset: 2px;
+}
+button,
+.button {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background: #075e54;
+  color: white;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.quiet {
+  color: #075e54;
+  background: #e4efeb;
+}
+button.danger {
+  color: #812d2d;
+  background: #f5e4e1;
+}
+.app-shell {
+  max-width: 1040px;
+  margin: auto;
+  padding: 0 1rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #d8e0dc;
+}
+.brand {
+  color: #075e54;
+  font-weight: 850;
+  font-size: 1.3rem;
+  text-decoration: none;
+}
+.site-header nav {
+  margin-left: auto;
+  display: flex;
+  gap: 1rem;
+}
+main {
+  flex: 1;
+  padding: 2rem 0;
+}
+footer {
+  padding: 1rem 0;
+  border-top: 1px solid #d8e0dc;
+  color: #52645f;
+  font-size: 0.9rem;
+}
+.panel {
+  border: 1px solid #d5dfda;
+  border-radius: 12px;
+  padding: 1.25rem;
+  background: white;
+  box-shadow: 0 2px 8px #18312d0a;
+}
+.hero {
+  max-width: 680px;
+  margin: 2rem auto;
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  line-height: 1.15;
+}
+.eyebrow,
+.meta {
+  color: #51645e;
+  font-size: 0.9rem;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+form.stack {
+  margin: 1.25rem 0;
+}
+label:not(.radio) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+input:not([type="checkbox"]):not([type="radio"]),
+select {
+  font: inherit;
+  padding: 0.7rem;
+  min-height: 2.8rem;
+  color: inherit;
+  background: white;
+  border: 1px solid #778a83;
+  border-radius: 7px;
+}
+.radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+.radio input {
+  margin-top: 0.35rem;
+  accent-color: #075e54;
+}
+.callout {
+  background: #eff5f1;
+  border-left: 4px solid #075e54;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+progress {
+  width: 100%;
+  height: 1.1rem;
+  accent-color: #087566;
+}
+.toolbar {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+.toolbar label {
+  min-width: 210px;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1rem;
+}
+.item-card h3 {
+  margin-top: 0;
+}
+fieldset {
+  border: 1px solid #d5dfda;
+  border-radius: 8px;
+  padding: 0.9rem;
+}
+legend {
+  font-weight: 650;
+}
+.notice {
+  background: #fff1d8;
+  padding: 0.8rem;
+  border-radius: 8px;
+}
+@media (max-width: 640px) {
+  .site-header {
+    align-items: flex-start;
+  }
+  .site-header nav {
+    width: 100%;
+    margin: 0;
+    justify-content: space-between;
+  }
+  main {
+    padding-top: 1rem;
+  }
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

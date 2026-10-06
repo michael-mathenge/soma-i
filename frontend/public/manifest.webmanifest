@@ -1,0 +1,8 @@
+{
+  "name": "SOMA.i — learning that leads somewhere",
+  "short_name": "SOMA.i",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#075e54"
+}

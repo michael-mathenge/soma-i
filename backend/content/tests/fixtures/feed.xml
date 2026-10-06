@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Fixture Learning Feed</title>
+<item><title>Introduction to SQL data analysis</title><link>https://example.test/sql-intro</link><description>Learn spreadsheets and SQL basics.</description><pubDate>Tue, 01 Sep 2026 10:00:00 GMT</pubDate></item>
+<item><title>Introduction to SQL data analysis</title><link>https://example.test/sql-intro</link><description>Duplicate URL should not create an item.</description><pubDate>Tue, 01 Sep 2026 10:00:00 GMT</pubDate></item>
+<item><title>Building accessible HTML pages</title><link>https://example.test/html-accessible</link><description>HTML and CSS for web development.</description><pubDate>Wed, 02 Sep 2026 10:00:00 GMT</pubDate></item>
+</channel></rss>
