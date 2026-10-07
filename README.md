@@ -7,7 +7,7 @@ SOMA.i is an invention-sprint proof of concept that connects credible learning c
 Replace `YOUR_GITHUB_CLONE_URL` with this repository's HTTPS clone URL, then run:
 
 ```powershell
-git clone YOUR_GITHUB_CLONE_URL
+git clone https://github.com/michael-mathenge/soma-i.git
 ```
 
 Open PowerShell in the cloned repository directory and continue with setup below.
