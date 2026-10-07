@@ -25,6 +25,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -c "import sys; assert sys.prefix != sys.base_prefix, 'Project virtual environment is not active'; print(sys.executable)"
 python -m pip install -r requirements.txt
+Copy-Item .env.example .env
 python backend\manage.py migrate
 python backend\manage.py seed_demo
 ```
