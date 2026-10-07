@@ -5,8 +5,12 @@ __pycache__/
 .ruff_cache/
 *.sqlite3
 .env
+.env.*
+!.env.example
+*.db
 node_modules/
 .pnpm-store/
 frontend/dist/
 playwright-report/
 test-results/
+.pytest_cache/
