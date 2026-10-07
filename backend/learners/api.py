@@ -261,6 +261,28 @@ def checkpoint_action(request, checkpoint_id, action):
     return Response(what_next(learner, checkpoint))
 
 
+@api_view(["GET"])
+def next_step(request):
+    learner = current_learner(request)
+    if learner is None:
+        return Response({"available": False, "reason": "no_learner"})
+    if learner.chosen_pathway is None:
+        return Response({"available": False, "reason": "no_pathway"})
+    latest = (
+        CheckpointRecord.objects.filter(
+            learner=learner,
+            status="done",
+            checkpoint__pathway_skill__pathway=learner.chosen_pathway,
+        )
+        .select_related("checkpoint__pathway_skill__skill")
+        .order_by("-checkpoint__pathway_skill__order")
+        .first()
+    )
+    if latest is None:
+        return Response({"available": False, "reason": "no_checkpoint"})
+    return Response(what_next(learner, latest.checkpoint))
+
+
 def what_next(learner, checkpoint):
     unlocked = checkpoint.pathway_skill.skill
     state = progress_for(learner)

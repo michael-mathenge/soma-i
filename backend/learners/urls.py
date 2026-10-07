@@ -8,6 +8,7 @@ urlpatterns = [
     path("demo/", api.demo_session),
     path("me/", api.me),
     path("dashboard/", api.dashboard),
+    path("next/", api.next_step),
     path("items/", api.items_list),
     path("items/<int:item_id>/done/", api.item_done),
     path("checkpoints/<int:checkpoint_id>/<str:action>/", api.checkpoint_action),

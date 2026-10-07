@@ -51,3 +51,53 @@ test("onboard and complete a checkpoint in English and Swahili", async ({
     await expect(page.getByText(flow.opportunities)).toBeVisible();
   }
 });
+
+test("direct /next load shows matched sample opportunities", async ({
+  page,
+}) => {
+  await page.addInitScript(() => sessionStorage.clear());
+  const response = await page.request.post("/api/demo/");
+  expect(response.ok()).toBeTruthy();
+
+  await page.goto("/next");
+
+  await expect(
+    page.getByRole("heading", { name: "What’s next" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Data Intern (sample)" }),
+  ).toBeVisible();
+  await expect(page.getByText("Sample listing").first()).toBeVisible();
+});
+
+test("/next explains when no learner exists in both languages", async ({
+  page,
+}) => {
+  for (const language of [
+    {
+      code: "en",
+      message:
+        "Choose a pathway first to see your next steps and matched opportunities.",
+      link: "Choose a pathway",
+    },
+    {
+      code: "sw",
+      message:
+        "Chagua njia ya kujifunza kwanza ili kuona hatua zako zinazofuata na fursa zinazolingana.",
+      link: "Chagua njia ya kujifunza",
+    },
+  ]) {
+    await page.goto("/");
+    await page.evaluate(
+      (code) => localStorage.setItem("somai-language", code),
+      language.code,
+    );
+    await page.context().clearCookies();
+    await page.goto("/next");
+
+    await expect(page.getByText(language.message)).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: language.link }),
+    ).toHaveAttribute("href", "/");
+  }
+});

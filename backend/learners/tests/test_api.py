@@ -44,6 +44,43 @@ def test_onboard_complete_checkpoint_and_get_whats_next(seeded):
     assert record.quiz_answers == [0, 0, 0]
 
 
+def test_direct_next_returns_latest_checkpoint_opportunities(seeded):
+    client = APIClient()
+    client.post("/api/demo/")
+
+    response = client.get("/api/next/")
+
+    assert response.status_code == 200
+    assert response.data["unlocked_skill"] == "Spreadsheets"
+    assert response.data["next_checkpoint"]["skill"] == "SQL"
+    assert response.data["opportunities"]
+    assert all(opportunity["sample"] for opportunity in response.data["opportunities"])
+    assert all(
+        opportunity["match_percent"] > 0
+        for opportunity in response.data["opportunities"]
+    )
+
+
+def test_direct_next_without_learner_returns_empty_state(seeded):
+    response = APIClient().get("/api/next/")
+
+    assert response.status_code == 200
+    assert response.data == {"available": False, "reason": "no_learner"}
+
+
+def test_direct_next_without_pathway_returns_empty_state():
+    learner = LearnerProfile.objects.create(display_name="No pathway")
+    client = APIClient()
+    session = client.session
+    session["learner_id"] = learner.pk
+    session.save()
+
+    response = client.get("/api/next/")
+
+    assert response.status_code == 200
+    assert response.data == {"available": False, "reason": "no_pathway"}
+
+
 def test_health_endpoint_is_public():
     response = APIClient().get("/api/health/")
     assert response.status_code == 200

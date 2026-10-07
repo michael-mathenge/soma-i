@@ -361,11 +361,10 @@ function CheckpointPage({ t }) {
   }, [id]);
   async function complete() {
     try {
-      const response = await api.post(`/checkpoints/${id}/complete/`, {
+      await api.post(`/checkpoints/${id}/complete/`, {
         self_attested: attested,
         quiz_answers: answers,
       });
-      sessionStorage.setItem("somai-next", JSON.stringify(response.data));
       navigate("/next");
     } catch {}
   }
@@ -456,23 +455,35 @@ function CheckpointPage({ t }) {
 }
 
 function NextPage({ t }) {
-  const [data, setData] = useState(
-    JSON.parse(sessionStorage.getItem("somai-next") || "null"),
-  );
+  const [data, setData] = useState(null);
   useEffect(() => {
-    if (!data)
-      api
-        .get("/dashboard/")
-        .then((r) => {
-          setData({
-            unlocked_skill: r.data.done.at(-1),
-            next_checkpoint: r.data.next_checkpoint,
-            items: r.data.items,
-            opportunities: [],
-          });
-        })
-        .catch(() => {});
-  }, [data]);
+    api
+      .get("/next/")
+      .then((response) => setData(response.data))
+      .catch(() => setData({ available: false, reason: "no_learner" }));
+  }, []);
+  if (data === null)
+    return (
+      <section className="panel">
+        <h1>{t.whatsNext}</h1>
+        <p>{t.loading}</p>
+      </section>
+    );
+  if (!data.unlocked_skill)
+    return (
+      <section className="panel stack">
+        <h1>{t.whatsNext}</h1>
+        <p>
+          {data.reason === "no_checkpoint" ? t.nextNoCheckpoint : t.nextEmpty}
+        </p>
+        <Link
+          className="button"
+          to={data.reason === "no_checkpoint" ? "/pathway" : "/"}
+        >
+          {data.reason === "no_checkpoint" ? t.back : t.choosePathway}
+        </Link>
+      </section>
+    );
   return (
     <section className="stack">
       <div className="panel">

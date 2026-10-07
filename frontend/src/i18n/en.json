@@ -37,6 +37,9 @@
   "match": "match",
   "sampleListing": "Sample listing",
   "back": "Back to pathway",
+  "choosePathway": "Choose a pathway",
+  "nextEmpty": "Choose a pathway first to see your next steps and matched opportunities.",
+  "nextNoCheckpoint": "Complete a checkpoint to see your next steps.",
   "loading": "Loading…",
   "error": "Please try again. Your progress is saved when online.",
   "saved": "Settings saved."

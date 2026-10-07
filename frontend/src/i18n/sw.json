@@ -37,6 +37,9 @@
   "match": "ulinganifu",
   "sampleListing": "Tangazo la mfano",
   "back": "Rudi kwenye njia",
+  "choosePathway": "Chagua njia ya kujifunza",
+  "nextEmpty": "Chagua njia ya kujifunza kwanza ili kuona hatua zako zinazofuata na fursa zinazolingana.",
+  "nextNoCheckpoint": "Kamilisha hatua moja ili kuona hatua zako zinazofuata.",
   "loading": "Inapakia…",
   "error": "Jaribu tena. Maendeleo huhifadhiwa ukiwa mtandaoni.",
   "saved": "Mipangilio imehifadhiwa."
