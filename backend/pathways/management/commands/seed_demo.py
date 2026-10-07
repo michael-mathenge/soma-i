@@ -46,6 +46,14 @@ QUIZ = [
 ]
 
 
+def _update_first_or_create(model, *, lookup, defaults):
+    """Update the lowest-ID match, without deleting legacy duplicate rows."""
+    existing = model.objects.filter(**lookup).order_by("pk").first()
+    if existing is not None:
+        return model.objects.update_or_create(pk=existing.pk, defaults=defaults)
+    return model.objects.update_or_create(**lookup, defaults=defaults)
+
+
 class Command(BaseCommand):
     help = "Seed pathways, sample content, opportunities, and an offline demo learner."
 
@@ -57,17 +65,18 @@ class Command(BaseCommand):
                 skill_by_name[name], _ = Skill.objects.get_or_create(
                     slug=slug, defaults={"name": name}
                 )
-        seeded = []
+        seeded = {}
         for title, description, outcome, names in PATHWAYS:
-            pathway, _ = Pathway.objects.update_or_create(
-                title=title,
+            pathway, _ = _update_first_or_create(
+                Pathway,
+                lookup={"title": title},
                 defaults={
                     "description": description,
                     "target_outcome": outcome,
                     "locale": "KE",
                 },
             )
-            seeded.append(pathway)
+            seeded[title] = pathway
             for order, name in enumerate(names, start=1):
                 step, _ = PathwaySkill.objects.update_or_create(
                     pathway=pathway,
@@ -272,13 +281,17 @@ class Command(BaseCommand):
             )
             opportunity.skills.set([skill] if skill else [])
 
-        pathway = Pathway.objects.get(title="Data Analyst")
-        demo, _ = LearnerProfile.objects.get_or_create(
-            display_name="Amina Demo",
-            defaults={"preferred_language": "en", "chosen_pathway": pathway},
+        pathway = seeded["Data Analyst"]
+        demo, _ = _update_first_or_create(
+            LearnerProfile,
+            lookup={"display_name": "Amina Demo"},
+            defaults={
+                "preferred_language": "en",
+                "reminder_opt_in": True,
+                "reminder_frequency": "weekly",
+                "chosen_pathway": pathway,
+            },
         )
-        demo.chosen_pathway = pathway
-        demo.save(update_fields=["chosen_pathway"])
         first_checkpoint = pathway.steps.select_related("checkpoint").first().checkpoint
         CheckpointRecord.objects.update_or_create(
             learner=demo,

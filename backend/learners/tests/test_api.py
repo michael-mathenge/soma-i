@@ -81,6 +81,63 @@ def test_direct_next_without_pathway_returns_empty_state():
     assert response.data == {"available": False, "reason": "no_pathway"}
 
 
+def test_seed_demo_is_repeatable_and_opts_amina_into_english_weekly_reminders():
+    call_command("seed_demo", verbosity=0)
+    call_command("seed_demo", verbosity=0)
+
+    pathway_titles = [
+        "Data Analyst",
+        "Web Developer",
+        "Digital Marketing Assistant",
+    ]
+    assert LearnerProfile.objects.filter(display_name="Amina Demo").count() == 1
+    assert {
+        title: Pathway.objects.filter(title=title).count() for title in pathway_titles
+    } == {title: 1 for title in pathway_titles}
+
+    amina = LearnerProfile.objects.get(display_name="Amina Demo")
+    assert amina.chosen_pathway.title == "Data Analyst"
+    assert amina.preferred_language == "en"
+    assert amina.reminder_opt_in is True
+    assert amina.reminder_frequency == "weekly"
+    assert amina.phone == ""
+
+
+def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
+    call_command("seed_demo", verbosity=0)
+    pathway = Pathway.objects.get(title="Data Analyst")
+    duplicate_pathway = Pathway.objects.create(
+        title="Data Analyst",
+        description="Leave this duplicate pathway untouched.",
+        target_outcome="Legacy outcome",
+    )
+    duplicate_learner = LearnerProfile.objects.create(
+        display_name="Amina Demo",
+        preferred_language="sw",
+        reminder_opt_in=False,
+        chosen_pathway=duplicate_pathway,
+    )
+
+    call_command("seed_demo", verbosity=0)
+
+    assert Pathway.objects.filter(title="Data Analyst").count() == 2
+    assert LearnerProfile.objects.filter(display_name="Amina Demo").count() == 2
+    assert Pathway.objects.get(pk=duplicate_pathway.pk).description == (
+        "Leave this duplicate pathway untouched."
+    )
+    assert LearnerProfile.objects.get(pk=duplicate_learner.pk).preferred_language == "sw"
+    canonical_amina = (
+        LearnerProfile.objects.filter(display_name="Amina Demo")
+        .order_by("pk")
+        .first()
+    )
+    assert canonical_amina is not None
+    amina = canonical_amina
+    assert amina.chosen_pathway_id == pathway.pk
+    assert amina.preferred_language == "en"
+    assert amina.reminder_opt_in is True
+
+
 def test_health_endpoint_is_public():
     response = APIClient().get("/api/health/")
     assert response.status_code == 200

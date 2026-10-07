@@ -13,7 +13,7 @@
 
 RSS `Source` records are parsed into deduplicated `Item` records. Rule-based keyword tagging associates items with `Skill` records. Ordered `PathwaySkill` rows and one checkpoint per skill organize those skills toward a stated outcome. A session-linked `LearnerProfile` tracks item completion and checkpoint status. Gap recommendations rank items for remaining skills, preferring low-data content after skill match. Opted-in learners due for a reminder are selected from that progress state, logged, and passed to a console or sandbox sender. Completing a checkpoint returns its unlocked skill, next checkpoint, recommended items, and skill-overlap-ranked opportunities.
 
-`Pathway` stores title, description, target outcome, and locale. `PathwaySkill` stores order and skill; `Checkpoint` stores title, criteria, unlock text, and quiz configuration. `Opportunity` carries type, provider, URL, location, deadline, skills, and sample-source note. `ReminderLog` records the short message, destination when provided, and send time.
+`Pathway` stores title, description, target outcome, and locale. `PathwaySkill` stores order and skill; `Checkpoint` stores title, criteria, unlock text, and quiz configuration. `Opportunity` carries type, provider, URL, location, deadline, skills, and sample-source note. `ReminderLog` records the learner, short message, send time, and sender name.
 
 ## Interfaces
 
