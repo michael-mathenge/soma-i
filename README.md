@@ -2,6 +2,16 @@
 
 SOMA.i is an invention-sprint proof of concept that connects credible learning content to practical skills, checkpoints, and next-step opportunities. Its primary track is **Guidance, Pathways & Opportunity**; it also demonstrates **Access & Discovery** through curated RSS and **Engagement** through checkpoints and reminders.
 
+## Clone (PowerShell)
+
+Replace `YOUR_GITHUB_CLONE_URL` with this repository's HTTPS clone URL, then run:
+
+```powershell
+git clone YOUR_GITHUB_CLONE_URL
+```
+
+Open PowerShell in the cloned repository directory and continue with setup below.
+
 ## How the operating constraints are addressed
 
 - **Credibility:** vetted RSS sources, visible publisher links, and source/date traceability; see `docs/SOURCES.md`.
@@ -82,3 +92,5 @@ The demo learner is `Amina Demo`, mid-way through Data Analyst, with seeded cont
 ## Built with Codex
 
 Codex supported planning against `AGENTS.md` in Plan mode and implementation across the completed M0–M6 milestones. We reviewed diffs and iterated with backend tests, production builds, and Playwright smoke checks, while documenting the project and its validation results.
+
+Licensed under the MIT License; see [LICENSE](LICENSE).
