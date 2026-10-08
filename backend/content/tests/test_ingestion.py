@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 
 from content.fetching import MAX_FEED_BYTES, FetchResponse, fetch_feed
 from content.ingestion import (
+    _matched_skills,
     clean_summary,
     entry_date,
     feed_staleness,
@@ -29,6 +30,32 @@ pytestmark = pytest.mark.django_db
 
 FETCHED_AT = datetime(2026, 10, 8, 9, 0, tzinfo=UTC)
 REFERENCE_DATE = date(2026, 10, 8)
+
+
+@pytest.mark.parametrize(
+    ("title", "summary", "not_expected"),
+    [
+        ("Digital skills", "A digital learning guide.", "Git"),
+        ("Fullscreen API", "Use the browser Fullscreen API.", "API Development"),
+        ("Attesting learner progress", "Attesting results.", "Testing"),
+    ],
+)
+def test_new_skill_keywords_do_not_match_substrings_or_browser_apis(
+    title, summary, not_expected
+):
+    assert not_expected not in {skill.name for skill in _matched_skills(title, summary)}
+
+
+def test_new_developer_skill_keywords_match_token_boundaries():
+    matched = {
+        skill.name
+        for skill in _matched_skills(
+            "Git basics, Python API development, and automated testing",
+            "Practice with Git and a REST API.",
+        )
+    }
+    assert {"Git", "Python", "API Development", "Testing"} <= matched
+
 
 DATA_FEED = {
     "key": "test_data",
