@@ -2,71 +2,81 @@
   {
     "title": "Python Algorithmic Trading with SnapTrade, Massive, Alpaca",
     "link": "https://www.freecodecamp.org/news/python-algorithmic-trading-with-snaptrade-massive-alpaca/",
-    "date": "Tue, 29 Sep 2026 14:27:04 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "We just published a comprehensive, hands-on video course on the freeCodeCamp.org YouTube channel that will teach you how to build an automated, end-to-end algorithmic trading system from scratch using",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-29T14:27:04+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a Reliable AI Assistant with the Claude API",
     "link": "https://www.freecodecamp.org/news/how-to-build-a-reliable-ai-assistant-with-the-claude-api/",
-    "date": "Tue, 29 Sep 2026 13:46:58 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Large language models can answer questions, summarise documents, write code, and interact with external systems. But building a reliable AI application requires more than sending a prompt and displayi",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-29T13:46:58+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Port a Jekyll Blog Theme to Python: Lessons From Actually Doing It",
     "link": "https://www.freecodecamp.org/news/how-to-build-a-reading-focused-blog-with-python-markdown-and-github-pages-for-free/",
-    "date": "Mon, 21 Sep 2026 20:57:10 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "I've been following a tufte-jekyll styled blog for a couple of years and that led me to discover Edward Tufte's book layout. Edward Tufte is renowned for his work on data visualization and information",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-21T20:57:10+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a GraphRAG System with Python, Neo4j and ServiceNow [Full Book]",
     "link": "https://www.freecodecamp.org/news/how-to-build-a-graphrag-system-with-python-neo4j-and-servicenow/",
-    "date": "Sat, 19 Sep 2026 17:30:12 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Somewhere in your company's ServiceNow instance is the answer to the question an engineer asks at two in the morning: if this is broken, what else is about to break? Every fact needed to answer it has",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-19T17:30:12+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Detect Hidden Target Leakage in Public Datasets with Python and a Dependency Graph",
     "link": "https://www.freecodecamp.org/news/how-to-detect-hidden-target-leakage-in-public-datasets-with-python-and-a-dependency-graph/",
-    "date": "Sat, 19 Sep 2026 17:27:39 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Some time ago, I gave a machine learning model five columns from a public CDC dataset and asked it to predict a sixth column from the same file. The model scored an R² of 0.998, which is about as clos",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-19T17:27:39+00:00",
+    "date_source": "published"
   },
   {
     "title": "How AI Coding Assistants Can Help You Debug Without Writing the Code for You",
     "link": "https://www.freecodecamp.org/news/how-ai-coding-assistants-can-help-you-debug-without-writing-the-code-for-you/",
-    "date": "Fri, 18 Sep 2026 21:31:44 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "AI coding assistants have become really good at fixing code. Paste an error into an AI tool and, within seconds, you'll get a corrected implementation. That's useful when you simply want to get someth",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-18T21:31:44+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Prevent Race Conditions in Django",
     "link": "https://www.freecodecamp.org/news/how-to-prevent-race-conditions-in-django/",
-    "date": "Fri, 11 Sep 2026 21:50:46 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Let's say you have enough credit left to generate one more image in an AI app. You submit a request in one browser tab, then submit another in a second tab before the first finishes. The app accepts b",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-11T21:50:46+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a Self-Evaluating AI System: Automated Testing and Evaluation Pipelines for LLM Applications",
     "link": "https://www.freecodecamp.org/news/build-a-self-evaluating-ai-system-automated-testing-and-evaluation-pipelines-for-llm-apps/",
-    "date": "Fri, 11 Sep 2026 15:24:04 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "So you shipped your AI feature and it works in demos. Your team is impressed. Then a user asks a question slightly outside your test cases and the model confidently returns something completely wrong.",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-11T15:24:04+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Use Gradio with Python: A Complete Beginner-to-Advanced Book",
     "link": "https://www.freecodecamp.org/news/how-to-use-gradio-with-python-beginner-to-advanced-book/",
-    "date": "Wed, 09 Sep 2026 18:09:51 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Gradio is one of those Python libraries that makes you wonder why building a web interface ever had to be complicated in the first place. You've probably experienced this before: you write a Python pr",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-09T18:09:51+00:00",
+    "date_source": "published"
   },
   {
     "title": "Learn Python Interactively",
     "link": "https://www.freecodecamp.org/news/learn-python-interactively/",
-    "date": "Wed, 09 Sep 2026 13:56:17 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Python continues to be one of the most versatile, widely adopted programming languages in tech. Because its syntax mirrors plain English, it remains the absolute best place for a beginner to start. We",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-09T13:56:17+00:00",
+    "date_source": "published"
   }
 ]

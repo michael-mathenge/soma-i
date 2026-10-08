@@ -16,11 +16,16 @@ SUMMARY_MAX_CHARS = 300
 
 def normalize_link(value):
     parsed = urlsplit((value or "").strip())
-    scheme = parsed.scheme.lower()
+    original_scheme = parsed.scheme.lower()
+    scheme = original_scheme
     if scheme == "http":
         scheme = "https"
     host = (parsed.hostname or "").lower()
-    if parsed.port:
+    port = parsed.port
+    if port and not (
+        (original_scheme == "http" and port == 80)
+        or (original_scheme == "https" and port == 443)
+    ):
         host = f"{host}:{parsed.port}"
     path = parsed.path.rstrip("/") or "/"
     query = urlencode(
@@ -47,19 +52,33 @@ def entry_date(entry, fetched_at):
                 timezone.make_aware(value) if timezone.is_naive(value) else value
             ), source
 
+    fixture_source = entry.get("date_source")
+    if fixture_source == "fetched":
+        return fetched_at, "fetched"
+
     fixture_date = entry.get("date")
     if fixture_date:
         try:
             value = datetime.fromisoformat(str(fixture_date).replace("Z", "+00:00"))
             if timezone.is_naive(value):
                 value = timezone.make_aware(value, UTC)
-            return value, "published"
+            source = (
+                fixture_source
+                if fixture_source in {"published", "updated"}
+                else "published"
+            )
+            return value, source
         except (TypeError, ValueError, OverflowError):
             try:
                 value = parsedate_to_datetime(fixture_date)
                 if timezone.is_naive(value):
                     value = timezone.make_aware(value, UTC)
-                return value, "published"
+                source = (
+                    fixture_source
+                    if fixture_source in {"published", "updated"}
+                    else "published"
+                )
+                return value, source
             except (TypeError, ValueError, OverflowError):
                 pass
 
@@ -179,7 +198,9 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
         title = plain_text(entry.get("title", "")).strip()[:300]
         original_link = str(entry.get("link", "")).strip()
         normalized_link = normalize_link(original_link)
-        summary = clean_summary(entry.get("summary", entry.get("description", "")))
+        summary = clean_summary(
+            entry.get("summary", entry.get("description", entry.get("excerpt", "")))
+        )
         if not title or not original_link or not normalized_link:
             continue
 

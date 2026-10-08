@@ -2,71 +2,81 @@
   {
     "title": "Session Budgets or Driver Caps: A Debate for Agent SQL Exploration",
     "link": "https://dev.to/dataio_4921/session-budgets-or-driver-caps-a-debate-for-agent-sql-exploration-2p0",
-    "date": "Thu, 08 Oct 2026 09:49:39 +0000",
+    "attribution": "DEV Community",
     "excerpt": "A composite warehouse incident, rather than a claimed personal outage, is enough to frame this operational choice. An exploratory agent drafted a wide analytical query against a shared reporting datab",
-    "attribution": "DEV Community"
+    "date": "2026-10-08T09:49:39+00:00",
+    "date_source": "published"
   },
   {
     "title": "The refund arrived after the payout, so the fix was two nullable columns and no code",
     "link": "https://dev.to/daniel_pertu/the-refund-arrived-after-the-payout-so-the-fix-was-two-nullable-columns-and-no-code-69a",
-    "date": "Thu, 08 Oct 2026 09:22:37 +0000",
+    "attribution": "DEV Community",
     "excerpt": "CogniPrep pays creators a commission when someone buys through their code. The policy is published in our terms, and you can read it on cogniprep.app/terms , section 7.2: Commission accrues only when ",
-    "attribution": "DEV Community"
+    "date": "2026-10-08T09:22:37+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Easily Convert JSON and Excel Files to SQL Insert Statements",
     "link": "https://dev.to/gcupic/how-to-easily-convert-json-and-excel-files-to-sql-insert-statements-4bno",
-    "date": "Thu, 08 Oct 2026 08:14:48 +0000",
+    "attribution": "DEV Community",
     "excerpt": "Converting structured data like JSON or Excel files into clean SQL INSERT statements is a task every developer runs into. Whether you are seeding a database, migrating legacy datasets, or prepping moc",
-    "attribution": "DEV Community"
+    "date": "2026-10-08T08:14:48+00:00",
+    "date_source": "published"
   },
   {
     "title": "Start and End Dates of the Longest Rising Period",
     "link": "https://dev.to/esproc_spl/start-and-end-dates-of-the-longest-rising-period-3m6j",
-    "date": "Thu, 08 Oct 2026 07:21:04 +0000",
+    "attribution": "DEV Community",
     "excerpt": "Problem Description The stock table records the daily closing prices of many stocks, with the fields CODE (stock code), DT (trading date) and CL (closing price). For a given target stock, find the per",
-    "attribution": "DEV Community"
+    "date": "2026-10-08T07:21:04+00:00",
+    "date_source": "published"
   },
   {
     "title": "SQL: Find the Top 2 Orders for Every Customer Using Window Functions",
     "link": "https://dev.to/kailas_warade_d2a15d1ef8a/sql-find-the-top-2-orders-for-every-customer-using-window-functions-1dnp",
-    "date": "Thu, 08 Oct 2026 03:26:32 +0000",
+    "attribution": "DEV Community",
     "excerpt": "SQL: Find the Top 2 Orders for Every Customer Using Window Functions One SQL problem I often see people get wrong is: How do you find the top 2 orders for every customer? Finding the top 2 orders over",
-    "attribution": "DEV Community"
+    "date": "2026-10-08T03:26:32+00:00",
+    "date_source": "published"
   },
   {
     "title": "DMS Database Design",
     "link": "https://dev.to/belerickii/dms-database-design-142p",
-    "date": "Thu, 08 Oct 2026 02:36:30 +0000",
+    "attribution": "DEV Community",
     "excerpt": "After analyzing the paper-based system used to handle academic registration and gathering the necessary requirements, the next step in the implementation process was the architectural design. I used s",
-    "attribution": "DEV Community"
+    "date": "2026-10-08T02:36:30+00:00",
+    "date_source": "published"
   },
   {
     "title": "Stop Hardcoding Your .NET Data Provider",
     "link": "https://dev.to/pengdows/stop-hardcoding-your-net-data-provider-4jmo",
-    "date": "Wed, 07 Oct 2026 21:50:12 +0000",
+    "attribution": "DEV Community",
     "excerpt": "There is a piece of advice I have been giving for a long time. I first wrote about it around 2010, before .NET Core existed: Do not hardcode your database provider into your application unless the app",
-    "attribution": "DEV Community"
+    "date": "2026-10-07T21:50:12+00:00",
+    "date_source": "published"
   },
   {
     "title": "Tired of pasting schemas into random servers? I built SchemaForge: a 100% private, client-side SQL dialect converter. Translate schemas between PostgreSQL, MySQL, MariaDB & SQL Server locally in your browser. Link: https://www.schemaforge.online/",
     "link": "https://dev.to/basil7012/tired-of-pasting-schemas-into-random-servers-i-built-schemaforge-a-100-private-client-side-sql-6ie",
-    "date": "Wed, 07 Oct 2026 20:33:18 +0000",
+    "attribution": "DEV Community",
     "excerpt": "SQL to C# & TypeScript Converter — SchemaForge Convert SQL CREATE TABLE scripts to C#, TypeScript, Python, Java & more. 63 free tools — 100% private, runs in your browser. schemaforge.online",
-    "attribution": "DEV Community"
+    "date": "2026-10-07T20:33:18+00:00",
+    "date_source": "published"
   },
   {
     "title": "Custom Fresh v2.1.0: Take Control of Laravel Database Resets",
     "link": "https://dev.to/mmramadan496/custom-fresh-v210-take-control-of-laravel-database-resets-59n4",
-    "date": "Wed, 07 Oct 2026 18:12:07 +0000",
+    "attribution": "DEV Community",
     "excerpt": "🚀 Custom Fresh v2.1.0 is here! Laravel database resets are easy until your project has tables you need to keep. Reference data, imported records, configuration tables, and other data not managed by mi",
-    "attribution": "DEV Community"
+    "date": "2026-10-07T18:12:07+00:00",
+    "date_source": "published"
   },
   {
     "title": "SQL Pagination",
     "link": "https://dev.to/rhuturaj_takle/sql-pagination-1i50",
-    "date": "Wed, 07 Oct 2026 15:27:56 +0000",
+    "attribution": "DEV Community",
     "excerpt": "SQL Pagination A deep-dive walkthrough of pagination in SQL Server — covering OFFSET / FETCH , why ORDER BY is mandatory and why it must be deterministic, calculating page numbers, getting the total r",
-    "attribution": "DEV Community"
+    "date": "2026-10-07T15:27:56+00:00",
+    "date_source": "published"
   }
 ]

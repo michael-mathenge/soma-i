@@ -19,7 +19,7 @@ from content.ingestion import (
     staleness_for,
     word_count_for_entry,
 )
-from content.matching import load_config
+from content.matching import exclusion_reason, load_config
 from content.models import Item, Skill, Source
 from learners.models import LearnerProfile
 from pathways.models import Checkpoint, Pathway, PathwaySkill
@@ -128,6 +128,21 @@ def test_entry_date_prefers_published_then_updated_then_injected_fetch_time():
     assert source == "fetched"
 
 
+def test_offline_fixture_date_source_is_honoured():
+    updated_at, source = entry_date(
+        {"date": "2026-10-01T12:00:00+00:00", "date_source": "updated"},
+        FETCHED_AT,
+    )
+    assert updated_at == datetime(2026, 10, 1, 12, 0, tzinfo=UTC)
+    assert source == "updated"
+
+    fetched_at, source = entry_date(
+        {"date": None, "date_source": "fetched"}, FETCHED_AT
+    )
+    assert fetched_at == FETCHED_AT
+    assert source == "fetched"
+
+
 def test_rfc822_and_iso_fixture_dates_parse_without_clock_reads():
     rss_fixture = Path(__file__).parent / "fixtures" / "feed.xml"
     rfc_entry = feedparser.parse(rss_fixture.read_bytes()).entries[0]
@@ -174,7 +189,7 @@ def test_full_content_sets_word_count_without_storing_article_text():
     assert word_count_for_entry(entry) == 4
 
 
-def test_guid_dedupes_only_within_feed_and_normalized_link_across_feeds():
+def test_same_guid_in_different_feeds_does_not_merge_unrelated_items():
     source_a = make_source(DATA_FEED)
     source_b = make_source(FRONTEND_FEED)
     first_link = "https://EXAMPLE.test/article/?utm_source=one#intro"
@@ -222,6 +237,81 @@ def test_guid_dedupes_only_within_feed_and_normalized_link_across_feeds():
     assert Item.objects.filter(guid="shared-guid").count() == 2
 
 
+@pytest.mark.parametrize(
+    ("first_link", "second_link"),
+    [
+        ("http://EXAMPLE.test/article", "https://example.test/article/"),
+        ("https://EXAMPLE.test/article/", "http://example.test/article"),
+    ],
+)
+def test_link_normalization_only_changes_dedupe_key_and_preserves_original_url(
+    first_link, second_link
+):
+    source_a = make_source(DATA_FEED)
+    source_b = make_source(FRONTEND_FEED)
+    registry = {**load_config(), "feeds": [DATA_FEED, FRONTEND_FEED]}
+    title = "SQL and CSS basics"
+    summary = "A beginner guide to SQL and CSS."
+
+    ingest_entries(
+        source_a,
+        DATA_FEED,
+        [
+            make_entry(
+                title=title,
+                link=first_link,
+                summary=summary,
+                published_parsed=(2026, 9, 1, 10, 0, 0, 1, 244, 0),
+            )
+        ],
+        FETCHED_AT,
+        registry,
+    )
+    result = ingest_entries(
+        source_b,
+        FRONTEND_FEED,
+        [
+            make_entry(
+                title=title,
+                link=second_link,
+                summary=summary,
+                updated_parsed=(2026, 9, 2, 10, 0, 0, 2, 245, 0),
+            )
+        ],
+        FETCHED_AT,
+        registry,
+    )
+
+    assert result["created"] == 0
+    assert result["duplicates_merged"] == 1
+    assert Item.objects.count() == 1
+    item = Item.objects.get()
+    assert item.url == first_link
+    assert item.source_id == source_a.pk
+    assert item.date_source == "published"
+    assert item.normalized_link == normalize_link(second_link)
+
+
+def test_normalize_link_strips_default_http_and_https_ports():
+    assert normalize_link("http://example.test:80/path") == "https://example.test/path"
+    assert (
+        normalize_link("https://example.test:443/path") == "https://example.test/path"
+    )
+
+
+def test_reparsing_same_feed_content_is_idempotent():
+    source = make_source()
+    entry = make_entry(title="SQL analysis basics", guid="stable-guid")
+
+    first = ingest_entries(source, DATA_FEED, [entry], FETCHED_AT)
+    second = ingest_entries(source, DATA_FEED, [entry], FETCHED_AT + timedelta(hours=1))
+
+    assert first["created"] == 1
+    assert second["created"] == 0
+    assert second["duplicates_merged"] == 1
+    assert Item.objects.count() == 1
+
+
 def test_pathway_items_are_queryable_on_sqlite_without_json_contains():
     source = make_source()
     ingest_entries(
@@ -257,6 +347,27 @@ def test_staleness_uses_content_date_not_fetch_time():
     source = make_source(latest_item_at=FETCHED_AT - timedelta(days=61))
     result = staleness_for(source, REFERENCE_DATE, 60)
     assert result == {"stale": True, "reason": "age", "age_days": 61}
+
+
+def test_api_computes_staleness_on_read_with_injected_reference_date():
+    from learners.api import item_json
+
+    source = make_source(latest_item_at=FETCHED_AT - timedelta(days=61))
+    item = Item.objects.create(
+        title="SQL basics",
+        url="https://example.test/sql-read-stale",
+        normalized_link="https://example.test/sql-read-stale",
+        published_at=FETCHED_AT - timedelta(days=61),
+        date_source="published",
+        pathway_keys=["Data Analyst"],
+        source=source,
+    )
+
+    response = item_json(item, reference_date=REFERENCE_DATE)
+
+    assert response["source_stale"] is True
+    assert response["source_stale_reason"] == "age"
+    assert response["age_days"] == 61
 
 
 def test_bozo_feed_with_partial_entries_is_usable_and_empty_malformed_feed_fails(
@@ -307,16 +418,51 @@ def test_command_offline_ingests_fixtures_without_calling_fetcher(monkeypatch):
         assert items_for_pathway(pathway)
     assert "date_source published=" in output
     assert "Stale feeds:" in output
+    realpython_url = next(
+        feed["url"] for feed in load_config()["feeds"] if feed["key"] == "realpython"
+    )
+    assert (
+        Item.objects.filter(source__url=realpython_url, date_source="updated").count()
+        == 10
+    )
     fixture_paths = list((Path(__file__).parent / "fixtures" / "feeds").glob("*.json"))
     assert len(fixture_paths) == len(load_config()["feeds"])
     for fixture_path in fixture_paths:
         rows = json.loads(fixture_path.read_text(encoding="utf-8"))
-        assert len(rows) <= 10
+        assert 10 <= len(rows) <= 12
         assert all(
-            set(row) == {"title", "link", "date", "excerpt", "attribution"}
+            set(row)
+            == {"title", "link", "date", "date_source", "excerpt", "attribution"}
             for row in rows
         )
-        assert all(len(row["excerpt"]) <= 200 for row in rows)
+        assert all(
+            row["date_source"] in {"published", "updated", "fetched"} for row in rows
+        )
+
+
+def test_offline_fixture_excerpts_are_limited_to_200_characters():
+    fixture_paths = (Path(__file__).parent / "fixtures" / "feeds").glob("*.json")
+    for fixture_path in fixture_paths:
+        rows = json.loads(fixture_path.read_text(encoding="utf-8"))
+        assert all(len(row["excerpt"]) <= 200 for row in rows), fixture_path.name
+
+
+def test_fixtures_keep_ten_nonexcluded_items_and_two_real_quiz_examples():
+    config = load_config()
+    feeds = {feed["key"]: feed for feed in config["feeds"]}
+    fixture_dir = Path(__file__).parent / "fixtures" / "feeds"
+
+    for key, feed in feeds.items():
+        rows = json.loads((fixture_dir / f"{key}.json").read_text(encoding="utf-8"))
+        excluded = [
+            row
+            for row in rows
+            if exclusion_reason(row["title"], feed["source_type"], config)
+        ]
+        assert len(rows) - len(excluded) == 10
+        assert len(excluded) == (2 if key == "realpython" else 0)
+        if key == "realpython":
+            assert all(row["title"].startswith("Quiz:") for row in excluded)
 
 
 def test_live_failure_does_not_prevent_later_feed_ingestion(monkeypatch):
@@ -345,6 +491,7 @@ def test_live_failure_does_not_prevent_later_feed_ingestion(monkeypatch):
 
     assert calls == [feed["url"] for feed in feeds]
     assert "feed failed" in command.stderr.getvalue()
+    assert "request timed out" in command.stderr.getvalue()
     assert Source.objects.get(url=feeds[1]["url"]).items.exists()
 
 
@@ -379,6 +526,38 @@ def test_html_instead_of_xml_fails_one_feed_and_continues(monkeypatch):
     assert Source.objects.get(url=feeds[1]["url"]).items.exists()
 
 
+def test_malformed_feed_failure_does_not_prevent_later_feed_ingestion(monkeypatch):
+    import content.management.commands.ingest_feeds as command_module
+
+    feeds = [{**DATA_FEED}, {**FRONTEND_FEED}]
+    config = {**load_config(), "feeds": feeds}
+    monkeypatch.setattr(command_module, "load_config", lambda: config)
+    valid_fixture = (Path(__file__).parent / "fixtures" / "feed.xml").read_bytes()
+    parser_results = [
+        SimpleNamespace(bozo=True, entries=[], bozo_exception=ValueError("bad XML")),
+        feedparser.parse(valid_fixture),
+    ]
+    monkeypatch.setattr(
+        command_module.feedparser, "parse", lambda _body: parser_results.pop(0)
+    )
+    calls = []
+
+    def fetcher(url, _headers):
+        calls.append(url)
+        return FetchResponse(200, {"Content-Type": "application/rss+xml"}, b"<rss />")
+
+    command = command_module.Command()
+    command.clock = lambda: FETCHED_AT
+    command.fetcher = fetcher
+    command.stdout = StringIO()
+    command.stderr = StringIO()
+    command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
+
+    assert calls == [feed["url"] for feed in feeds]
+    assert "Malformed feed" in command.stderr.getvalue()
+    assert Source.objects.get(url=feeds[1]["url"]).items.exists()
+
+
 def test_recent_feed_is_skipped_and_force_bypasses_interval(monkeypatch):
     import content.management.commands.ingest_feeds as command_module
 
@@ -387,8 +566,8 @@ def test_recent_feed_is_skipped_and_force_bypasses_interval(monkeypatch):
     source = make_source(last_fetched_at=FETCHED_AT - timedelta(minutes=10))
     calls = []
 
-    def fetcher(*_args):
-        calls.append(True)
+    def fetcher(_url, headers):
+        calls.append(headers)
         return FetchResponse(200, {"Content-Type": "application/rss+xml"}, b"")
 
     skipped = command_module.Command()
@@ -400,14 +579,26 @@ def test_recent_feed_is_skipped_and_force_bypasses_interval(monkeypatch):
     assert not calls
     assert "minimum interval not elapsed" in skipped.stdout.getvalue()
 
+    source.etag = '"v1"'
+    source.last_modified = "Wed, 07 Oct 2026 12:00:00 GMT"
+    source.save(update_fields=["etag", "last_modified"])
     forced = command_module.Command()
     forced.clock = lambda: FETCHED_AT
     forced.fetcher = fetcher
     forced.stdout = StringIO()
     forced.stderr = StringIO()
     forced.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
-    assert calls == [True]
+    assert calls == [
+        {
+            "If-None-Match": '"v1"',
+            "If-Modified-Since": "Wed, 07 Oct 2026 12:00:00 GMT",
+        }
+    ]
     assert Source.objects.get(pk=source.pk).last_fetched_at == FETCHED_AT
+    parser = forced.create_parser("manage.py", "ingest_feeds")
+    help_text = " ".join(parser.format_help().split())
+    assert "--force" in help_text
+    assert "conditional ETag/Last-Modified validators are still sent" in help_text
 
 
 def test_304_sends_validators_and_does_not_reingest(monkeypatch):
@@ -510,12 +701,24 @@ def test_fetcher_rejects_http_and_oversize_responses(monkeypatch):
 
 
 def test_redirect_handler_limits_redirects_and_requires_https():
+    from urllib.error import HTTPError
     from urllib.request import Request
 
     from content.fetching import LimitedHTTPSRedirectHandler
 
     assert LimitedHTTPSRedirectHandler.max_redirections == 5
     handler = LimitedHTTPSRedirectHandler()
+    request = Request("https://example.test/feed.xml")
+    request.redirect_dict = {f"https://example.test/{index}": 1 for index in range(5)}
+    with pytest.raises(HTTPError, match="redirect error"):
+        handler.http_error_302(
+            request,
+            None,
+            302,
+            "Found",
+            {"location": "https://example.test/next.xml"},
+        )
+
     with pytest.raises(ValueError, match="remain on HTTPS"):
         handler.redirect_request(
             Request("https://example.test/feed.xml"),

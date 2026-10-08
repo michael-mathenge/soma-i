@@ -2,71 +2,81 @@
   {
     "title": "How to Submit a Quarterly Update to HMRC's Making Tax Digital API",
     "link": "https://www.freecodecamp.org/news/how-to-submit-a-quarterly-update-to-hmrc-making-tax-digital-api/",
-    "date": "Sun, 04 Oct 2026 12:11:49 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Four times a year, every sole trader and landlord in Making Tax Digital (MTD) for Income Tax has to send HMRC a summary of their income and expenses. The first deadline of the 2026-27 tax year, 7 Augu",
-    "attribution": "freeCodeCamp"
+    "date": "2026-10-04T12:11:49+00:00",
+    "date_source": "published"
   },
   {
     "title": "The Node.js and Express.js Handbook for Beginners – Servers, Routes, Routers, and Views Explained",
     "link": "https://www.freecodecamp.org/news/nodejs-and-expressjs-handbook-for-beginners/",
-    "date": "Thu, 01 Oct 2026 09:47:51 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Node.js is a runtime environment for executing JavaScript outside the web browser. From small scripts to large-scale back-end applications, Node.js provides the APIs and tools you need to build JavaSc",
-    "attribution": "freeCodeCamp"
+    "date": "2026-10-01T09:47:51+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a Real-Time Word Counter Tool with HTML, CSS, and JavaScript",
     "link": "https://www.freecodecamp.org/news/how-to-build-a-real-time-word-counter-tool-with-html-css-and-javascript/",
-    "date": "Wed, 30 Sep 2026 05:55:08 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Whether you're writing an essay, a tweet, or a blog post, keeping track of your word and character count is very important. In this tutorial, you'll build a fully functional, real-time Word Counter to",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-30T05:55:08+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Use the Fullscreen API in JavaScript (and Keep the Screen Awake with the Wake Lock API)",
     "link": "https://www.freecodecamp.org/news/fullscreen-api-javascript-wake-lock/",
-    "date": "Tue, 29 Sep 2026 13:31:42 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Sooner or later, most front-end developers hit the same request: \"Can this take up the whole screen?\" A slide deck, a video player, kiosk dashboard, game, drawing canvas, or timer on a classroom proje",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-29T13:31:42+00:00",
+    "date_source": "published"
   },
   {
     "title": "How ORMs Still Let SQL Injection Through (and How to Close the Gaps)",
     "link": "https://www.freecodecamp.org/news/how-orms-still-let-sql-injection-through-and-how-to-close-the-gaps/",
-    "date": "Tue, 29 Sep 2026 06:36:31 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "A lot of developers assume that once they're on an ORM, SQL injection stops being their problem. But it doesn't disappear. It just relocates. ORMs like Sequelize, Prisma, TypeORM, and Knex parameteriz",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-29T06:36:31+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a Bulk Image Compressor Tool with HTML, CSS, and JavaScript",
     "link": "https://www.freecodecamp.org/news/how-to-build-a-bulk-image-compressor-tool-with-html-css-and-javascript/",
-    "date": "Fri, 18 Sep 2026 15:47:01 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "High-resolution images look great, but they can significantly slow down page load times and consume massive amounts of storage. While backend compression tools are common, building a client-side image",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-18T15:47:01+00:00",
+    "date_source": "published"
   },
   {
     "title": "The Gamepad API Lies to You: A Practical Guide to Reading Controller Input in JavaScript",
     "link": "https://www.freecodecamp.org/news/gamepad-api-javascript-guide/",
-    "date": "Mon, 07 Sep 2026 22:39:45 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "The Gamepad API is one of the smallest browser APIs you'll ever use. Four properties, one function, and no permissions prompt. You can have a controller drawn on screen in about fifteen lines. Those f",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-07T22:39:45+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a Scholarship Research MCP Server with Node.js, Express, and MongoDB",
     "link": "https://www.freecodecamp.org/news/how-to-build-a-scholarship-research-mcp-server-with-node-js-express-and-mongodb/",
-    "date": "Fri, 04 Sep 2026 20:44:35 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Scholarship hunting is a research job, not a single search box. You filter awards by field, GPA, citizenship, and deadline. You keep a shortlist. You write notes about essays and recommenders. Then yo",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-04T20:44:35+00:00",
+    "date_source": "published"
   },
   {
     "title": "Why You Should Never Send Emails Inside Your API Requests",
     "link": "https://www.freecodecamp.org/news/why-you-should-never-send-emails-inside-your-api-requests/",
-    "date": "Tue, 01 Sep 2026 20:33:19 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Your signup endpoint looks fine in development. A user registers, you save the row, you call your email provider, and you return 201 Created. Everyone gets a welcome email. You ship it. Then productio",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-01T20:33:19+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Get Reliable Structured Data Out of an LLM",
     "link": "https://www.freecodecamp.org/news/how-to-get-reliable-structured-data-out-of-an-llm/",
-    "date": "Thu, 27 Aug 2026 18:56:03 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Most tutorials about calling a language model end at JSON.parse(response.content). That line works on your first ten test cases. Then you ship, and somewhere around request four hundred the model retu",
-    "attribution": "freeCodeCamp"
+    "date": "2026-08-27T18:56:03+00:00",
+    "date_source": "published"
   }
 ]

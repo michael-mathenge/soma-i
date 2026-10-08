@@ -79,8 +79,8 @@ def _offline_entries(feed_key):
         / f"{feed_key}.json"
     )
     values = json.loads(fixture.read_text(encoding="utf-8"))
-    if len(values) > 10:
-        raise FeedResponseError(f"Offline fixture {fixture.name} exceeds 10 entries")
+    if len(values) > 12:
+        raise FeedResponseError(f"Offline fixture {fixture.name} exceeds 12 entries")
     return values
 
 
@@ -96,7 +96,10 @@ class Command(BaseCommand):
         parser.add_argument(
             "--force",
             action="store_true",
-            help="Bypass the one-hour minimum interval between live fetches.",
+            help=(
+                "Bypass the one-hour minimum interval between live fetches; "
+                "conditional ETag/Last-Modified validators are still sent."
+            ),
         )
         parser.add_argument(
             "--reference-date",

@@ -6,11 +6,16 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 def normalize_link(value):
     parsed = urlsplit((value or "").strip())
-    scheme = parsed.scheme.lower()
+    original_scheme = parsed.scheme.lower()
+    scheme = original_scheme
     if scheme == "http":
         scheme = "https"
     host = (parsed.hostname or "").lower()
-    if parsed.port:
+    port = parsed.port
+    if port and not (
+        (original_scheme == "http" and port == 80)
+        or (original_scheme == "https" and port == 443)
+    ):
         host = f"{host}:{parsed.port}"
     path = parsed.path.rstrip("/") or "/"
     query = urlencode(

@@ -2,71 +2,81 @@
   {
     "title": "Let’s Use the Emergent CSS random() Function in all the Browsers",
     "link": "https://css-tricks.com/css-random-function-polyfill/",
-    "date": "Mon, 31 Aug 2026 15:12:19 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "The journey to create a polyfill for the upcoming CSS random() function that works in all browsers. Let’s Use the Emergent CSS random() Function in all the Browsers originally handwritten and publishe",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-31T15:12:19+00:00",
+    "date_source": "published"
   },
   {
     "title": "What’s !important #18: , Syntax ::highlight()ing, named-feature(), and More",
     "link": "https://css-tricks.com/whats-important-18/",
-    "date": "Mon, 31 Aug 2026 14:08:55 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "Well, that’s a wrap. No, not a flex-wrap, but rather today marks a new day, week, month, season, aaaand new edition of What’s important (#18), bringing you the best content that developers have produc",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-31T14:08:55+00:00",
+    "date_source": "published"
   },
   {
     "title": "Creating Web Widgets Using the Document Picture-in-Picture API",
     "link": "https://css-tricks.com/creating-web-widgets-using-the-document-picture-in-picture-api/",
-    "date": "Thu, 27 Aug 2026 14:41:06 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "The general idea is that we create a Document Picture-in-Picture window (DPIP window), and then we put HTML, CSS, and JavaScript into it. Creating Web Widgets Using the Document Picture-in-Picture API",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-27T14:41:06+00:00",
+    "date_source": "published"
   },
   {
     "title": "animation-trigger",
     "link": "https://css-tricks.com/almanac/properties/a/animation-trigger/",
-    "date": "Wed, 26 Aug 2026 15:38:41 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "The CSS animation-trigger property allows you to delay the start of a CSS animation until a specific trigger occurs. animation-trigger originally handwritten and published with love on CSS-Tricks . Yo",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-26T15:38:41+00:00",
+    "date_source": "published"
   },
   {
     "title": "MicroLighter: Syntax Highlighter",
     "link": "https://css-tricks.com/microlighter-syntax-highlighter/",
-    "date": "Tue, 25 Aug 2026 14:10:34 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "Syntax highlighting for code blocks without the complicated markup, spans, classes, and bloated JavaScript, courtesy of Uncle Dave. MicroLighter: Syntax Highlighter originally handwritten and publishe",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-25T14:10:34+00:00",
+    "date_source": "published"
   },
   {
     "title": "WordPress PHP-Only Block Registration",
     "link": "https://css-tricks.com/wordpress-php-block-registration/",
-    "date": "Mon, 24 Aug 2026 13:54:02 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "Seven and half years after blocks arrived in Core, WordPress introduces a way to build blocks without React annd build pipelines. All you need is PHP. WordPress PHP-Only Block Registration originally ",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-24T13:54:02+00:00",
+    "date_source": "published"
   },
   {
     "title": "Resolved: CSS Class Prefix Selector",
     "link": "https://css-tricks.com/resolved-css-class-prefix-selector/",
-    "date": "Fri, 21 Aug 2026 15:13:03 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "A newly resolved proposal would allow us to select classes that are a prefix for variations with a wildcard, like .prefix-* . Resolved: CSS Class Prefix Selector originally handwritten and published w",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-21T15:13:03+00:00",
+    "date_source": "published"
   },
   {
     "title": "CSS Navigation Matching, Early Days",
     "link": "https://css-tricks.com/css-navigation-matching-early-days/",
-    "date": "Wed, 19 Aug 2026 14:44:41 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "Apply a style when someone navigates from one specific page to another. The idea being it'd make the sources for cross-document view transitions declarative in CSS rather than managing that stuff in J",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-19T14:44:41+00:00",
+    "date_source": "published"
   },
   {
     "title": "WordPress.com Student Plan",
     "link": "https://css-tricks.com/wordpress-student-plan/",
-    "date": "Wed, 19 Aug 2026 08:50:00 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "As someone who teaches beginning web development, I find that building a WordPress site makes for a great final project. Hosting those projects has always been a roadblock though. WordPress.com Studen",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-19T08:50:00+00:00",
+    "date_source": "published"
   },
   {
     "title": "Dark mode toggles: two states are enough",
     "link": "https://css-tricks.com/dark-mode-toggles-two-states-are-enough/",
-    "date": "Mon, 17 Aug 2026 14:15:50 +0000",
+    "attribution": "CSS-Tricks",
     "excerpt": "Lea's pushing back on light/dark mode implementations that display three state options for visitors: light, dark, and system. Dark mode toggles: two states are enough originally handwritten and publis",
-    "attribution": "CSS-Tricks"
+    "date": "2026-08-17T14:15:50+00:00",
+    "date_source": "published"
   }
 ]

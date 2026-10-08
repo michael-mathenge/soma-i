@@ -2,71 +2,81 @@
   {
     "title": "How to Catch Security Vulnerabilities in Code Before They Reach Your Pull Requests",
     "link": "https://www.freecodecamp.org/news/catch-security-vulnerabilities-code-pull-requests/",
-    "date": "Mon, 14 Sep 2026 22:23:01 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Security reviews are most effective when developers receive feedback while the code is still fresh in their minds. Waiting until a pull request, CI build, or penetration test to find exposed credentia",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-14T22:23:01+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Fix a Leaked API Key: A Developer’s Guide to Git Security",
     "link": "https://www.freecodecamp.org/news/how-to-fix-a-leaked-api-key/",
-    "date": "Tue, 25 Aug 2026 18:22:13 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Imagine this: you're working late, your code finally works, and you're ready to push it to GitHub. You run: git add . git commit -m \"Fix API integration\" git push A few minutes later, you notice some",
-    "attribution": "freeCodeCamp"
+    "date": "2026-08-25T18:22:13+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Make Your GitHub Profile Stand Out",
     "link": "https://www.freecodecamp.org/news/how-to-make-your-github-profile-stand-out/",
-    "date": "Sat, 18 Apr 2026 00:15:59 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "If you have a Github profile, you might overlook the many ways you can customize it – and that's completely understandable. After all, at its core, GitHub is a home for your code. But beyond repositor",
-    "attribution": "freeCodeCamp"
+    "date": "2026-04-18T00:15:59+00:00",
+    "date_source": "published"
   },
   {
     "title": "OSS Pull Request Therapy: Learning to Enjoy Code Reviews with npmx",
     "link": "https://www.freecodecamp.org/news/learning-to-enjoy-code-reviews-with-npmx/",
-    "date": "Tue, 03 Mar 2026 15:09:09 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "For years, I thought Open Source Software (OSS) just wasn’t for me. I had no plans to join any OSS communities on top of my existing developer community obligations. Curious about the hype I saw on Bl",
-    "attribution": "freeCodeCamp"
+    "date": "2026-03-03T15:09:09+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Save Multiple Drafts in Git: A Guide to Using Stash",
     "link": "https://www.freecodecamp.org/news/how-to-save-multiple-drafts-in-git-a-guide-to-using-stash/",
-    "date": "Mon, 09 Feb 2026 15:03:08 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Writing code can be similar to writing tutorials. In both cases, you’ll typically need to create and work on multiple drafts before reaching the final version. In an ideal setting, you would write cod",
-    "attribution": "freeCodeCamp"
+    "date": "2026-02-09T15:03:08+00:00",
+    "date_source": "published"
   },
   {
     "title": "Learn How to Use Git and GitHub – A Beginner-Friendly Handbook",
     "link": "https://www.freecodecamp.org/news/learn-how-to-use-git-and-github-a-beginner-friendly-handbook/",
-    "date": "Fri, 12 Dec 2025 21:14:03 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "In this handbook, you’re going to dive into something really exciting: Git and GitHub. To start, let’s clear one thing up: Git and GitHub are not the same thing. In short, Git is the tool that runs on",
-    "attribution": "freeCodeCamp"
+    "date": "2025-12-12T21:14:03+00:00",
+    "date_source": "published"
   },
   {
     "title": "Git & GitHub Crash Course for Beginners",
     "link": "https://www.freecodecamp.org/news/git-and-github-crash-course-for-beginners/",
-    "date": "Thu, 04 Dec 2025 20:29:14 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Git is important for any developer. We just posted a course that will help you learn Git and GitHub from scratch with clear examples, real workflows, branching, merging, stashing, rebase, pull request",
-    "attribution": "freeCodeCamp"
+    "date": "2025-12-04T20:29:14+00:00",
+    "date_source": "published"
   },
   {
     "title": "What is the GitHub CLI? How to Use GitHub from the Command Line",
     "link": "https://www.freecodecamp.org/news/how-to-use-github-from-the-command-line/",
-    "date": "Fri, 26 Sep 2025 16:51:19 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "The GitHub CLI (Command Line Interface) is a powerful tool developed by GitHub that allows developers to interact with GitHub directly from the terminal. It provides a simple way to perform many GitHu",
-    "attribution": "freeCodeCamp"
+    "date": "2025-09-26T16:51:19+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Use Lazygit to Improve Your Git Workflow",
     "link": "https://www.freecodecamp.org/news/how-to-use-lazygit-to-improve-your-git-workflow/",
-    "date": "Thu, 10 Apr 2025 13:49:46 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Lazygit is an open-source command line terminal UI for Git commands that I’ve used for the last couple of years, and it’s become my new best friend. Basically, the Lazygit tool is a wrapper for the Gi",
-    "attribution": "freeCodeCamp"
+    "date": "2025-04-10T13:49:46+00:00",
+    "date_source": "published"
   },
   {
     "title": "Learn Git through Gamification – A Visual Guide to Key Version Control Concepts",
     "link": "https://www.freecodecamp.org/news/learn-git-through-gamification/",
-    "date": "Sun, 02 Mar 2025 06:00:00 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Git has many concepts and commands that you’ll need to understand before you feel confident using it. Some of these concepts may sound trivial, especially to someone who has worked with Git before. Bu",
-    "attribution": "freeCodeCamp"
+    "date": "2025-03-02T06:00:00+00:00",
+    "date_source": "published"
   }
 ]

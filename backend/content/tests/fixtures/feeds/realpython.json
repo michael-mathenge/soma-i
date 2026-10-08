@@ -2,71 +2,97 @@
   {
     "title": "The Best IDEs and Code Editors for Python (Guide)",
     "link": "https://realpython.com/python-ides-code-editors-guide/",
-    "date": "2026-10-07T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Compare the best Python IDEs and code editors side by side, with free picks for beginners and pro tools for data science and AI-assisted coding.",
-    "attribution": "Real Python"
+    "date": "2026-10-07T14:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "Exploring the MVC Pattern in Python",
     "link": "https://realpython.com/courses/exploring-mvc-pattern-python/",
-    "date": "2026-10-06T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Learn how the Model-View-Controller pattern organizes Python web apps, then build a small Flask app using models, views, and controllers.",
-    "attribution": "Real Python"
+    "date": "2026-10-06T14:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "Python 3.15 Gets a Surprise RC3 and Other Python News for October 2026",
     "link": "https://realpython.com/python-news-october-2026/",
-    "date": "2026-10-05T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Python 3.15 gets a surprise RC3, the first Packaging Council is elected, Polars 2.0 and SQLAlchemy 2.1 arrive, and AI APIs break Python code again.",
-    "attribution": "Real Python"
+    "date": "2026-10-05T14:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "How to Install Python on Your System: A Guide",
     "link": "https://realpython.com/installing-python/",
-    "date": "2026-10-04T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Learn how to install Python on Windows, macOS, and Linux, check your version, and pick the best installation method for your system.",
-    "attribution": "Real Python"
+    "date": "2026-10-04T14:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "Strings and Character Data in Python",
     "link": "https://realpython.com/python-strings/",
-    "date": "2026-10-04T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Work with Python strings using a rich set of operators and functions: string literals, the str() function, and the methods you'll use most.",
-    "attribution": "Real Python"
+    "date": "2026-10-04T14:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "11 Beginner Tips for Learning Python Programming",
     "link": "https://realpython.com/python-beginner-tips/",
-    "date": "2026-10-03T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Python tips for beginners: the learning strategies and habits that take you from your first script to code you're proud of.",
-    "attribution": "Real Python"
+    "date": "2026-10-03T14:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "Basic Data Types in Python: A Quick Exploration",
     "link": "https://realpython.com/python-data-types/",
-    "date": "2026-10-03T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Explore the Python basic data types built into the language: numbers, strings, bytes, and Booleans, and how each one behaves.",
-    "attribution": "Real Python"
+    "date": "2026-10-03T14:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "The Real Python Podcast – Episode #313: Python 3.15: Exploring the New Features",
     "link": "https://realpython.com/podcasts/rpp/313/",
-    "date": "2026-10-02T12:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Python 3.15 is (almost*) here! Christopher Trudeau and Bartosz Zaczyński return to discuss the new version. Bartosz coordinated the series of preview articles with members of the Real Python team and ",
-    "attribution": "Real Python"
+    "date": "2026-10-02T12:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "Python 3.15: Cool New Features for You to Try",
     "link": "https://realpython.com/python315-new-features/",
-    "date": "2026-09-30T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Learn what's new in Python 3.15, from lazy imports, frozendict, and sentinels to a sampling profiler and friendlier error messages.",
-    "attribution": "Real Python"
+    "date": "2026-09-30T14:00:00+00:00",
+    "date_source": "updated"
   },
   {
     "title": "Community Videos",
     "link": "https://realpython.com/courses/community-videos/",
-    "date": "2026-09-30T14:00:00+00:00",
+    "attribution": "Real Python",
     "excerpt": "Watch Real Python's YouTube videos right here on the site, with the resources mentioned in each video and a full transcript.",
-    "attribution": "Real Python"
+    "date": "2026-09-30T14:00:00+00:00",
+    "date_source": "updated"
+  },
+  {
+    "title": "Quiz: Python, Boto3, and AWS S3: Demystified",
+    "link": "https://realpython.com/quizzes/python-boto3-aws-s3/",
+    "attribution": "Real Python",
+    "excerpt": "Test your understanding of Boto3 and AWS S3 in Python. Create buckets, upload objects, configure storage and versioning, and clean up safely.",
+    "date": "2026-10-08T12:00:00+00:00",
+    "date_source": "updated"
+  },
+  {
+    "title": "Quiz: The Best IDEs and Code Editors for Python (Guide)",
+    "link": "https://realpython.com/quizzes/python-ides-code-editors-guide/",
+    "attribution": "Real Python",
+    "excerpt": "Test your grasp of Python IDEs and code editors, from beginner-friendly tools to notebooks, AI-first editors, and cloud workspaces.",
+    "date": "2026-10-07T12:00:00+00:00",
+    "date_source": "updated"
   }
 ]

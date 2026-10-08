@@ -2,71 +2,81 @@
   {
     "title": "How to Make a Static HTML Page Editable in the Browser with Vanilla JavaScript",
     "link": "https://www.freecodecamp.org/news/how-to-make-a-static-html-page-editable-in-the-browser-with-vanilla-javascript/",
-    "date": "Wed, 22 Jul 2026 20:22:03 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "When you maintain a document for someone else, such as a résumé, a one-page portfolio, or a printable menu, the bottleneck is rarely the layout. It's the edit loop. Every small change (\"move this bull",
-    "attribution": "freeCodeCamp"
+    "date": "2026-07-22T20:22:03+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a Dark Mode Toggle Without JavaScript",
     "link": "https://www.freecodecamp.org/news/how-to-build-a-dark-mode-toggle-without-javascript/",
-    "date": "Mon, 06 Jul 2026 13:55:11 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Over the years, I've worked on many Static Site Generated (SSG) websites that work without JavaScript. And during that time, I've created a few solutions. One of them is a dark mode toggle that doesn'",
-    "attribution": "freeCodeCamp"
+    "date": "2026-07-06T13:55:11+00:00",
+    "date_source": "published"
   },
   {
     "title": "Less Common HTML Elements and How to Use Them in Your Code",
     "link": "https://www.freecodecamp.org/news/less-common-html-elements-and-how-to-use-them/",
-    "date": "Mon, 04 Nov 2024 19:31:35 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "HTML has a lot of tags that many people use every day, like , , and . But there are also some hidden gems that often go unnoticed. These tags can help make websites more engaging, accessible, and mean",
-    "attribution": "freeCodeCamp"
+    "date": "2024-11-04T19:31:35+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Create Filling CSS Loaders Using One Element",
     "link": "https://www.freecodecamp.org/news/filling-css-loaders/",
-    "date": "Wed, 23 Oct 2024 17:33:35 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "In a previous article, I showed you how to create two types of CSS loaders: a spinner and a progress bar. In this article, you’ll learn about another variation called a filling CSS loader. I think a d",
-    "attribution": "freeCodeCamp"
+    "date": "2024-10-23T17:33:35+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Use HTML Attributes to Make Your Websites and Apps More Accessible",
     "link": "https://www.freecodecamp.org/news/how-to-use-html-attributes-to-make-your-websites-and-apps-more-accessible/",
-    "date": "Fri, 06 Sep 2024 20:04:11 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Have you ever used an attribute in HTML without fully understanding its purpose? You're not alone! Over time, I've dug into the meaning behind many HTML attributes, especially those that are crucial f",
-    "attribution": "freeCodeCamp"
+    "date": "2024-09-06T20:04:11+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Create Interactive HTML Prototypes – How Far Can You Go Without JavaScript?",
     "link": "https://www.freecodecamp.org/news/how-to-create-interactive-html-prototypes/",
-    "date": "Tue, 27 Aug 2024 10:55:58 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Interactivity is what makes a website come alive. Whether it's a button that reveals more content or a form that responds to your input, these little touches keep users engaged. Traditionally, we've r",
-    "attribution": "freeCodeCamp"
+    "date": "2024-08-27T10:55:58+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Use Server-Side Rendering in Next.js Apps for Better SEO",
     "link": "https://www.freecodecamp.org/news/server-side-rendering-in-next-js-for-improved-seo/",
-    "date": "Wed, 17 Jul 2024 18:02:11 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Server-side rendering (SSR) is a web development technique that can help improve your site's SEO. It does this by generating HTML content on the server in response to a user's request. This approach c",
-    "attribution": "freeCodeCamp"
+    "date": "2024-07-17T18:02:11+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Change Background Color with JavaScript – BG Color in JS and HTML",
     "link": "https://www.freecodecamp.org/news/how-to-change-background-color-with-javascript/",
-    "date": "Fri, 28 Jun 2024 16:21:26 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "You can style elements with JavaScript using the element's style property. In this article, you'll learn how to change background color using JavaScript. Here's what the mini project you'll build look",
-    "attribution": "freeCodeCamp"
+    "date": "2024-06-28T16:21:26+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Create a Masonry Layout Using HTML and CSS",
     "link": "https://www.freecodecamp.org/news/how-to-create-a-mansory-layout-using-html-and-css/",
-    "date": "Tue, 18 Jun 2024 12:22:43 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "A masonry layout is a grid-based design where items are arranged in a way that minimizes vertical gaps between them. an example of a masonry layout Unlike traditional grids with fixed row heights, mas",
-    "attribution": "freeCodeCamp"
+    "date": "2024-06-18T12:22:43+00:00",
+    "date_source": "published"
   },
   {
     "title": "HTML for Beginners – HTML Basics With Code Examples",
     "link": "https://www.freecodecamp.org/news/introduction-to-html-basics/",
-    "date": "Tue, 07 May 2024 19:45:50 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Welcome to the exciting world of web development! In this beginner's guide, you will learn the fundamentals of HTML, the backbone of every web page. Imagine a tree: its roots anchor and nourish the en",
-    "attribution": "freeCodeCamp"
+    "date": "2024-05-07T19:45:50+00:00",
+    "date_source": "published"
   }
 ]

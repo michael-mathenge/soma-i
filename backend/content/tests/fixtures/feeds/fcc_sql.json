@@ -2,71 +2,81 @@
   {
     "title": "How ORMs Still Let SQL Injection Through (and How to Close the Gaps)",
     "link": "https://www.freecodecamp.org/news/how-orms-still-let-sql-injection-through-and-how-to-close-the-gaps/",
-    "date": "Tue, 29 Sep 2026 06:36:31 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "A lot of developers assume that once they're on an ORM, SQL injection stops being their problem. But it doesn't disappear. It just relocates. ORMs like Sequelize, Prisma, TypeORM, and Knex parameteriz",
-    "attribution": "freeCodeCamp"
+    "date": "2026-09-29T06:36:31+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Work with Subqueries in SQL",
     "link": "https://www.freecodecamp.org/news/how-to-work-with-subqueries-in-sql/",
-    "date": "Mon, 17 Aug 2026 21:31:33 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Whenever you see a query nested inside another query in SQL, that's a subquery. A subquery is also known as an inner query while the one that contains it is called the main or outer query. Subqueries",
-    "attribution": "freeCodeCamp"
+    "date": "2026-08-17T21:31:33+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a Production-Ready AI Agent for $0/Month Using PHP, cPanel, and Gemini Flash",
     "link": "https://www.freecodecamp.org/news/how-to-build-a-production-ready-ai-agent-for-0-month-using-php-cpanel-and-gemini-flash/",
-    "date": "Thu, 13 Aug 2026 17:38:27 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "In this tutorial, you’ll build a practical AI agent that can receive a user prompt, decide whether it needs to use a tool, execute that tool in PHP, store conversation history in MySQL, and continue r",
-    "attribution": "freeCodeCamp"
+    "date": "2026-08-13T17:38:27+00:00",
+    "date_source": "published"
   },
   {
     "title": "Firestore Data Modeling Guide: Embedded Documents vs Referencing (with a Blog Case Study)",
     "link": "https://www.freecodecamp.org/news/firestore-data-modeling-guide-embedded-documents-vs-referencing-with-a-blog-case-study/",
-    "date": "Fri, 24 Jul 2026 15:19:10 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "When developers transition from the relational world (MySQL, PostgreSQL) to Firestore, Firebase's NoSQL document database, they often bring their old habits with them. They try to replicate tables, fo",
-    "attribution": "freeCodeCamp"
+    "date": "2026-07-24T15:19:10+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Optimize Enterprise Application Performance with T-SQL Query Tuning and Indexing Strategies",
     "link": "https://www.freecodecamp.org/news/optimize-enterprise-app-performance-with-t-sql-query-tuning-and-indexing-strategies/",
-    "date": "Mon, 20 Jul 2026 20:49:29 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "In this article, you'll learn how to optimize SQL Server performance using T-SQL query tuning, indexing strategies, execution plans, and real-world optimization techniques for enterprise applications.",
-    "attribution": "freeCodeCamp"
+    "date": "2026-07-20T20:49:29+00:00",
+    "date_source": "published"
   },
   {
     "title": "Learn SQL – Course for Beginners in Spanish",
     "link": "https://www.freecodecamp.org/news/learn-sql-course-for-beginners-in-spanish/",
-    "date": "Thu, 26 Mar 2026 11:48:06 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "SQL (Structured Query Language) is the standard language for managing and manipulating data in relational databases. It's an essential tool that allows you to communicate with the databases that power",
-    "attribution": "freeCodeCamp"
+    "date": "2026-03-26T11:48:06+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Build a Bank Ledger in Golang with PostgreSQL using the Double-Entry Accounting Principle.",
     "link": "https://www.freecodecamp.org/news/build-a-bank-ledger-in-go-with-postgresql-using-the-double-entry-accounting-principle/",
-    "date": "Wed, 25 Mar 2026 17:11:25 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "The Hidden Bugs in How Most Developers Store Money Imagine you're building the backend for a million-dollar fintech app. You store each user's balance as a single number in the database. It feels simp",
-    "attribution": "freeCodeCamp"
+    "date": "2026-03-25T17:11:25+00:00",
+    "date_source": "published"
   },
   {
     "title": "Learn Databases and SQL from Harvard University",
     "link": "https://www.freecodecamp.org/news/learn-databases-and-sql-from-harvard-university/",
-    "date": "Thu, 09 Oct 2025 14:36:01 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "Are you ready to master the art of data management using one of the most essential languages in the world of computing? Introducing CS50 SQL, Harvard University's focused video course dedicated to an ",
-    "attribution": "freeCodeCamp"
+    "date": "2025-10-09T14:36:01+00:00",
+    "date_source": "published"
   },
   {
     "title": "A Brief Introduction to SQLite",
     "link": "https://www.freecodecamp.org/news/a-brief-introduction-to-sqlite/",
-    "date": "Fri, 19 Sep 2025 14:02:06 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "SQLite is one of the most underappreciated tools in a developer's toolkit. It's a full-featured relational database that runs directly in your application. No server setup. No configuration files. No ",
-    "attribution": "freeCodeCamp"
+    "date": "2025-09-19T14:02:06+00:00",
+    "date_source": "published"
   },
   {
     "title": "How to Design Structured Database Systems Using SQL [Full Book]",
     "link": "https://www.freecodecamp.org/news/how-to-design-structured-database-systems-using-sql-full-book/",
-    "date": "Wed, 13 Aug 2025 18:03:10 +0000",
+    "attribution": "freeCodeCamp",
     "excerpt": "This book will guide you, step-by-step, through designing a relational database using SQL. SQL is one of the most recognized relational languages for managing and querying data in databases. You’ll le",
-    "attribution": "freeCodeCamp"
+    "date": "2025-08-13T18:03:10+00:00",
+    "date_source": "published"
   }
 ]
