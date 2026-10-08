@@ -16,6 +16,7 @@ from content.ingestion import (
     ingest_entries,
     items_for_pathway,
     normalize_link,
+    safe_http_link,
     staleness_for,
     word_count_for_entry,
 )
@@ -143,6 +144,29 @@ def test_ingestion_rejects_unsafe_links_and_accepts_trimmed_http_urls(caplog):
     }
     assert "Test Data feed: rejected item with unsafe link" in caplog.text
     assert not any(link in caplog.text for link in links if link)
+
+
+def test_safe_http_link_rejects_credentials_but_allows_at_in_path_or_query():
+    for link in (
+        "https://@example.test/",
+        "https://:@example.test/",
+        "https://user@example.test/",
+        "https://user:password@example.test/",
+    ):
+        assert safe_http_link(link) is None
+
+    valid_link = "https://example.test/path/@user?return=@example.test"
+    assert safe_http_link(valid_link) == valid_link
+
+
+def test_safe_http_link_rejects_unicode_control_and_format_characters():
+    for link in (
+        "https://exam\x7fple.test/path",
+        "https://exam\x85ple.test/path",
+        "https://example.test/\u200bpath",
+        "https://example.test/\u202epath",
+    ):
+        assert safe_http_link(link) is None
 
 
 def test_item_api_payload_clears_unsafe_legacy_urls():

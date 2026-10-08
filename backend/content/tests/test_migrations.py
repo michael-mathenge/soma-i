@@ -56,6 +56,14 @@ def test_old_feed_rows_receive_only_safe_metadata_backfill():
             source=old_sources[0],
         ),
         OldItem.objects.create(
+            pk=15,
+            title="Malformed URL between collisions",
+            url="http://[::1/x",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=old_sources[0],
+        ),
+        OldItem.objects.create(
             pk=40,
             title="Inserted first slash collision",
             url="https://example.test/trailing/",
@@ -97,6 +105,7 @@ def test_old_feed_rows_receive_only_safe_metadata_backfill():
         expected_collisions = {
             10: "https://example.test/tracking",
             20: None,
+            15: None,
             30: "https://example.test/trailing",
             40: None,
         }
@@ -107,7 +116,7 @@ def test_old_feed_rows_receive_only_safe_metadata_backfill():
         from content.models import Source as CurrentSource
 
         before_ingest = Item.objects.count()
-        ingest_entries(
+        ingest_stats = ingest_entries(
             CurrentSource.objects.get(pk=old_sources[0].pk),
             {
                 "name": "MIT News Research",
@@ -120,10 +129,103 @@ def test_old_feed_rows_receive_only_safe_metadata_backfill():
                     "title": "SQL basics",
                     "link": "https://example.test/tracking/?utm_medium=later",
                     "summary": "Learn SQL basics",
+                    "guid": "migration-collision-guid",
                 }
             ],
             old_date,
         )
+        assert ingest_stats["created"] == 0
+        assert ingest_stats["duplicates_merged"] == 1
         assert Item.objects.count() == before_ingest
+        assert Item.objects.get(pk=10).guid == "migration-collision-guid"
+        assert Item.objects.get(pk=20).guid == ""
+    finally:
+        MigrationExecutor(connection).migrate(latest_targets)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_migration_backfill_handles_malformed_urls_and_collision_order():
+    latest_targets = MigrationExecutor(connection).loader.graph.leaf_nodes()
+    old_target = [("content", "0001_initial")]
+    executor = MigrationExecutor(connection)
+    executor.migrate(old_target)
+    old_apps = executor.loader.project_state(old_target).apps
+    OldSource = old_apps.get_model("content", "Source")
+    OldItem = old_apps.get_model("content", "Item")
+    old_date = datetime(2026, 6, 1, 12, 0, tzinfo=UTC)
+    source = OldSource.objects.create(
+        name="Legacy feed",
+        url="https://legacy.example.test/feed.xml",
+        credibility_note="Legacy source",
+    )
+    rows = [
+        OldItem.objects.create(
+            pk=20,
+            title="Inserted first collision row",
+            url="https://example.test/collision?utm_source=first",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=source,
+        ),
+        OldItem.objects.create(
+            pk=10,
+            title="Lowest id collision row",
+            url="https://example.test/collision?utm_source=second",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=source,
+        ),
+        OldItem.objects.create(
+            pk=15,
+            title="Malformed IPv6 row",
+            url="http://[::1/x",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=source,
+        ),
+        OldItem.objects.create(
+            pk=30,
+            title="Malformed port row",
+            url="http://host:abc/",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=source,
+        ),
+        OldItem.objects.create(
+            pk=40,
+            title="Out of range port row",
+            url="http://host:99999/",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=source,
+        ),
+        OldItem.objects.create(
+            pk=50,
+            title="Normal URL row",
+            url="https://example.test/normal/",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=source,
+        ),
+    ]
+
+    try:
+        MigrationExecutor(connection).migrate(latest_targets)
+        latest_apps = (
+            MigrationExecutor(connection).loader.project_state(latest_targets).apps
+        )
+        Item = latest_apps.get_model("content", "Item")
+
+        assert Item.objects.filter(pk__in=[row.pk for row in rows]).count() == len(rows)
+        expected_links = {
+            10: "https://example.test/collision",
+            15: None,
+            20: None,
+            30: None,
+            40: None,
+            50: "https://example.test/normal",
+        }
+        for item_id, expected_link in expected_links.items():
+            assert Item.objects.get(pk=item_id).normalized_link == expected_link
     finally:
         MigrationExecutor(connection).migrate(latest_targets)

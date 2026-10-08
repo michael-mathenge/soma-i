@@ -1,5 +1,6 @@
 import logging
 import re
+import unicodedata
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -19,7 +20,9 @@ logger = logging.getLogger(__name__)
 def safe_http_link(value):
     """Return a trimmed absolute HTTP(S) URL, or None for an unsafe link."""
     link = str(value or "").strip()
-    if not link or any(char.isspace() or ord(char) < 32 for char in link):
+    if not link or any(
+        char.isspace() or unicodedata.category(char) in {"Cc", "Cf"} for char in link
+    ):
         return None
     try:
         parsed = urlsplit(link)
@@ -27,7 +30,11 @@ def safe_http_link(value):
         parsed.port  # Validate malformed or out-of-range ports.
     except ValueError:
         return None
-    if parsed.scheme.lower() not in {"http", "https"} or not hostname:
+    if (
+        parsed.scheme.lower() not in {"http", "https"}
+        or not hostname
+        or "@" in parsed.netloc
+    ):
         return None
     return link
 

@@ -35,8 +35,13 @@ def backfill_normalized_links(apps, schema_editor):
     seen_links = set()
     # Lowest id keeps the normalized link; later colliding rows remain NULL.
     for item in Item.objects.using(alias).order_by("pk").iterator():
-        normalized_link = normalize_link(item.url)
-        if normalized_link in seen_links:
+        try:
+            normalized_link = normalize_link(item.url)
+        except ValueError:
+            normalized_link = None
+        if normalized_link is None:
+            item.normalized_link = None
+        elif normalized_link in seen_links:
             item.normalized_link = None
         else:
             item.normalized_link = normalized_link
