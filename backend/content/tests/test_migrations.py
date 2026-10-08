@@ -38,6 +38,40 @@ def test_old_feed_rows_receive_only_safe_metadata_backfill():
         )
         for source, slug in zip(old_sources, ("mit", "mdn", "fcc"), strict=True)
     ]
+    collision_items = [
+        OldItem.objects.create(
+            pk=20,
+            title="Inserted first tracking collision",
+            url="https://example.test/tracking?utm_source=first",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=old_sources[0],
+        ),
+        OldItem.objects.create(
+            pk=10,
+            title="Lowest id tracking collision",
+            url="https://example.test/tracking?utm_source=second",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=old_sources[0],
+        ),
+        OldItem.objects.create(
+            pk=40,
+            title="Inserted first slash collision",
+            url="https://example.test/trailing/",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=old_sources[1],
+        ),
+        OldItem.objects.create(
+            pk=30,
+            title="Lowest id slash collision",
+            url="https://example.test/trailing",
+            summary="Legacy summary",
+            published_at=old_date,
+            source=old_sources[1],
+        ),
+    ]
 
     try:
         latest_executor = MigrationExecutor(connection)
@@ -58,5 +92,38 @@ def test_old_feed_rows_receive_only_safe_metadata_backfill():
             assert item.pathway_keys == []
             assert item.url.endswith("?utm_source=old#section")
             assert item.normalized_link == expected_link
+
+        assert Item.objects.count() == len(old_items) + len(collision_items)
+        expected_collisions = {
+            10: "https://example.test/tracking",
+            20: None,
+            30: "https://example.test/trailing",
+            40: None,
+        }
+        for item_id, expected_link in expected_collisions.items():
+            assert Item.objects.get(pk=item_id).normalized_link == expected_link
+
+        from content.ingestion import ingest_entries
+        from content.models import Source as CurrentSource
+
+        before_ingest = Item.objects.count()
+        ingest_entries(
+            CurrentSource.objects.get(pk=old_sources[0].pk),
+            {
+                "name": "MIT News Research",
+                "url": "https://mit-news.example.test/feed.xml",
+                "source_type": "nonprofit",
+                "pathways": ["Data Analyst"],
+            },
+            [
+                {
+                    "title": "SQL basics",
+                    "link": "https://example.test/tracking/?utm_medium=later",
+                    "summary": "Learn SQL basics",
+                }
+            ],
+            old_date,
+        )
+        assert Item.objects.count() == before_ingest
     finally:
         MigrationExecutor(connection).migrate(latest_targets)

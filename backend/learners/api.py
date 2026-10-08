@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from content.ingestion import feed_staleness
+from content.ingestion import feed_staleness, safe_http_link
 from content.matching import load_config, source_for_url
 from content.models import Item
 from learners.models import LearnerProfile
@@ -27,7 +27,7 @@ def item_json(item, done_ids=None, reference_date=None):
     return {
         "id": item.pk,
         "title": item.title,
-        "url": item.url,
+        "url": safe_http_link(item.url) or "",
         "summary": item.summary,
         "published_at": item.published_at.isoformat(),
         "source": item.source.name,

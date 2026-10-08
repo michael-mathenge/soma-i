@@ -110,6 +110,55 @@ def test_fixture_ingestion_deduplicates_links_and_keeps_skill_tags():
     assert "HTML" in list(html.skills.values_list("name", flat=True))
 
 
+def test_ingestion_rejects_unsafe_links_and_accepts_trimmed_http_urls(caplog):
+    source = make_source()
+    links = [
+        "data:text/html,unsafe",
+        "javascript:alert(1)",
+        "ftp://example.test/file",
+        "",
+        "relative/path",
+        "//example.test/path",
+        "https://",
+        "http:///path",
+        "http://exa mple.test/path",
+        "  https://example.test/padded  ",
+        "HtTp://example.test/mixed-case",
+        "https://example.test/valid",
+    ]
+
+    result = ingest_entries(
+        source,
+        DATA_FEED,
+        [make_entry(link=link) for link in links],
+        FETCHED_AT,
+    )
+
+    assert result["created"] == 3
+    assert result["rejected_unsafe_link"] == 9
+    assert set(Item.objects.values_list("url", flat=True)) == {
+        "https://example.test/padded",
+        "HtTp://example.test/mixed-case",
+        "https://example.test/valid",
+    }
+    assert "Test Data feed: rejected item with unsafe link" in caplog.text
+    assert not any(link in caplog.text for link in links if link)
+
+
+def test_item_api_payload_clears_unsafe_legacy_urls():
+    from learners.api import item_json
+
+    item = Item.objects.create(
+        title="Legacy unsafe URL",
+        url="javascript:alert(1)",
+        summary="Legacy item",
+        published_at=FETCHED_AT,
+        source=make_source(),
+    )
+
+    assert item_json(item)["url"] == ""
+
+
 def test_entry_date_prefers_published_then_updated_then_injected_fetch_time():
     published = (2026, 9, 1, 10, 0, 0, 1, 244, 0)
     updated = (2026, 9, 3, 10, 0, 0, 3, 246, 0)
@@ -413,6 +462,7 @@ def test_command_offline_ingests_fixtures_without_calling_fetcher(monkeypatch):
     command.handle(offline=True, force=False, reference_date=REFERENCE_DATE)
 
     output = command.stdout.getvalue()
+    assert "rejected: unsafe link: 0" in output
     for pathway in load_config()["pathways"]:
         assert f"{pathway}: " in output
         assert items_for_pathway(pathway)

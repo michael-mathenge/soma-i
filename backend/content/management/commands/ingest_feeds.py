@@ -187,6 +187,7 @@ class Command(BaseCommand):
                 self.stdout.write(
                     f"{source.name}: {stats['created']} new, "
                     f"{stats['duplicates_merged']} duplicate(s) merged, "
+                    f"rejected: unsafe link: {stats['rejected_unsafe_link']}, "
                     f"{len(entries)} parsed"
                 )
             except Exception as exc:  # Keep the remaining registry feeds running.

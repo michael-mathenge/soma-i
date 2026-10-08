@@ -302,9 +302,13 @@ function Cards({ items = [], t, doneCallback }) {
       {items.map((item) => (
         <article className="panel item-card" key={item.id}>
           <h3>
-            <a href={item.url} target="_blank" rel="noreferrer">
-              {item.title}
-            </a>
+            {item.url ? (
+              <a href={item.url} target="_blank" rel="noreferrer">
+                {item.title}
+              </a>
+            ) : (
+              item.title
+            )}
           </h3>
           <p>{item.summary}</p>
           <p className="meta">
