@@ -14,3 +14,6 @@ frontend/dist/
 playwright-report/
 test-results/
 .pytest_cache/
+
+.local/
+.idea/

@@ -125,11 +125,11 @@ def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
     assert Pathway.objects.get(pk=duplicate_pathway.pk).description == (
         "Leave this duplicate pathway untouched."
     )
-    assert LearnerProfile.objects.get(pk=duplicate_learner.pk).preferred_language == "sw"
+    assert (
+        LearnerProfile.objects.get(pk=duplicate_learner.pk).preferred_language == "sw"
+    )
     canonical_amina = (
-        LearnerProfile.objects.filter(display_name="Amina Demo")
-        .order_by("pk")
-        .first()
+        LearnerProfile.objects.filter(display_name="Amina Demo").order_by("pk").first()
     )
     assert canonical_amina is not None
     amina = canonical_amina

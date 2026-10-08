@@ -1,7 +1,10 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from content.ingestion import feed_staleness
+from content.matching import load_config, source_for_url
 from content.models import Item
 from learners.models import LearnerProfile
 from opportunities.matching import match_score
@@ -10,7 +13,17 @@ from pathways.logic import completed_items, progress_for, recommendations
 from pathways.models import Checkpoint, CheckpointRecord, ItemRecord, Pathway
 
 
-def item_json(item, done_ids=None):
+def item_json(item, done_ids=None, reference_date=None):
+    if reference_date is None:
+        reference_date = timezone.localdate()
+    config = load_config()
+    feed = source_for_url(item.source.url, config)
+    stale = feed_staleness(item.source, feed or {}, reference_date, config)
+    age_days = (
+        (reference_date - item.published_at.date()).days
+        if item.date_source in {"published", "updated"}
+        else None
+    )
     return {
         "id": item.pk,
         "title": item.title,
@@ -22,6 +35,14 @@ def item_json(item, done_ids=None):
         "estimated_minutes": item.estimated_minutes,
         "is_low_data": item.is_low_data,
         "done": item.pk in (done_ids or set()),
+        "fetched_at": item.fetched_at.isoformat() if item.fetched_at else None,
+        "date_source": item.date_source,
+        "age_days": age_days,
+        "pathway_keys": item.pathway_keys,
+        "source_attribution": item.source.attribution,
+        "source_rights": item.source.rights,
+        "source_stale": stale["stale"],
+        "source_stale_reason": stale["reason"],
     }
 
 

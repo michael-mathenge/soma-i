@@ -1,0 +1,82 @@
+[
+  {
+    "title": "How CSS content-visibility Works and How It Can Improve Rendering Performance",
+    "link": "https://www.freecodecamp.org/news/css-content-visibility-rendering-performance/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "What happens when a page has 150 content-heavy cards, but the user can only see the first few? You might expect the browser to only worry about what's currently visible. But this isn't exactly what ha",
+    "date": "2026-10-01T06:00:00+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How to Build a Real-Time Word Counter Tool with HTML, CSS, and JavaScript",
+    "link": "https://www.freecodecamp.org/news/how-to-build-a-real-time-word-counter-tool-with-html-css-and-javascript/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "Whether you're writing an essay, a tweet, or a blog post, keeping track of your word and character count is very important. In this tutorial, you'll build a fully functional, real-time Word Counter to",
+    "date": "2026-09-30T05:55:08+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How to Make a Static HTML Page Editable in the Browser with Vanilla JavaScript",
+    "link": "https://www.freecodecamp.org/news/how-to-make-a-static-html-page-editable-in-the-browser-with-vanilla-javascript/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "When you maintain a document for someone else, such as a résumé, a one-page portfolio, or a printable menu, the bottleneck is rarely the layout. It's the edit loop. Every small change (\"move this bull",
+    "date": "2026-07-22T20:22:03+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How to Create Accessible Modals and Pop-ups Using HTML, CSS, and Minimal JavaScript",
+    "link": "https://www.freecodecamp.org/news/how-to-create-accessible-modals-and-pop-ups-using-html-css-and-minimal-javascript/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "Creating pop-ups and modals on your site can be a complicated process. And it often requires a lot of boilerplate code to get started. But the real challenge comes when you want to make that modal or",
+    "date": "2026-07-17T20:34:10+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How to Build a Dark Mode Toggle Without JavaScript",
+    "link": "https://www.freecodecamp.org/news/how-to-build-a-dark-mode-toggle-without-javascript/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "Over the years, I've worked on many Static Site Generated (SSG) websites that work without JavaScript. And during that time, I've created a few solutions. One of them is a dark mode toggle that doesn'",
+    "date": "2026-07-06T13:55:11+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How to Build a Text Compare Tool with HTML, CSS, and JavaScript",
+    "link": "https://www.freecodecamp.org/news/how-to-build-text-compare-tool-html-css-javascript/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "Have you ever tried to spot the differences between two long paragraphs of text? Reading line-by-line to find a missing word or a new sentence is a massive headache. In this tutorial, you'll build you",
+    "date": "2026-07-01T15:36:17+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How to Build a Case Converter Tool Using HTML, CSS, and JavaScript",
+    "link": "https://www.freecodecamp.org/news/how-to-build-a-case-converter-tool/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "If you're looking to level up your front-end development skills by building a practical web utility, this is the guide for you. We'll code a fully functional Case Converter Tool from scratch using onl",
+    "date": "2026-06-12T07:51:10+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How to Build Responsive Designs and Scroll Effects with CSS Container Queries",
+    "link": "https://www.freecodecamp.org/news/how-to-build-responsive-designs-and-scroll-effects-with-css-container-queries/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "Container queries let you target specific sections of your webpage and apply styles to create customizable, responsive designs based on the container's size rather than that of the viewport. This guid",
+    "date": "2026-06-02T23:25:47+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How Atomic CSS and Functional Programming Are Related",
+    "link": "https://www.freecodecamp.org/news/atomic-and-functional-css/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "Hello, friends! My name is Ramazan, and I'm a front-end developer and enthusiast who loves looking at familiar things in web development from new perspectives. You might have heard of functional progr",
+    "date": "2026-03-19T17:38:23+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How to Center Any Element in CSS: 7 Methods That Always Work",
+    "link": "https://www.freecodecamp.org/news/center-any-element-in-css/",
+    "attribution": "freeCodeCamp",
+    "excerpt": "Centering elements in CSS often seems straightforward at first, but it quickly becomes confusing once you start building real layouts. A property like text-align: center; works perfectly for text, yet",
+    "date": "2026-03-06T19:38:28+00:00",
+    "date_source": "published"
+  }
+]

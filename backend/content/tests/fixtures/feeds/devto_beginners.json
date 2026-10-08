@@ -1,0 +1,82 @@
+[
+  {
+    "title": "How To Create Professional Presentation Slides Using AI In 5 Minutes",
+    "link": "https://dev.to/bytevibeai/how-to-create-professional-presentation-slides-using-ai-in-5-minutes-1o01",
+    "attribution": "DEV Community",
+    "excerpt": "Hey everyone! 💡 Every marketer and creator knows the struggle: the concept is ready, the outline is noted, but everything stalls because building presentation slides from scratch takes too much time a",
+    "date": "2026-10-08T13:20:07+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "GPT-2 is the transformer plus five decisions, and inference is a different program",
+    "link": "https://dev.to/cchinchilladev/gpt-2-is-the-transformer-plus-five-decisions-and-inference-is-a-different-program-4gib",
+    "attribution": "DEV Community",
+    "excerpt": "Originally published at cchinchilla.dev . Part 6 of From code to weights, a 12-part series on ML fundamentals for engineers. Part 5 ended on a block and a stack of twelve. GPT-2 is that stack plus fiv",
+    "date": "2026-10-08T13:00:00+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "Your first HTTPS certificate renewal: issue, install, check",
+    "link": "https://dev.to/pki-channnel/your-first-https-certificate-renewal-issue-install-check-25jo",
+    "attribution": "DEV Community",
+    "excerpt": "Your hosting dashboard says that a new certificate is ready. Does that mean your visitors are using it? The answer depends on where HTTPS is managed. For your first renewal, write down who obtains the",
+    "date": "2026-10-08T12:40:49+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "Coder Legion Dev Story",
+    "link": "https://dev.to/mtindiedev_2/coder-legion-dev-story-591l",
+    "attribution": "DEV Community",
+    "excerpt": "I had the honor and privilege to be featured on Coder Legion as a part of their Dev Stories! https://coderlegion.com/30279/from-testing-games-to-building-them-mihaela-turianus-journey-into-indie-game-",
+    "date": "2026-10-08T12:39:05+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "Why AI search engines might be completely missing your new website",
+    "link": "https://dev.to/rehan_khan_3e3277f5d7d64d/why-ai-search-engines-might-be-completely-missing-your-new-website-1hnd",
+    "attribution": "DEV Community",
+    "excerpt": "When shipping a new side-project, most developers remember meta tags and sitemaps, but completely forget two silent killers: AI Crawler Directives ( robots.txt ) : Search engines are evolving into AI-",
+    "date": "2026-10-08T12:32:57+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "How I Would Build a Simple College Research Website for MBA Students",
+    "link": "https://dev.to/mohd_annas_f595375ab65fe9/how-i-would-build-a-simple-college-research-website-for-mba-students-1mam",
+    "attribution": "DEV Community",
+    "excerpt": "How I Would Build a Simple College Research Website for MBA Students When students research MBA colleges, they often have to compare information from many different sources. A well-organized college i",
+    "date": "2026-10-08T12:32:12+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "Coin Change I: When the Default Value Can Break Everything",
+    "link": "https://dev.to/im_nishant/coin-change-i-when-the-default-value-can-break-everything-2ebc",
+    "attribution": "DEV Community",
+    "excerpt": "Coin Change II counts ways. Coin Change I asks a different question: what is the minimum number of coins needed to make a given amount? The choice structure is identical. Unbounded, same-row TAKE, pre",
+    "date": "2026-10-08T12:30:00+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "Top Family Resorts in Chennai - Lush Garden Resort",
+    "link": "https://dev.to/resortlushgarden/top-family-resorts-in-chennai-lush-garden-resort-4h10",
+    "attribution": "DEV Community",
+    "excerpt": "INTRODUCTION Planning a fun and relaxing family getaway from the city? Choosing the right resort can make your vacation more enjoyable, especially when you want comfortable accommodation, exciting act",
+    "date": "2026-10-08T12:23:26+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "Zakat Calculation Guide for Muslims: Step by Step",
+    "link": "https://dev.to/al_mustafacanada_06062a3/zakat-calculation-guide-for-muslims-step-by-step-2c8p",
+    "attribution": "DEV Community",
+    "excerpt": "Table of Contents What Is Zakat in Islam Explained Simply? How to Calculate Zakat Step by Step Who Is Eligible to Receive Zakat in Islam? Zakat vs Sadaqah: Complete Guide for Beginners Benefits of Pay",
+    "date": "2026-10-08T12:21:24+00:00",
+    "date_source": "published"
+  },
+  {
+    "title": "CSS Media Queries for Beginners: How to Make a Website Responsive",
+    "link": "https://dev.to/swapnil_raja/css-media-queries-for-beginners-how-to-make-a-website-responsive-15f6",
+    "attribution": "DEV Community",
+    "excerpt": "CSS media queries allow you to apply different CSS styles for different screen sizes, so your website can work well on mobile, tablet, laptop, and desktop screens. A website should not look good only ",
+    "date": "2026-10-08T11:48:21+00:00",
+    "date_source": "published"
+  }
+]
