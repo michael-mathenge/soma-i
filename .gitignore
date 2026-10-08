@@ -16,3 +16,4 @@ test-results/
 .pytest_cache/
 
 .local/
+.idea/
