@@ -126,6 +126,7 @@
   "feeds": [
     {
       "key": "fcc_data_analysis",
+      "stale_after_days": 60,
       "name": "freeCodeCamp Data Analysis",
       "url": "https://www.freecodecamp.org/news/tag/data-analysis/rss/",
       "source_type": "nonprofit",
@@ -136,6 +137,7 @@
     },
     {
       "key": "fcc_sql",
+      "stale_after_days": 60,
       "name": "freeCodeCamp SQL",
       "url": "https://www.freecodecamp.org/news/tag/sql/rss/",
       "source_type": "nonprofit",
@@ -146,6 +148,7 @@
     },
     {
       "key": "fcc_python",
+      "stale_after_days": 60,
       "name": "freeCodeCamp Python",
       "url": "https://www.freecodecamp.org/news/tag/python/rss/",
       "source_type": "nonprofit",
@@ -156,6 +159,7 @@
     },
     {
       "key": "fcc_javascript",
+      "stale_after_days": 60,
       "name": "freeCodeCamp JavaScript",
       "url": "https://www.freecodecamp.org/news/tag/javascript/rss/",
       "source_type": "nonprofit",
@@ -166,6 +170,7 @@
     },
     {
       "key": "fcc_git",
+      "stale_after_days": 60,
       "name": "freeCodeCamp Git",
       "url": "https://www.freecodecamp.org/news/tag/git/rss/",
       "source_type": "nonprofit",
@@ -176,6 +181,7 @@
     },
     {
       "key": "fcc_css",
+      "stale_after_days": 60,
       "name": "freeCodeCamp CSS",
       "url": "https://www.freecodecamp.org/news/tag/css/rss/",
       "source_type": "nonprofit",
@@ -186,6 +192,7 @@
     },
     {
       "key": "fcc_html",
+      "stale_after_days": 60,
       "name": "freeCodeCamp HTML",
       "url": "https://www.freecodecamp.org/news/tag/html/rss/",
       "source_type": "nonprofit",
@@ -196,6 +203,7 @@
     },
     {
       "key": "realpython",
+      "stale_after_days": 60,
       "name": "Real Python",
       "url": "https://realpython.com/atom.xml",
       "source_type": "publisher",
@@ -206,6 +214,7 @@
     },
     {
       "key": "csstricks",
+      "stale_after_days": 60,
       "name": "CSS-Tricks",
       "url": "https://css-tricks.com/feed/",
       "source_type": "publisher",
@@ -216,6 +225,7 @@
     },
     {
       "key": "devto_sql",
+      "stale_after_days": 60,
       "name": "DEV.to SQL",
       "url": "https://dev.to/feed/tag/sql",
       "source_type": "community",
@@ -226,6 +236,7 @@
     },
     {
       "key": "devto_beginners",
+      "stale_after_days": 60,
       "name": "DEV.to beginners",
       "url": "https://dev.to/feed/tag/beginners",
       "source_type": "community",

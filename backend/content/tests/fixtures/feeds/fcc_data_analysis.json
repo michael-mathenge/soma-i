@@ -1,0 +1,72 @@
+[
+  {
+    "title": "How to Detect Hidden Target Leakage in Public Datasets with Python and a Dependency Graph",
+    "link": "https://www.freecodecamp.org/news/how-to-detect-hidden-target-leakage-in-public-datasets-with-python-and-a-dependency-graph/",
+    "date": "Sat, 19 Sep 2026 17:27:39 +0000",
+    "excerpt": "Some time ago, I gave a machine learning model five columns from a public CDC dataset and asked it to predict a sixth column from the same file. The model scored an R² of 0.998, which is about as clos",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "What Every Dev Should Know About Tracking Product Data",
+    "link": "https://www.freecodecamp.org/news/what-devs-should-know-about-tracking-product-data/",
+    "date": "Mon, 31 Aug 2026 21:41:58 +0000",
+    "excerpt": "Product data is the record of what actually happens inside your app or website. It shows what your users do, how your system behaves, and how your business performs. In this article, you'll learn what",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "How to Optimize PySpark Jobs: Real-World Scenarios for Understanding Logical Plans",
+    "link": "https://www.freecodecamp.org/news/how-to-optimize-pyspark-jobs-handbook/",
+    "date": "Thu, 05 Feb 2026 22:45:15 +0000",
+    "excerpt": "In the world of big data, performance isn't just about bigger clusters – it's about smarter code. Spark is deceptively simple to write but notoriously difficult to optimize, because what you write isn",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "How to Create Boxplots and Model Data in R Using ggplot2",
+    "link": "https://www.freecodecamp.org/news/how-to-create-boxplots-and-model-data-in-r/",
+    "date": "Thu, 15 Jan 2026 18:48:32 +0000",
+    "excerpt": "In this tutorial, you’ll walk through a complete data analysis project using the HR Analytics dataset by Saad Haroon on Kaggle. You’ll start by loading and cleaning the data, then explore it visually ",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "How to Create Scatterplots and Model Data in R Using ggplot2",
+    "link": "https://www.freecodecamp.org/news/how-to-create-scatterplots-and-model-data-in-r/",
+    "date": "Mon, 05 Jan 2026 12:05:54 +0000",
+    "excerpt": "You can use R as a powerful tool for data analysis, data visualization, and statistical modelling. In this guide, you’ll learn how to load real-world data into R, visualize patterns using ggplot2, bui",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "How Embedded Analytics Makes Your App More Valuable",
+    "link": "https://www.freecodecamp.org/news/how-embedded-analytics-makes-your-app-more-valuable/",
+    "date": "Mon, 08 Dec 2025 17:03:00 +0000",
+    "excerpt": "Most business apps capture data. They track orders, tickets, leads, expenses, tasks, or deliveries. But when someone needs insights, they often leave the app, export a file or open a BI tool to get an",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "Common Pitfalls to Avoid When Analyzing and Modeling Data",
+    "link": "https://www.freecodecamp.org/news/common-pitfalls-to-avoid-when-analyzing-and-modeling-data/",
+    "date": "Tue, 14 Oct 2025 13:48:34 +0000",
+    "excerpt": "Working with data at any level, whether as an analyst, engineer, scientist, or decision-maker, involves going through a range of challenges. Even experienced teams can run into issues that quietly aff",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "How to Forecast Time Series Data with Python Darts",
+    "link": "https://www.freecodecamp.org/news/how-to-forecast-time-series-data-with-python-darts/",
+    "date": "Mon, 06 Oct 2025 18:37:01 +0000",
+    "excerpt": "When analyzing time series data, your main objective is to consider the period during which the data is collected and how your variable of interest changes over time. There are various libraries for t",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "The Rise of AI Analytics and What It Means for Industries",
+    "link": "https://www.freecodecamp.org/news/the-rise-of-ai-analytics-and-what-it-means-for-industries/",
+    "date": "Tue, 08 Jul 2025 15:53:59 +0000",
+    "excerpt": "Businesses today are flooded with data. From online purchases to hospital records, every action generates information. But data alone is not useful. What matters is how companies use it to make decisi",
+    "attribution": "freeCodeCamp"
+  },
+  {
+    "title": "How to Extract YouTube Analytics Data and Analyze in Python",
+    "link": "https://www.freecodecamp.org/news/extract-youtube-analytics-data-and-analyze-in-python/",
+    "date": "Wed, 26 Mar 2025 16:05:29 +0000",
+    "excerpt": "If you’re a YouTube content creator, you’ll make data-driven decisions when posting content. This helps you target the right audience when creating your videos. YouTube Studio provides YouTube Analyti",
+    "attribution": "freeCodeCamp"
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "title": "How To Create Professional Presentation Slides Using AI In 5 Minutes",
+    "link": "https://dev.to/bytevibeai/how-to-create-professional-presentation-slides-using-ai-in-5-minutes-1o01",
+    "date": "Thu, 08 Oct 2026 13:20:07 +0000",
+    "excerpt": "Hey everyone! 💡 Every marketer and creator knows the struggle: the concept is ready, the outline is noted, but everything stalls because building presentation slides from scratch takes too much time a",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "GPT-2 is the transformer plus five decisions, and inference is a different program",
+    "link": "https://dev.to/cchinchilladev/gpt-2-is-the-transformer-plus-five-decisions-and-inference-is-a-different-program-4gib",
+    "date": "Thu, 08 Oct 2026 13:00:00 +0000",
+    "excerpt": "Originally published at cchinchilla.dev . Part 6 of From code to weights, a 12-part series on ML fundamentals for engineers. Part 5 ended on a block and a stack of twelve. GPT-2 is that stack plus fiv",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "Your first HTTPS certificate renewal: issue, install, check",
+    "link": "https://dev.to/pki-channnel/your-first-https-certificate-renewal-issue-install-check-25jo",
+    "date": "Thu, 08 Oct 2026 12:40:49 +0000",
+    "excerpt": "Your hosting dashboard says that a new certificate is ready. Does that mean your visitors are using it? The answer depends on where HTTPS is managed. For your first renewal, write down who obtains the",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "Zakat Calculation Guide for Muslims: Step by Step",
+    "link": "https://dev.to/al_mustafacanada_06062a3/zakat-calculation-guide-for-muslims-step-by-step-2c8p",
+    "date": "Thu, 08 Oct 2026 12:21:24 +0000",
+    "excerpt": "Table of Contents What Is Zakat in Islam Explained Simply? How to Calculate Zakat Step by Step Who Is Eligible to Receive Zakat in Islam? Zakat vs Sadaqah: Complete Guide for Beginners Benefits of Pay",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "CSS Media Queries for Beginners: How to Make a Website Responsive",
+    "link": "https://dev.to/swapnil_raja/css-media-queries-for-beginners-how-to-make-a-website-responsive-15f6",
+    "date": "Thu, 08 Oct 2026 11:48:21 +0000",
+    "excerpt": "CSS media queries allow you to apply different CSS styles for different screen sizes, so your website can work well on mobile, tablet, laptop, and desktop screens. A website should not look good only ",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "CSS Flexbox vs CSS Grid: Which One Should Beginners Learn First?",
+    "link": "https://dev.to/swapnil_raja/css-flexbox-vs-css-grid-which-one-should-beginners-learn-first-2npe",
+    "date": "Thu, 08 Oct 2026 11:48:20 +0000",
+    "excerpt": "When beginners start learning CSS layout, two names appear again and again: Flexbox and CSS Grid. Both are powerful. Both are modern. Both are used in real websites. But this also creates confusion. S",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "10 HTML and CSS Projects for Beginners to Practice in 2026",
+    "link": "https://dev.to/swapnil_raja/10-html-and-css-projects-for-beginners-to-practice-in-2026-2j53",
+    "date": "Thu, 08 Oct 2026 11:48:18 +0000",
+    "excerpt": "Learning HTML and CSS is the first step in web development. HTML creates the structure of a webpage, and CSS controls the design, spacing, colors, and layout. But reading tutorials alone is not enough",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "Coder Legion Dev Story",
+    "link": "https://dev.to/mtindiedev_2/coder-legion-dev-story-591l",
+    "date": "Thu, 08 Oct 2026 12:39:05 +0000",
+    "excerpt": "I had the honor and privilege to be featured on Coder Legion as a part of their Dev Stories! https://coderlegion.com/30279/from-testing-games-to-building-them-mihaela-turianus-journey-into-indie-game-",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "Why AI search engines might be completely missing your new website",
+    "link": "https://dev.to/rehan_khan_3e3277f5d7d64d/why-ai-search-engines-might-be-completely-missing-your-new-website-1hnd",
+    "date": "Thu, 08 Oct 2026 12:32:57 +0000",
+    "excerpt": "When shipping a new side-project, most developers remember meta tags and sitemaps, but completely forget two silent killers: AI Crawler Directives ( robots.txt ) : Search engines are evolving into AI-",
+    "attribution": "DEV Community"
+  },
+  {
+    "title": "How I Would Build a Simple College Research Website for MBA Students",
+    "link": "https://dev.to/mohd_annas_f595375ab65fe9/how-i-would-build-a-simple-college-research-website-for-mba-students-1mam",
+    "date": "Thu, 08 Oct 2026 12:32:12 +0000",
+    "excerpt": "How I Would Build a Simple College Research Website for MBA Students When students research MBA colleges, they often have to compare information from many different sources. A well-organized college i",
+    "attribution": "DEV Community"
+  }
+]
