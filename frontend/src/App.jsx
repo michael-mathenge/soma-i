@@ -14,9 +14,6 @@ import sw from "./i18n/sw.json";
 const SW_TEXT = {
   "Data Analyst": "Mchambuzi wa Data",
   "Junior Data Analyst": "Mchambuzi wa Data wa ngazi ya mwanzo",
-  "Web Developer": "Msanidi wa Tovuti",
-  "Junior Web Developer": "Msanidi wa Tovuti wa ngazi ya mwanzo",
-  "Digital Marketing Assistant": "Msaidizi wa Masoko ya Kidijitali",
   Spreadsheets: "Majedwali",
   "Data Visualisation": "Uwasilishaji wa Data kwa Michoro",
   Statistics: "Takwimu",
