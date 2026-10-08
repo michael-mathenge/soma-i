@@ -1,0 +1,240 @@
+{
+  "defaults": {
+    "stale_after_days": 60,
+    "level": "mixed",
+    "summary_match_characters": 300,
+    "fetch_min_interval_seconds": 3600
+  },
+  "pathways": {
+    "Data Analyst": {
+      "keywords": [
+        "sql",
+        "sql query",
+        "window function",
+        "database",
+        "data analysis",
+        "pandas",
+        "numpy",
+        "matplotlib",
+        "excel",
+        "spreadsheet",
+        "visualization",
+        "chart",
+        "dashboard",
+        "statistics",
+        "ggplot",
+        "data cleaning"
+      ]
+    },
+    "Frontend Developer": {
+      "keywords": [
+        "html",
+        "css",
+        "javascript",
+        "accessibility",
+        "responsive",
+        "responsive design",
+        "dom",
+        "flexbox",
+        "css grid",
+        "css layout",
+        "frontend",
+        "front-end"
+      ]
+    },
+    "Backend/Python Developer": {
+      "keywords": [
+        "python",
+        "api",
+        "node",
+        "express",
+        "server",
+        "flask",
+        "django",
+        "git",
+        "database",
+        "testing"
+      ],
+      "conditional_keywords": {
+        "api": {
+          "requires_any": [
+            "python",
+            "node",
+            "express",
+            "server",
+            "backend",
+            "rest",
+            "http",
+            "flask",
+            "django",
+            "fastapi"
+          ]
+        }
+      }
+    }
+  },
+  "ranking": {
+    "beginner_score": {
+      "strong_signals": [
+        "beginner",
+        "introduction",
+        "intro",
+        "getting started",
+        "basics",
+        "fundamentals",
+        "handbook",
+        "for beginners",
+        "step by step"
+      ],
+      "strong_weight": 2,
+      "medium_signals": ["how to", "tutorial", "guide", "what is"],
+      "medium_weight": 1,
+      "negative_signals": [
+        "deep dive",
+        "architecture",
+        "enterprise",
+        "production-ready",
+        "internals",
+        "from scratch",
+        "agent",
+        "llm",
+        "rag",
+        "tuning",
+        "optimize",
+        "trade-offs",
+        "advanced",
+        "pyspark",
+        "algorithmic trading"
+      ],
+      "negative_weight": -2
+    },
+    "community_adjustment": -1,
+    "recency_tiebreak": "published_at; fetched-date items have no recency advantage"
+  },
+  "exclusions": {
+    "all": ["^\\s*Quiz:"],
+    "community": [
+      "\\bbest\\b.*\\bcompany\\b",
+      "\\bfree\\b.*\\bapi\\b",
+      "\\bbreaking my lurking streak\\b",
+      "\\bintroduc(?:e|ing) myself\\b",
+      "^\\s*(?:hi\\b|i[’']m\\b|i am\\b)"
+    ]
+  },
+  "feeds": [
+    {
+      "key": "fcc_data_analysis",
+      "name": "freeCodeCamp Data Analysis",
+      "url": "https://www.freecodecamp.org/news/tag/data-analysis/rss/",
+      "source_type": "nonprofit",
+      "pathways": ["Data Analyst"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "freeCodeCamp"
+    },
+    {
+      "key": "fcc_sql",
+      "name": "freeCodeCamp SQL",
+      "url": "https://www.freecodecamp.org/news/tag/sql/rss/",
+      "source_type": "nonprofit",
+      "pathways": ["Data Analyst"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "freeCodeCamp"
+    },
+    {
+      "key": "fcc_python",
+      "name": "freeCodeCamp Python",
+      "url": "https://www.freecodecamp.org/news/tag/python/rss/",
+      "source_type": "nonprofit",
+      "pathways": ["Backend/Python Developer"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "freeCodeCamp"
+    },
+    {
+      "key": "fcc_javascript",
+      "name": "freeCodeCamp JavaScript",
+      "url": "https://www.freecodecamp.org/news/tag/javascript/rss/",
+      "source_type": "nonprofit",
+      "pathways": ["Frontend Developer", "Backend/Python Developer"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "freeCodeCamp"
+    },
+    {
+      "key": "fcc_git",
+      "name": "freeCodeCamp Git",
+      "url": "https://www.freecodecamp.org/news/tag/git/rss/",
+      "source_type": "nonprofit",
+      "pathways": ["Frontend Developer", "Backend/Python Developer"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "freeCodeCamp"
+    },
+    {
+      "key": "fcc_css",
+      "name": "freeCodeCamp CSS",
+      "url": "https://www.freecodecamp.org/news/tag/css/rss/",
+      "source_type": "nonprofit",
+      "pathways": ["Frontend Developer"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "freeCodeCamp"
+    },
+    {
+      "key": "fcc_html",
+      "name": "freeCodeCamp HTML",
+      "url": "https://www.freecodecamp.org/news/tag/html/rss/",
+      "source_type": "nonprofit",
+      "pathways": ["Frontend Developer"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "freeCodeCamp"
+    },
+    {
+      "key": "realpython",
+      "name": "Real Python",
+      "url": "https://realpython.com/atom.xml",
+      "source_type": "publisher",
+      "pathways": ["Backend/Python Developer", "Data Analyst"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "Real Python"
+    },
+    {
+      "key": "csstricks",
+      "name": "CSS-Tricks",
+      "url": "https://css-tricks.com/feed/",
+      "source_type": "publisher",
+      "pathways": ["Frontend Developer"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "CSS-Tricks"
+    },
+    {
+      "key": "devto_sql",
+      "name": "DEV.to SQL",
+      "url": "https://dev.to/feed/tag/sql",
+      "source_type": "community",
+      "pathways": ["Data Analyst"],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "DEV Community"
+    },
+    {
+      "key": "devto_beginners",
+      "name": "DEV.to beginners",
+      "url": "https://dev.to/feed/tag/beginners",
+      "source_type": "community",
+      "pathways": [
+        "Data Analyst",
+        "Frontend Developer",
+        "Backend/Python Developer"
+      ],
+      "level": "mixed",
+      "rights": "not stated",
+      "attribution": "DEV Community"
+    }
+  ]
+}
