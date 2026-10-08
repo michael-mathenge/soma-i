@@ -1,32 +1,21 @@
-from django.core.management.base import BaseCommand
-from django.utils import timezone
+import json
+from datetime import UTC, datetime
+from pathlib import Path
 
+from django.core.management.base import BaseCommand, CommandError
+
+from content.ingestion import ingest_entries
+from content.matching import load_config
 from content.models import Item, Skill, Source
 from content.sources import SOURCES
 from learners.models import LearnerProfile
 from opportunities.models import Opportunity
+from pathways.constants import CANONICAL_PATHWAYS, FIXTURE_FEEDS
 from pathways.models import Checkpoint, CheckpointRecord, Pathway, PathwaySkill
 
-PATHWAYS = [
-    (
-        "Data Analyst",
-        "Build practical skills for entry-level data work.",
-        "Junior Data Analyst",
-        ["Spreadsheets", "SQL", "Data Visualisation", "Statistics"],
-    ),
-    (
-        "Web Developer",
-        "Learn the foundations of accessible websites.",
-        "Junior Web Developer",
-        ["HTML", "CSS", "JavaScript", "Accessibility"],
-    ),
-    (
-        "Digital Marketing Assistant",
-        "Develop skills for digital campaigns and content.",
-        "Digital Marketing Assistant",
-        ["Content Strategy", "Social Media", "SEO", "Marketing Analytics"],
-    ),
-]
+FIXED_SAMPLE_DATE = datetime(2026, 1, 1, tzinfo=UTC)
+LEGACY_FRONTEND_TITLE = "Web Developer"
+SAMPLE_CONTENT_LABEL = " (sample content)"
 QUIZ = [
     {
         "question": "Which action best shows this skill?",
@@ -59,25 +48,28 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         skill_by_name = {}
-        for _, _, _, names in PATHWAYS:
-            for name in names:
+        for pathway_config in CANONICAL_PATHWAYS:
+            for name in pathway_config["skills"]:
                 slug = name.lower().replace(" ", "-")
                 skill_by_name[name], _ = Skill.objects.get_or_create(
                     slug=slug, defaults={"name": name}
                 )
+        self._rename_legacy_frontend_pathway()
+
         seeded = {}
-        for title, description, outcome, names in PATHWAYS:
+        for pathway_config in CANONICAL_PATHWAYS:
+            title = pathway_config["title"]
             pathway, _ = _update_first_or_create(
                 Pathway,
                 lookup={"title": title},
                 defaults={
-                    "description": description,
-                    "target_outcome": outcome,
+                    "description": pathway_config["description"],
+                    "target_outcome": pathway_config["target_outcome"],
                     "locale": "KE",
                 },
             )
             seeded[title] = pathway
-            for order, name in enumerate(names, start=1):
+            for order, name in enumerate(pathway_config["skills"], start=1):
                 step, _ = PathwaySkill.objects.update_or_create(
                     pathway=pathway,
                     order=order,
@@ -88,7 +80,10 @@ class Command(BaseCommand):
                     defaults={
                         "title": f"{name} checkpoint",
                         "criteria": f"Complete a short practice task using {name} and reflect on what you learned.",
-                        "unlocks_text": f"You can now use {name} as part of your {outcome} journey.",
+                        "unlocks_text": (
+                            f"You can now use {name} as part of your "
+                            f"{pathway_config['target_outcome']} journey."
+                        ),
                         "quiz_json": QUIZ,
                     },
                 )
@@ -177,13 +172,21 @@ class Command(BaseCommand):
                 defaults={
                     "title": f"{title} (demo)",
                     "summary": summary,
-                    "published_at": timezone.now(),
+                    "published_at": FIXED_SAMPLE_DATE,
                     "source": sources[source_name],
                     "estimated_minutes": 8,
                     "is_low_data": True,
                 },
             )
+            for name in names:
+                if name not in skill_by_name:
+                    slug = name.lower().replace(" ", "-")
+                    skill_by_name[name], _ = Skill.objects.get_or_create(
+                        slug=slug, defaults={"name": name}
+                    )
             item.skills.set([skill_by_name[name] for name in names])
+
+        self._seed_fixture_items()
 
         opportunity_seeds = [
             (
@@ -307,3 +310,69 @@ class Command(BaseCommand):
                 "Seeded pathways, demo items, 10 sample opportunities, and Amina Demo."
             )
         )
+
+    def _rename_legacy_frontend_pathway(self):
+        if Pathway.objects.filter(title=CANONICAL_PATHWAYS[1]["title"]).exists():
+            return
+        legacy = (
+            Pathway.objects.filter(title=LEGACY_FRONTEND_TITLE).order_by("pk").first()
+        )
+        if legacy is None:
+            return
+
+        expected = list(CANONICAL_PATHWAYS[1]["skills"][:4])
+        actual = list(
+            legacy.steps.select_related("skill")
+            .order_by("order")
+            .values_list("skill__name", flat=True)
+        )
+        if actual != expected:
+            raise CommandError(
+                "Cannot rename Web Developer: expected the existing four steps "
+                f"{expected}, found {actual}."
+            )
+
+        legacy.title = CANONICAL_PATHWAYS[1]["title"]
+        legacy.description = CANONICAL_PATHWAYS[1]["description"]
+        legacy.target_outcome = CANONICAL_PATHWAYS[1]["target_outcome"]
+        legacy.save(update_fields=["title", "description", "target_outcome"])
+
+    def _seed_fixture_items(self):
+        config = load_config()
+        feeds_by_key = {feed["key"]: feed for feed in config["feeds"]}
+        fixture_dir = (
+            Path(__file__).resolve().parents[3]
+            / "content"
+            / "tests"
+            / "fixtures"
+            / "feeds"
+        )
+
+        for feed_key in FIXTURE_FEEDS:
+            feed = feeds_by_key[feed_key]
+            source, _ = Source.objects.get_or_create(
+                url=feed["url"],
+                defaults={
+                    "name": feed["name"],
+                    "credibility_note": (
+                        f"RSS feed attributed to {feed['attribution']}."
+                    ),
+                    "attribution": feed["attribution"],
+                    "rights": feed.get("rights", "not stated"),
+                    "level": feed.get("level", "mixed"),
+                },
+            )
+            entries = json.loads(
+                (fixture_dir / f"{feed_key}.json").read_text(encoding="utf-8")
+            )
+            ingest_entries(source, feed, entries, FIXED_SAMPLE_DATE, config)
+            for entry in entries:
+                item = Item.objects.filter(url=entry.get("link", "").strip()).first()
+                if item is None or not set(feed["pathways"]).intersection(
+                    item.pathway_keys
+                ):
+                    continue
+                if not item.title.endswith(SAMPLE_CONTENT_LABEL):
+                    item.title = f"{item.title}{SAMPLE_CONTENT_LABEL}"
+                item.is_low_data = True
+                item.save(update_fields=["title", "is_low_data"])

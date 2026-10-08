@@ -2,8 +2,10 @@ import pytest
 from django.core.management import call_command
 from rest_framework.test import APIClient
 
+from content.models import Skill
 from learners.models import LearnerProfile
-from pathways.models import CheckpointRecord, Pathway
+from pathways.constants import CANONICAL_PATHWAYS
+from pathways.models import Checkpoint, CheckpointRecord, Pathway, PathwaySkill
 
 pytestmark = pytest.mark.django_db
 
@@ -85,11 +87,7 @@ def test_seed_demo_is_repeatable_and_opts_amina_into_english_weekly_reminders():
     call_command("seed_demo", verbosity=0)
     call_command("seed_demo", verbosity=0)
 
-    pathway_titles = [
-        "Data Analyst",
-        "Web Developer",
-        "Digital Marketing Assistant",
-    ]
+    pathway_titles = [pathway["title"] for pathway in CANONICAL_PATHWAYS]
     assert LearnerProfile.objects.filter(display_name="Amina Demo").count() == 1
     assert {
         title: Pathway.objects.filter(title=title).count() for title in pathway_titles
@@ -101,6 +99,102 @@ def test_seed_demo_is_repeatable_and_opts_amina_into_english_weekly_reminders():
     assert amina.reminder_opt_in is True
     assert amina.reminder_frequency == "weekly"
     assert amina.phone == ""
+
+
+def test_seed_demo_upgrades_old_seed_without_losing_amina_progress():
+    old_pathways = {
+        "Data Analyst": ["Spreadsheets", "SQL", "Data Visualisation", "Statistics"],
+        "Web Developer": ["HTML", "CSS", "JavaScript", "Accessibility"],
+        "Digital Marketing Assistant": [
+            "Content Strategy",
+            "Social Media",
+            "SEO",
+            "Marketing Analytics",
+        ],
+    }
+    paths = {}
+    first_checkpoint = None
+    for title, names in old_pathways.items():
+        pathway = Pathway.objects.create(
+            title=title, description="Old seeded path", target_outcome=title
+        )
+        paths[title] = pathway
+        for order, name in enumerate(names, start=1):
+            skill, _ = Skill.objects.get_or_create(
+                slug=name.lower().replace(" ", "-"), defaults={"name": name}
+            )
+            step = PathwaySkill.objects.create(
+                pathway=pathway, skill=skill, order=order
+            )
+            checkpoint = Checkpoint.objects.create(
+                pathway_skill=step,
+                title=f"{name} checkpoint",
+                criteria="Practice",
+                unlocks_text="Next",
+            )
+            if title == "Data Analyst" and order == 1:
+                first_checkpoint = checkpoint
+
+    amina = LearnerProfile.objects.create(
+        display_name="Amina Demo", chosen_pathway=paths["Data Analyst"]
+    )
+    progress = CheckpointRecord.objects.create(
+        learner=amina,
+        checkpoint=first_checkpoint,
+        status="done",
+        self_attested=True,
+        quiz_answers={"demo": True},
+    )
+
+    call_command("seed_demo", verbosity=0)
+
+    amina.refresh_from_db()
+    progress.refresh_from_db()
+    assert amina.chosen_pathway_id == paths["Data Analyst"].pk
+    assert progress.checkpoint_id == first_checkpoint.pk
+    assert progress.status == "done"
+    assert Pathway.objects.filter(pk=paths["Digital Marketing Assistant"].pk).exists()
+    frontend = Pathway.objects.get(pk=paths["Web Developer"].pk)
+    assert frontend.title == CANONICAL_PATHWAYS[1]["title"]
+    assert list(
+        frontend.steps.order_by("order").values_list("skill__name", flat=True)
+    ) == list(CANONICAL_PATHWAYS[1]["skills"])
+
+    response = APIClient().get("/api/pathways/")
+    assert response.status_code == 200
+    assert [path["title"] for path in response.data] == [
+        pathway["title"] for pathway in CANONICAL_PATHWAYS
+    ]
+
+
+def test_seed_demo_fixture_picks_are_offline_low_data_and_labeled():
+    from datetime import UTC, datetime
+
+    from content.models import Item
+
+    call_command("seed_demo", verbosity=0)
+
+    fixed_date = datetime(2026, 1, 1, tzinfo=UTC)
+    data_item = Item.objects.get(
+        url="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content"
+    )
+    assert data_item.title == "Spreadsheet skills for clear data (demo)"
+    assert data_item.published_at == fixed_date
+
+    for pathway in CANONICAL_PATHWAYS[1:]:
+        for skill_name in pathway["skills"]:
+            minimum = 1 if skill_name in {"API Development", "Testing"} else 2
+            picks = Item.objects.filter(
+                skills__name=skill_name,
+                is_low_data=True,
+                title__endswith="(sample content)",
+            ).distinct()
+            assert (
+                sum(pathway["title"] in item.pathway_keys for item in picks) >= minimum
+            ), (
+                f"{pathway['title']} / {skill_name} should have at least "
+                f"{minimum} picks"
+            )
 
 
 def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
@@ -147,7 +241,7 @@ def test_health_endpoint_is_public():
 def test_skip_restart_switch_and_delete_are_available(seeded):
     client = APIClient()
     data_path = seeded["Data Analyst"]
-    web_path = seeded["Web Developer"]
+    web_path = seeded["Frontend Developer"]
     client.post("/api/me/", {"pathway_id": data_path.pk}, format="json")
     first = data_path.steps.first().checkpoint
     assert (

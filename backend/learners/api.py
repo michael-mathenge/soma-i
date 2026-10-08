@@ -9,6 +9,7 @@ from content.models import Item
 from learners.models import LearnerProfile
 from opportunities.matching import match_score
 from opportunities.models import Opportunity
+from pathways.constants import CANONICAL_PATHWAYS
 from pathways.logic import completed_items, progress_for, recommendations
 from pathways.models import Checkpoint, CheckpointRecord, ItemRecord, Pathway
 
@@ -82,6 +83,11 @@ def health(request):
 
 @api_view(["GET"])
 def pathways_list(request):
+    canonical = {pathway["title"]: None for pathway in CANONICAL_PATHWAYS}
+    for pathway in Pathway.objects.filter(title__in=canonical).order_by("pk"):
+        if canonical[pathway.title] is None:
+            canonical[pathway.title] = pathway
+
     return Response(
         [
             {
@@ -91,7 +97,9 @@ def pathways_list(request):
                 "target_outcome": p.target_outcome,
                 "locale": p.locale,
             }
-            for p in Pathway.objects.all()
+            for title in canonical
+            for p in [canonical[title]]
+            if p is not None
         ]
     )
 
