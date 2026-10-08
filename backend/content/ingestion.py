@@ -1,4 +1,6 @@
+import logging
 import re
+import unicodedata
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -12,6 +14,29 @@ from content.models import Item, Skill
 from content.skill_keywords import SKILL_KEYWORDS
 
 SUMMARY_MAX_CHARS = 300
+logger = logging.getLogger(__name__)
+
+
+def safe_http_link(value):
+    """Return a trimmed absolute HTTP(S) URL, or None for an unsafe link."""
+    link = str(value or "").strip()
+    if not link or any(
+        char.isspace() or unicodedata.category(char) in {"Cc", "Cf"} for char in link
+    ):
+        return None
+    try:
+        parsed = urlsplit(link)
+        hostname = parsed.hostname
+        parsed.port  # Validate malformed or out-of-range ports.
+    except ValueError:
+        return None
+    if (
+        parsed.scheme.lower() not in {"http", "https"}
+        or not hostname
+        or "@" in parsed.netloc
+    ):
+        return None
+    return link
 
 
 def normalize_link(value):
@@ -193,10 +218,18 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
     latest_item_at = None
     pathway_counts = {pathway: 0 for pathway in feed_config["pathways"]}
     duplicate_pathway_counts = {pathway: 0 for pathway in feed_config["pathways"]}
+    rejected_unsafe_link = 0
 
     for entry in entries:
         title = plain_text(entry.get("title", "")).strip()[:300]
-        original_link = str(entry.get("link", "")).strip()
+        original_link = safe_http_link(entry.get("link", ""))
+        if original_link is None:
+            rejected_unsafe_link += 1
+            logger.warning(
+                "%s: rejected item with unsafe link",
+                feed_config.get("name") or source.name,
+            )
+            continue
         normalized_link = normalize_link(original_link)
         summary = clean_summary(
             entry.get("summary", entry.get("description", entry.get("excerpt", "")))
@@ -298,6 +331,7 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
     return {
         "created": created,
         "duplicates_merged": duplicates_merged,
+        "rejected_unsafe_link": rejected_unsafe_link,
         "date_counts": dates,
         "latest_item_at": latest_item_at,
         "pathway_counts": pathway_counts,
