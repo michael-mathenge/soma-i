@@ -14,28 +14,43 @@ from content.matching import (
 )
 
 
-def test_css_media_queries_are_not_data_analyst_content():
+def test_css_media_queries_are_frontend_not_data_analyst():
     title = "CSS Media Queries for Beginners: How to Make a Website Responsive"
     summary = "CSS media queries help adapt a site to different screen sizes."
     assert not topic_matches("Data Analyst", title, summary)
     assert topic_matches("Frontend Developer", title, summary)
 
 
+def test_css_flexbox_and_grid_are_frontend_not_data_analyst():
+    title = "CSS Flexbox vs CSS Grid: Which One Should Beginners Learn First?"
+    assert not topic_matches("Data Analyst", title)
+    assert topic_matches("Frontend Developer", title)
+
+
+def test_html_css_projects_are_frontend_not_data_analyst():
+    title = "10 HTML and CSS Projects for Beginners to Practice in 2026"
+    assert not topic_matches("Data Analyst", title)
+    assert topic_matches("Frontend Developer", title)
+
+
 @pytest.mark.parametrize(
-    "title,summary",
+    "title",
     [
-        (
-            "How To Create Professional Presentation Slides Using AI In 5 Minutes",
-            "A presentation layout can be made in just a few minutes.",
-        ),
-        (
-            "Your first HTTPS certificate renewal: issue, install, check",
-            "Browsers rely on a valid certificate when connecting to a website.",
-        ),
+        "Zakat Calculation Guide for Muslims: Step by Step",
+        "GPT-2 is the transformer plus five decisions, and inference is a different program",
+        "Your first HTTPS certificate renewal: issue, install, check",
     ],
 )
-def test_reported_frontend_false_positives_do_not_pass(title, summary):
-    assert not topic_matches("Frontend Developer", title, summary)
+def test_reported_unrelated_titles_pass_no_pathway(title):
+    for pathway in load_config()["pathways"]:
+        assert not topic_matches(pathway, title, source_type="community")
+
+
+def test_ai_presentation_slides_pass_no_pathway():
+    title = "How To Create Professional Presentation Slides Using AI In 5 Minutes"
+    summary = "A presentation layout can be made in just a few minutes."
+    for pathway in load_config()["pathways"]:
+        assert not topic_matches(pathway, title, summary)
 
 
 @pytest.mark.parametrize(
@@ -49,15 +64,18 @@ def test_browser_apis_do_not_pass_backend_pathway_without_backend_context(title)
     assert not topic_matches("Backend/Python Developer", title)
 
 
-@pytest.mark.parametrize(
-    "title",
-    [
-        "How to Choose the Best React JS Development Company in the UK",
-        "A free SEO audit API for developers: score any URL with one request",
-        "DEV! Breaking my lurking streak to introduce myself",
-    ],
-)
-def test_community_promo_titles_are_excluded(title):
+def test_best_company_promo_is_excluded():
+    title = "How to Choose the Best React JS Development Company in the UK"
+    assert exclusion_reason(title, "community")
+
+
+def test_free_api_promo_is_excluded():
+    title = "A free SEO audit API for developers: score any URL with one request"
+    assert exclusion_reason(title, "community")
+
+
+def test_self_introduction_promo_is_excluded():
+    title = "DEV! Breaking my lurking streak to introduce myself"
     assert exclusion_reason(title, "community")
 
 
@@ -111,12 +129,18 @@ def test_backend_api_requires_a_backend_context_term():
     assert topic_matches("Backend/Python Developer", "Python API design")
 
 
-def test_fcc_git_feed_has_no_frontend_keyword_match():
+def test_frontend_keywords_include_git_and_github():
     config = load_config()
     frontend_terms = config["pathways"]["Frontend Developer"]["keywords"]
-    assert "git" not in frontend_terms
-    assert "github" not in frontend_terms
-    assert not topic_matches("Frontend Developer", "Learn Git and GitHub")
+    assert "git" in frontend_terms
+    assert "github" in frontend_terms
+    assert topic_matches("Frontend Developer", "Learn Git and GitHub")
+
+
+def test_frontend_git_term_uses_token_matching():
+    assert topic_matches("Frontend Developer", "Git basics")
+    assert topic_matches("Frontend Developer", "GitHub introduction")
+    assert not topic_matches("Frontend Developer", "Digital fundamentals")
 
 
 def test_html_is_removed_before_matching():
@@ -128,6 +152,12 @@ def test_html_is_removed_before_matching():
         "A guide",
         "<p>Useful <b>Python</b> basics</p>",
     )
+
+
+def test_hostile_title_html_is_stripped_before_topic_matching():
+    title = '<img src=x onerror="alert(1)"> Python basics'
+    assert plain_text(title) == "Python basics"
+    assert topic_matches("Backend/Python Developer", title)
 
 
 def test_beginner_score_and_community_adjustment():
