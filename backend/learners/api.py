@@ -88,6 +88,28 @@ def pathways_list(request):
         if canonical[pathway.title] is None:
             canonical[pathway.title] = pathway
 
+    config_by_title = {pathway["title"]: pathway for pathway in CANONICAL_PATHWAYS}
+    seeded_picks = {}
+    for title, pathway in canonical.items():
+        if pathway is None:
+            continue
+        seeded_picks[title] = {}
+        for skill_name in config_by_title[title]["skills"]:
+            items = (
+                Item.objects.filter(skills__name=skill_name)
+                .distinct()
+                .order_by("pk")
+            )
+            seeded_picks[title][skill_name] = [
+                {
+                    "id": item.pk,
+                    "title": item.title,
+                    "url": item.url,
+                    "skills": list(item.skills.values_list("name", flat=True)),
+                }
+                for item in items
+            ]
+
     return Response(
         [
             {
@@ -96,6 +118,7 @@ def pathways_list(request):
                 "description": p.description,
                 "target_outcome": p.target_outcome,
                 "locale": p.locale,
+                "seeded_picks": seeded_picks[title],
             }
             for title in canonical
             for p in [canonical[title]]
@@ -185,9 +208,12 @@ def dashboard(request):
         return error
     state = progress_for(learner)
     done_ids = completed_items(learner)
+    picks_by_skill = [
+        recommendations(skill, 3) for skill in state["remaining"]
+    ]
     recommended = []
-    for skill in state["remaining"]:
-        recommended.extend(recommendations(skill, 3))
+    for index in range(max((len(items) for items in picks_by_skill), default=0)):
+        recommended.extend(items[index] for items in picks_by_skill if index < len(items))
     seen = set()
     recommended = [
         item for item in recommended if not (item.pk in seen or seen.add(item.pk))
