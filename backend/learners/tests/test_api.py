@@ -317,6 +317,53 @@ def test_fresh_fixture_seed_label_is_idempotent_and_live_ingest_dedupes():
     assert Item.objects.get(normalized_link=normalized_link).pk == item_id
 
 
+def test_seed_demo_repairs_only_seed_owned_data_analyst_demo_dates():
+    from datetime import UTC, datetime
+
+    from django.utils import timezone
+
+    from content.models import Item, Source
+
+    live_url = "https://news.mit.edu/rss/research"
+    source = Source.objects.create(
+        name="Existing live source",
+        url="https://example.test/live-source",
+        credibility_note="Existing live item for seed-key collision test.",
+    )
+    live_date = datetime(2020, 5, 4, tzinfo=UTC)
+    live_item = Item.objects.create(
+        title="Live item at a seed URL",
+        url=live_url,
+        published_at=live_date,
+        source=source,
+        is_low_data=False,
+    )
+
+    call_command("seed_demo", verbosity=0)
+
+    old_seed_items = [
+        Item.objects.get(
+            url="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content"
+        ),
+        Item.objects.get(url="https://www.freecodecamp.org/news/sql-tutorial/"),
+    ]
+    old_date = timezone.now()
+    Item.objects.filter(pk__in=[item.pk for item in old_seed_items]).update(
+        published_at=old_date
+    )
+
+    call_command("seed_demo", verbosity=0)
+
+    fixed_date = datetime(2026, 1, 1, tzinfo=UTC)
+    for item in old_seed_items:
+        item.refresh_from_db()
+        assert item.published_at == fixed_date
+    live_item.refresh_from_db()
+    assert live_item.title == "Live item at a seed URL"
+    assert live_item.published_at == live_date
+    assert live_item.is_low_data is False
+
+
 def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
     call_command("seed_demo", verbosity=0)
     pathway = Pathway.objects.get(title="Data Analyst")

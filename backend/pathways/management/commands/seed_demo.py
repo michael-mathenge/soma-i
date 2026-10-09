@@ -23,6 +23,20 @@ from pathways.models import Checkpoint, CheckpointRecord, Pathway, PathwaySkill
 FIXED_SAMPLE_DATE = datetime(2026, 1, 1, tzinfo=UTC)
 LEGACY_FRONTEND_TITLE = "Web Developer"
 SAMPLE_CONTENT_LABEL = " (sample content)"
+DATA_ANALYST_DEMO_KEYS = {
+    (
+        "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
+        "Spreadsheet skills for clear data (demo)",
+    ),
+    (
+        "https://www.freecodecamp.org/news/sql-tutorial/",
+        "Practice spreadsheet formulas (demo)",
+    ),
+    (
+        "https://news.mit.edu/rss/research",
+        "Organize a small dataset (demo)",
+    ),
+}
 QUIZ = [
     {
         "question": "Which action best shows this skill?",
@@ -192,6 +206,10 @@ class Command(BaseCommand):
                         slug=slug, defaults={"name": name}
                     )
             item.skills.set([skill_by_name[name] for name in names])
+            if (url, item.title) in DATA_ANALYST_DEMO_KEYS:
+                if item.published_at != FIXED_SAMPLE_DATE:
+                    item.published_at = FIXED_SAMPLE_DATE
+                    item.save(update_fields=["published_at"])
 
         self._seed_fixture_items()
 
