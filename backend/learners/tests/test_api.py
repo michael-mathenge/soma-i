@@ -402,6 +402,89 @@ def test_pathways_list_omits_seeded_picks_and_stays_under_1500_bytes(seeded):
     )
 
 
+def test_clean_seed_omits_search_visibility_demo():
+    from content.models import Item
+
+    call_command("seed_demo", verbosity=0)
+
+    assert not Item.objects.filter(title="Search visibility basics (demo)").exists()
+
+
+def test_demo_items_have_only_canonical_pathway_skills():
+    from content.models import Item
+
+    call_command("seed_demo", verbosity=0)
+    canonical_skills = {
+        skill_name
+        for pathway in CANONICAL_PATHWAYS
+        for skill_name in pathway["skills"]
+    }
+
+    for item in Item.objects.filter(title__endswith="(demo)"):
+        assert set(item.skills.values_list("name", flat=True)) <= canonical_skills
+
+
+def test_seed_demo_preserves_existing_search_visibility_row():
+    from django.utils import timezone
+
+    from content.models import Item, Skill, Source
+
+    source = Source.objects.create(
+        name="Existing seed source",
+        url="https://developers.google.com/search/feed",
+        credibility_note="Existing seed row",
+    )
+    seo, _ = Skill.objects.get_or_create(slug="seo", defaults={"name": "SEO"})
+    item = Item.objects.create(
+        title="Search visibility basics (demo)",
+        url="https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+        published_at=timezone.now(),
+        source=source,
+    )
+    item.skills.add(seo)
+
+    call_command("seed_demo", verbosity=0)
+
+    item.refresh_from_db()
+    assert Item.objects.filter(pk=item.pk).exists()
+    assert list(item.skills.values_list("name", flat=True)) == ["SEO"]
+
+
+def test_seed_demo_does_not_strip_live_item_skills():
+    from django.utils import timezone
+
+    from content.models import Item, Skill, Source
+
+    source = Source.objects.create(
+        name="Live research feed",
+        url="https://news.mit.edu/rss/research",
+        credibility_note="Live ingested source",
+    )
+    marketing, _ = Skill.objects.get_or_create(
+        slug="marketing-analytics", defaults={"name": "Marketing Analytics"}
+    )
+    seo, _ = Skill.objects.get_or_create(slug="seo", defaults={"name": "SEO"})
+    live_date = timezone.now()
+    item = Item.objects.create(
+        title="Live research item",
+        url="https://news.mit.edu/rss/research",
+        published_at=live_date,
+        is_low_data=False,
+        source=source,
+    )
+    item.skills.add(marketing, seo)
+
+    call_command("seed_demo", verbosity=0)
+
+    item.refresh_from_db()
+    assert item.title == "Live research item"
+    assert item.published_at == live_date
+    assert item.is_low_data is False
+    assert {"Marketing Analytics", "SEO"} <= set(
+        item.skills.values_list("name", flat=True)
+    )
+
+
 def test_dashboard_round_robin_covers_four_skills_deduplicates_and_is_deterministic(
     seeded, monkeypatch
 ):

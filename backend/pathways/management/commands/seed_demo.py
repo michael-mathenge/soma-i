@@ -133,7 +133,7 @@ class Command(BaseCommand):
             (
                 "Organize a small dataset",
                 "Sort and filter example records before analysis.",
-                ["Spreadsheets", "SQL", "Statistics", "Marketing Analytics"],
+                ["Spreadsheets", "SQL", "Statistics"],
                 "https://news.mit.edu/rss/research",
                 "MIT News Research",
             ),
@@ -151,16 +151,9 @@ class Command(BaseCommand):
                 "https://www.freecodecamp.org/news/learn-javascript-full-course/",
                 "freeCodeCamp News",
             ),
-            (
-                "Search visibility basics",
-                "Learn how search engines discover web content.",
-                ["SEO", "Marketing Analytics"],
-                "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
-                "MIT News Research",
-            ),
         ]
         for title, summary, names, url, source_name in examples:
-            item, _ = Item.objects.get_or_create(
+            item, created = Item.objects.get_or_create(
                 url=url,
                 defaults={
                     "title": f"{title} (demo)",
@@ -177,7 +170,11 @@ class Command(BaseCommand):
                     skill_by_name[name], _ = Skill.objects.get_or_create(
                         slug=slug, defaults={"name": name}
                     )
-            item.skills.set([skill_by_name[name] for name in names])
+            assigned_skills = [skill_by_name[name] for name in names]
+            if created or item.title == f"{title} (demo)":
+                item.skills.set(assigned_skills)
+            else:
+                item.skills.add(*assigned_skills)
             if (url, item.title) in DATA_ANALYST_DEMO_KEYS:
                 if item.published_at != FIXED_SAMPLE_DATE:
                     item.published_at = FIXED_SAMPLE_DATE
