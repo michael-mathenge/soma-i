@@ -364,6 +364,32 @@ def test_seed_demo_repairs_only_seed_owned_data_analyst_demo_dates():
     assert live_item.is_low_data is False
 
 
+def test_seed_demo_provides_picks_for_each_data_analyst_skill():
+    from content.models import Item
+    from pathways.management.commands.seed_demo import DATA_ANALYST_DEMO_KEYS
+
+    call_command("seed_demo", verbosity=0)
+
+    seeded_items = [
+        Item.objects.get(url=url, title=title)
+        for url, title in DATA_ANALYST_DEMO_KEYS
+    ]
+    seeded_item_ids = [item.pk for item in seeded_items]
+    expected_counts = {
+        "Spreadsheets": 3,
+        "SQL": 3,
+        "Data Visualisation": 1,
+        "Statistics": 2,
+    }
+    for skill_name, expected_count in expected_counts.items():
+        assert (
+            Item.objects.filter(
+                pk__in=seeded_item_ids, skills__name=skill_name
+            ).distinct().count()
+            == expected_count
+        )
+
+
 def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
     call_command("seed_demo", verbosity=0)
     pathway = Pathway.objects.get(title="Data Analyst")
