@@ -1,32 +1,55 @@
-from django.core.management.base import BaseCommand
-from django.utils import timezone
+import json
+from datetime import UTC, datetime
+from pathlib import Path
 
+from django.core.management.base import BaseCommand, CommandError
+
+from content.ingestion import (
+    _matched_skills,
+    clean_summary,
+    ingest_entries,
+    normalize_link,
+    pathway_matches,
+    safe_http_link,
+)
+from content.matching import load_config, plain_text
 from content.models import Item, Skill, Source
-from content.sources import SOURCES
 from learners.models import LearnerProfile
 from opportunities.models import Opportunity
+from pathways.constants import CANONICAL_PATHWAYS, FIXTURE_FEEDS
 from pathways.models import Checkpoint, CheckpointRecord, Pathway, PathwaySkill
 
-PATHWAYS = [
+FIXED_SAMPLE_DATE = datetime(2026, 1, 1, tzinfo=UTC)
+LEGACY_FRONTEND_TITLE = "Web Developer"
+SAMPLE_CONTENT_LABEL = " (sample content)"
+DATA_ANALYST_DEMO_KEYS = {
     (
-        "Data Analyst",
-        "Build practical skills for entry-level data work.",
-        "Junior Data Analyst",
-        ["Spreadsheets", "SQL", "Data Visualisation", "Statistics"],
+        "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-skills",
+        "Spreadsheet skills for clear data (demo)",
     ),
     (
-        "Web Developer",
-        "Learn the foundations of accessible websites.",
-        "Junior Web Developer",
-        ["HTML", "CSS", "JavaScript", "Accessibility"],
+        "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-formulas",
+        "Practice spreadsheet formulas (demo)",
     ),
     (
-        "Digital Marketing Assistant",
-        "Develop skills for digital campaigns and content.",
-        "Digital Marketing Assistant",
-        ["Content Strategy", "Social Media", "SEO", "Marketing Analytics"],
+        "https://github.com/michael-mathenge/soma-i#demo-small-dataset",
+        "Organize a small dataset (demo)",
     ),
-]
+}
+SAMPLE_SOURCE_URL = "https://github.com/michael-mathenge/soma-i"
+LEGACY_DEMO_URLS = {
+    "Spreadsheet skills for clear data (demo)": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
+    "Practice spreadsheet formulas (demo)": "https://www.freecodecamp.org/news/sql-tutorial/",
+    "Organize a small dataset (demo)": "https://news.mit.edu/rss/research",
+    "CSS layout foundations (demo)": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics",
+    "JavaScript essentials (demo)": "https://www.freecodecamp.org/news/learn-javascript-full-course/",
+}
+EXCLUDED_SEED_FIXTURE_SKILLS = {
+    (
+        "https://www.freecodecamp.org/news/how-to-build-a-reading-focused-blog-with-python-markdown-and-github-pages-for-free/",
+        "Data Visualisation",
+    ),
+}
 QUIZ = [
     {
         "question": "Which action best shows this skill?",
@@ -59,25 +82,28 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         skill_by_name = {}
-        for _, _, _, names in PATHWAYS:
-            for name in names:
+        for pathway_config in CANONICAL_PATHWAYS:
+            for name in pathway_config["skills"]:
                 slug = name.lower().replace(" ", "-")
                 skill_by_name[name], _ = Skill.objects.get_or_create(
                     slug=slug, defaults={"name": name}
                 )
+        self._rename_legacy_frontend_pathway()
+
         seeded = {}
-        for title, description, outcome, names in PATHWAYS:
+        for pathway_config in CANONICAL_PATHWAYS:
+            title = pathway_config["title"]
             pathway, _ = _update_first_or_create(
                 Pathway,
                 lookup={"title": title},
                 defaults={
-                    "description": description,
-                    "target_outcome": outcome,
+                    "description": pathway_config["description"],
+                    "target_outcome": pathway_config["target_outcome"],
                     "locale": "KE",
                 },
             )
             seeded[title] = pathway
-            for order, name in enumerate(names, start=1):
+            for order, name in enumerate(pathway_config["skills"], start=1):
                 step, _ = PathwaySkill.objects.update_or_create(
                     pathway=pathway,
                     order=order,
@@ -88,102 +114,120 @@ class Command(BaseCommand):
                     defaults={
                         "title": f"{name} checkpoint",
                         "criteria": f"Complete a short practice task using {name} and reflect on what you learned.",
-                        "unlocks_text": f"You can now use {name} as part of your {outcome} journey.",
+                        "unlocks_text": (
+                            f"You can now use {name} as part of your "
+                            f"{pathway_config['target_outcome']} journey."
+                        ),
                         "quiz_json": QUIZ,
                     },
                 )
 
-        configs = {config["name"]: config for config in SOURCES}
-        sources = {}
-        for name, config in configs.items():
-            sources[name], _ = Source.objects.get_or_create(
-                url=config["url"], defaults=config
-            )
+        sample_source, _ = Source.objects.update_or_create(
+            url=SAMPLE_SOURCE_URL,
+            defaults={
+                "name": "SOMA.i sample content",
+                "credibility_note": "Hand-written sample content for the SOMA.i demo; not from an external feed.",
+                "attribution": "SOMA.i",
+                "rights": "not stated",
+                "level": "beginner",
+                "language": "en",
+                "active": True,
+            },
+        )
         examples = [
             (
                 "Spreadsheet skills for clear data",
                 "Work with rows, columns, formulas, and summaries.",
-                ["Spreadsheets", "Data Visualisation"],
-                "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
-                "MDN Blog",
+                ["Spreadsheets", "SQL"],
+                "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-skills",
             ),
             (
                 "Practice spreadsheet formulas",
                 "Use formulas to summarize a small dataset.",
-                ["Spreadsheets", "Statistics"],
-                "https://www.freecodecamp.org/news/sql-tutorial/",
-                "freeCodeCamp News",
+                ["Spreadsheets", "SQL", "Data Visualisation", "Statistics"],
+                "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-formulas",
             ),
             (
                 "Organize a small dataset",
                 "Sort and filter example records before analysis.",
-                ["Spreadsheets", "SQL"],
-                "https://news.mit.edu/rss/research",
-                "MIT News Research",
-            ),
-            (
-                "SQL basics for analysts",
-                "Learn to select and filter information in a database.",
-                ["SQL", "Statistics"],
-                "https://www.freecodecamp.org/news/sql-tutorial/",
-                "freeCodeCamp News",
-            ),
-            (
-                "HTML page structure",
-                "Build a clear page with semantic HTML.",
-                ["HTML", "Accessibility"],
-                "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
-                "MDN Blog",
+                ["Spreadsheets", "SQL", "Statistics"],
+                "https://github.com/michael-mathenge/soma-i#demo-small-dataset",
             ),
             (
                 "CSS layout foundations",
                 "Use CSS to style and arrange a simple page.",
                 ["CSS", "HTML"],
-                "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics",
-                "MDN Blog",
+                "https://github.com/michael-mathenge/soma-i#demo-css-layout",
             ),
             (
                 "JavaScript essentials",
                 "Add interaction with beginner JavaScript concepts.",
                 ["JavaScript", "HTML"],
-                "https://www.freecodecamp.org/news/learn-javascript-full-course/",
-                "freeCodeCamp News",
-            ),
-            (
-                "Create useful digital content",
-                "Plan content for an audience and a clear goal.",
-                ["Content Strategy", "Social Media"],
-                "https://news.mit.edu/rss/research",
-                "MIT News Research",
-            ),
-            (
-                "Search visibility basics",
-                "Learn how search engines discover web content.",
-                ["SEO", "Marketing Analytics"],
-                "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
-                "MIT News Research",
-            ),
-            (
-                "Read campaign results",
-                "Use simple metrics to review a campaign.",
-                ["Marketing Analytics", "Statistics"],
-                "https://news.mit.edu/rss/research",
-                "MIT News Research",
+                "https://github.com/michael-mathenge/soma-i#demo-javascript-essentials",
             ),
         ]
-        for title, summary, names, url, source_name in examples:
-            item, _ = Item.objects.get_or_create(
-                url=url,
-                defaults={
-                    "title": f"{title} (demo)",
-                    "summary": summary,
-                    "published_at": timezone.now(),
-                    "source": sources[source_name],
-                    "estimated_minutes": 8,
-                    "is_low_data": True,
-                },
+        legacy_url_collisions = 0
+        for title, summary, names, url in examples:
+            sample_title = f"{title} (demo)"
+            item = (
+                Item.objects.filter(url=url, title=sample_title).order_by("pk").first()
             )
-            item.skills.set([skill_by_name[name] for name in names])
+            if item is None:
+                legacy_url = LEGACY_DEMO_URLS[sample_title]
+                item = (
+                    Item.objects.filter(url=legacy_url, title=sample_title)
+                    .order_by("pk")
+                    .first()
+                )
+            created = item is None
+            if (
+                not created
+                and item.url != url
+                and Item.objects.filter(url=url).exclude(pk=item.pk).exists()
+            ):
+                legacy_url_collisions += 1
+                continue
+            if created:
+                if Item.objects.filter(url=url).exists():
+                    continue
+                item = Item(
+                    url=url,
+                    title=sample_title,
+                    summary=summary,
+                    published_at=FIXED_SAMPLE_DATE,
+                    source=sample_source,
+                    estimated_minutes=8,
+                    is_low_data=True,
+                )
+            else:
+                item.url = url
+                item.title = sample_title
+                item.summary = summary
+                item.source = sample_source
+                item.estimated_minutes = 8
+                item.is_low_data = True
+            item.normalized_link = None
+            item.save()
+            for name in names:
+                if name not in skill_by_name:
+                    slug = name.lower().replace(" ", "-")
+                    skill_by_name[name], _ = Skill.objects.get_or_create(
+                        slug=slug, defaults={"name": name}
+                    )
+            assigned_skills = [skill_by_name[name] for name in names]
+            if created or item.title == sample_title:
+                # Replace legacy marketing tags on seed-owned demos with their pathway skills.
+                item.skills.set(assigned_skills)
+            if (url, item.title) in DATA_ANALYST_DEMO_KEYS:
+                if item.published_at != FIXED_SAMPLE_DATE:
+                    item.published_at = FIXED_SAMPLE_DATE
+                    item.save(update_fields=["published_at"])
+
+        self.stdout.write(
+            f"Skipped {legacy_url_collisions} legacy demo row(s) due to destination URL conflicts."
+        )
+
+        self._seed_fixture_items()
 
         opportunity_seeds = [
             (
@@ -307,3 +351,124 @@ class Command(BaseCommand):
                 "Seeded pathways, demo items, 10 sample opportunities, and Amina Demo."
             )
         )
+
+    def _rename_legacy_frontend_pathway(self):
+        if Pathway.objects.filter(title=CANONICAL_PATHWAYS[1]["title"]).exists():
+            return
+        legacy = (
+            Pathway.objects.filter(title=LEGACY_FRONTEND_TITLE).order_by("pk").first()
+        )
+        if legacy is None:
+            return
+
+        expected = list(CANONICAL_PATHWAYS[1]["skills"][:4])
+        actual = list(
+            legacy.steps.select_related("skill")
+            .order_by("order")
+            .values_list("skill__name", flat=True)
+        )
+        if actual != expected:
+            raise CommandError(
+                "Cannot rename Web Developer: expected the existing four steps "
+                f"{expected}, found {actual}."
+            )
+
+        legacy.title = CANONICAL_PATHWAYS[1]["title"]
+        legacy.description = CANONICAL_PATHWAYS[1]["description"]
+        legacy.target_outcome = CANONICAL_PATHWAYS[1]["target_outcome"]
+        legacy.save(update_fields=["title", "description", "target_outcome"])
+
+    def _seed_fixture_items(self):
+        config = load_config()
+        feeds_by_key = {feed["key"]: feed for feed in config["feeds"]}
+        fixture_dir = (
+            Path(__file__).resolve().parents[3]
+            / "content"
+            / "tests"
+            / "fixtures"
+            / "feeds"
+        )
+
+        for feed_key in FIXTURE_FEEDS:
+            feed = feeds_by_key[feed_key]
+            source, _ = Source.objects.get_or_create(
+                url=feed["url"],
+                defaults={
+                    "name": feed["name"],
+                    "credibility_note": (
+                        f"RSS feed attributed to {feed['attribution']}."
+                    ),
+                    "attribution": feed["attribution"],
+                    "rights": feed.get("rights", "not stated"),
+                    "level": feed.get("level", "mixed"),
+                },
+            )
+            entries = json.loads(
+                (fixture_dir / f"{feed_key}.json").read_text(encoding="utf-8")
+            )
+            entries_to_ingest = []
+            new_normalized_links = set()
+            for entry in entries:
+                original_link = safe_http_link(entry.get("link", ""))
+                if original_link is None:
+                    entries_to_ingest.append(entry)
+                    continue
+                title = plain_text(entry.get("title", "")).strip()[:300]
+                summary = clean_summary(
+                    entry.get(
+                        "summary", entry.get("description", entry.get("excerpt", ""))
+                    )
+                )
+                if not title or not pathway_matches(feed, title, summary, config):
+                    continue
+
+                normalized_link = normalize_link(original_link)
+                item = (
+                    Item.objects.filter(normalized_link=normalized_link)
+                    .order_by("pk")
+                    .first()
+                )
+                if item is None:
+                    item = Item.objects.filter(url=original_link).order_by("pk").first()
+                guid = str(entry.get("id", entry.get("guid", ""))).strip()
+                if item is None and guid:
+                    item = (
+                        Item.objects.filter(source=source, guid=guid)
+                        .order_by("pk")
+                        .first()
+                    )
+                if item is not None:
+                    item.skills.add(*_matched_skills(title, summary))
+                    continue
+
+                entries_to_ingest.append(entry)
+                new_normalized_links.add(normalized_link)
+
+            ingest_entries(source, feed, entries_to_ingest, FIXED_SAMPLE_DATE, config)
+            for normalized_link in new_normalized_links:
+                item = (
+                    Item.objects.filter(normalized_link=normalized_link)
+                    .order_by("pk")
+                    .first()
+                )
+                if item is None:
+                    continue
+                if not item.title.endswith(SAMPLE_CONTENT_LABEL):
+                    item.title = f"{item.title}{SAMPLE_CONTENT_LABEL}"
+                item.is_low_data = True
+                item.save(update_fields=["title", "is_low_data"])
+
+            for link, skill_name in EXCLUDED_SEED_FIXTURE_SKILLS:
+                if not any(
+                    normalize_link(entry.get("link", "")) == normalize_link(link)
+                    for entry in entries
+                ):
+                    continue
+                item = (
+                    Item.objects.filter(normalized_link=normalize_link(link))
+                    .order_by("pk")
+                    .first()
+                )
+                if item is not None and item.title.endswith(SAMPLE_CONTENT_LABEL):
+                    skill = Skill.objects.get(name=skill_name)
+                    item.skills.remove(skill)

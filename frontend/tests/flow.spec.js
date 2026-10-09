@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { resetE2ESeed } from "./reset-e2e-seed.js";
+
+test.beforeEach(() => resetE2ESeed());
 
 test("onboard and complete a checkpoint in English and Swahili", async ({
   page,

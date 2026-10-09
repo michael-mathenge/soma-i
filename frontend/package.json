@@ -8,6 +8,8 @@
     "build": "vite build --configLoader runner && node scripts/report-gzip.js",
     "preview": "vite preview --host 127.0.0.1",
     "test:e2e": "playwright test",
+    "test:e2e:guard": "node --test test-support/e2e-database-guard.test.js",
+    "clean:e2e": "node scripts/clean-e2e.mjs",
     "lint": "eslint src tests",
     "format": "prettier --write \"src/**/*.{js,jsx,json,css}\" \"tests/**/*.js\" \"*.{js,json,html}\""
   },

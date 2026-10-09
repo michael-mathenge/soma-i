@@ -1,3 +1,4 @@
+from content.matching import load_config, ranking_key, source_for_url
 from content.models import Item
 from pathways.models import CheckpointRecord, ItemRecord
 
@@ -45,8 +46,28 @@ def progress_for(learner):
 
 
 def recommendations(skill, limit=5):
-    items = list(Item.objects.filter(skills=skill).distinct())
+    items = list(Item.objects.filter(skills=skill).select_related("source").distinct())
     items.sort(key=lambda item: (not item.is_low_data, item.title.lower()))
+
+    config = load_config()
+    fixture_slots = [
+        index
+        for index, item in enumerate(items)
+        if source_for_url(item.source.url, config) is not None
+    ]
+    ranked_fixtures = sorted(
+        (items[index] for index in fixture_slots),
+        key=lambda item: (
+            not item.is_low_data,
+            ranking_key(
+                item,
+                source_for_url(item.source.url, config)["source_type"],
+                config,
+            ),
+        ),
+    )
+    for index, item in zip(fixture_slots, ranked_fixtures):
+        items[index] = item
     return items[:limit]
 
 

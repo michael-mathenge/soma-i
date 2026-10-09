@@ -14,9 +14,6 @@ import sw from "./i18n/sw.json";
 const SW_TEXT = {
   "Data Analyst": "Mchambuzi wa Data",
   "Junior Data Analyst": "Mchambuzi wa Data wa ngazi ya mwanzo",
-  "Web Developer": "Msanidi wa Tovuti",
-  "Junior Web Developer": "Msanidi wa Tovuti wa ngazi ya mwanzo",
-  "Digital Marketing Assistant": "Msaidizi wa Masoko ya Kidijitali",
   Spreadsheets: "Majedwali",
   "Data Visualisation": "Uwasilishaji wa Data kwa Michoro",
   Statistics: "Takwimu",
@@ -33,6 +30,28 @@ function checkpointTitle(t, value) {
     : value;
 }
 
+let pathwayRequestInFlight = null;
+let pathwayResponseCache = null;
+function getPathways() {
+  if (pathwayResponseCache) return Promise.resolve(pathwayResponseCache);
+  if (!pathwayRequestInFlight) {
+    const request = api.get("/pathways/").then((response) => {
+      pathwayResponseCache = response;
+      return response;
+    });
+    pathwayRequestInFlight = request;
+    request.then(
+      () => {
+        if (pathwayRequestInFlight === request) pathwayRequestInFlight = null;
+      },
+      () => {
+        if (pathwayRequestInFlight === request) pathwayRequestInFlight = null;
+      },
+    );
+  }
+  return pathwayRequestInFlight;
+}
+
 function App() {
   const [language, setLanguage] = useState(
     localStorage.getItem("somai-language") || "en",
@@ -42,20 +61,28 @@ function App() {
   const [error, setError] = useState("");
   const t = language === "sw" ? sw : en;
   const refresh = useCallback(async () => {
+    let pathwayRequest;
     try {
-      const [me, paths] = await Promise.all([
-        api.get("/me/"),
-        api.get("/pathways/"),
+      const meRequest = api.get("/me/");
+      pathwayRequest = getPathways();
+      const [me, pathwayResponse] = await Promise.all([
+        meRequest,
+        pathwayRequest,
       ]);
       setLearner(me.data);
-      setPathways(paths.data);
+      setPathways(pathwayResponse.data);
       setError("");
     } catch {
       setLearner(null);
       try {
-        setPathways((await api.get("/pathways/")).data);
+        const pathwayResponse = await pathwayRequest;
+        setPathways(pathwayResponse.data);
       } catch {
-        setPathways([]);
+        try {
+          setPathways((await getPathways()).data);
+        } catch {
+          setPathways([]);
+        }
       }
     }
   }, []);
@@ -103,7 +130,14 @@ function App() {
           />
           <Route
             path="/pathway"
-            element={<Dashboard learner={learner} refresh={refresh} t={t} />}
+            element={
+              <Dashboard
+                learner={learner}
+                pathways={pathways}
+                refresh={refresh}
+                t={t}
+              />
+            }
           />
           <Route path="/items" element={<ItemList t={t} />} />
           <Route path="/checkpoint/:id" element={<CheckpointPage t={t} />} />
@@ -198,16 +232,14 @@ function Onboarding({ pathways, t, language, setLang, refresh }) {
   );
 }
 
-function Dashboard({ learner, refresh, t }) {
+function Dashboard({ learner, pathways = [], refresh, t }) {
   const [data, setData] = useState(null);
-  const [paths, setPaths] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
     api
       .get("/dashboard/")
       .then((r) => setData(r.data))
       .catch(() => setData(null));
-    api.get("/pathways/").then((r) => setPaths(r.data));
   }, [learner]);
   async function action(name) {
     try {
@@ -275,7 +307,7 @@ function Dashboard({ learner, refresh, t }) {
                 setData((await api.get("/dashboard/")).data);
               }}
             >
-              {paths.map((p) => (
+              {pathways.map((p) => (
                 <option key={p.id} value={p.id}>
                   {localText(t, p.title)}
                 </option>
@@ -310,10 +342,11 @@ function Cards({ items = [], t, doneCallback }) {
               item.title
             )}
           </h3>
-          <p>{item.summary}</p>
+          <p className="item-summary">{item.summary}</p>
           <p className="meta">
-            {item.source} · {item.estimated_minutes} {t.minutes} ·{" "}
-            {item.is_low_data && t.lowData}
+            {[item.source, item.is_low_data && t.lowData]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
           <p>{item.skills.join(" · ")}</p>
           {!item.done && (

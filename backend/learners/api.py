@@ -9,8 +9,13 @@ from content.models import Item
 from learners.models import LearnerProfile
 from opportunities.matching import match_score
 from opportunities.models import Opportunity
+from pathways.constants import CANONICAL_PATHWAYS
 from pathways.logic import completed_items, progress_for, recommendations
 from pathways.models import Checkpoint, CheckpointRecord, ItemRecord, Pathway
+
+CANONICAL_SKILL_NAMES = frozenset(
+    skill_name for pathway in CANONICAL_PATHWAYS for skill_name in pathway["skills"]
+)
 
 
 def item_json(item, done_ids=None, reference_date=None):
@@ -31,7 +36,11 @@ def item_json(item, done_ids=None, reference_date=None):
         "summary": item.summary,
         "published_at": item.published_at.isoformat(),
         "source": item.source.name,
-        "skills": list(item.skills.values_list("name", flat=True)),
+        "skills": list(
+            item.skills.filter(name__in=CANONICAL_SKILL_NAMES)
+            .order_by("pk")
+            .values_list("name", flat=True)
+        ),
         "estimated_minutes": item.estimated_minutes,
         "is_low_data": item.is_low_data,
         "done": item.pk in (done_ids or set()),
@@ -82,6 +91,11 @@ def health(request):
 
 @api_view(["GET"])
 def pathways_list(request):
+    canonical = {pathway["title"]: None for pathway in CANONICAL_PATHWAYS}
+    for pathway in Pathway.objects.filter(title__in=canonical).order_by("pk"):
+        if canonical[pathway.title] is None:
+            canonical[pathway.title] = pathway
+
     return Response(
         [
             {
@@ -91,7 +105,9 @@ def pathways_list(request):
                 "target_outcome": p.target_outcome,
                 "locale": p.locale,
             }
-            for p in Pathway.objects.all()
+            for title in canonical
+            for p in [canonical[title]]
+            if p is not None
         ]
     )
 
@@ -177,9 +193,12 @@ def dashboard(request):
         return error
     state = progress_for(learner)
     done_ids = completed_items(learner)
+    picks_by_skill = [recommendations(skill, 3) for skill in state["remaining"]]
     recommended = []
-    for skill in state["remaining"]:
-        recommended.extend(recommendations(skill, 3))
+    for index in range(max((len(items) for items in picks_by_skill), default=0)):
+        recommended.extend(
+            items[index] for items in picks_by_skill if index < len(items)
+        )
     seen = set()
     recommended = [
         item for item in recommended if not (item.pk in seen or seen.add(item.pk))

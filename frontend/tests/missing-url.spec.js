@@ -1,4 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { resetE2ESeed } from "./reset-e2e-seed.js";
+
+test.beforeEach(() => resetE2ESeed());
 
 test("items without a URL render as text while linked items stay linked", async ({
   page,

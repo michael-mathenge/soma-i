@@ -4,6 +4,8 @@ import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(fileURLToPath(new URL('./dist/', import.meta.url)))
+const apiPort = Number(process.env.SOMAI_E2E_API_PORT || 8000)
+const uiPort = Number(process.env.SOMAI_E2E_UI_PORT || 4173)
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -15,7 +17,7 @@ const mimeTypes = {
 createServer((request, response) => {
   if (request.url.startsWith('/api/')) {
     const proxy = httpRequest(
-      { hostname: '127.0.0.1', port: 8000, path: request.url, method: request.method, headers: request.headers },
+      { hostname: '127.0.0.1', port: apiPort, path: request.url, method: request.method, headers: request.headers },
       (upstream) => {
         response.writeHead(upstream.statusCode || 502, upstream.headers)
         upstream.pipe(response)
@@ -36,4 +38,4 @@ createServer((request, response) => {
   const finalPath = existsSync(filePath) ? filePath : resolve(root, 'index.html')
   response.writeHead(200, { 'Content-Type': mimeTypes[extname(finalPath)] || 'application/octet-stream' })
   createReadStream(finalPath).pipe(response)
-}).listen(4173, '127.0.0.1')
+}).listen(uiPort, '127.0.0.1')
