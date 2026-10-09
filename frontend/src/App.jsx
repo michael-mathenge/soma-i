@@ -314,8 +314,9 @@ function Cards({ items = [], t, doneCallback }) {
           </h3>
           <p>{item.summary}</p>
           <p className="meta">
-            {item.source} · {item.estimated_minutes} {t.minutes} ·{" "}
-            {item.is_low_data && t.lowData}
+            {[item.source, item.is_low_data && t.lowData]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
           <p>{item.skills.join(" · ")}</p>
           {!item.done && (
