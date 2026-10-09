@@ -197,6 +197,126 @@ def test_seed_demo_fixture_picks_are_offline_low_data_and_labeled():
             )
 
 
+def test_seed_demo_leaves_live_normalized_match_unchanged_and_adds_missing_skill():
+    import json
+    from datetime import UTC, datetime
+    from pathlib import Path
+    from urllib.parse import urlsplit, urlunsplit
+
+    from content.ingestion import ingest_entries, normalize_link
+    from content.matching import load_config
+    from content.models import Item, Source
+
+    config = load_config()
+    feed = next(feed for feed in config["feeds"] if feed["key"] == "fcc_html")
+    fixture_path = (
+        Path(__file__).resolve().parents[2]
+        / "content"
+        / "tests"
+        / "fixtures"
+        / "feeds"
+        / "fcc_html.json"
+    )
+    entry = json.loads(fixture_path.read_text(encoding="utf-8"))[0]
+    original = urlsplit(entry["link"])
+    entry_variant = {
+        **entry,
+        "link": urlunsplit(
+            (
+                "http",
+                original.netloc,
+                original.path.rstrip("/") + "/",
+                "utm_source=legacy-seed-test",
+                "",
+            )
+        ),
+    }
+    source = Source.objects.create(
+        name=feed["name"],
+        url=feed["url"],
+        credibility_note="Test fixture source.",
+        attribution=feed["attribution"],
+        rights=feed.get("rights", "not stated"),
+        level=feed.get("level", "mixed"),
+    )
+    ingest_entries(source, feed, [entry_variant], datetime(2025, 1, 1, tzinfo=UTC), config)
+    live_item = Item.objects.get(normalized_link=normalize_link(entry["link"]))
+    live_item.title = "Live title must stay unchanged"
+    live_item.published_at = datetime(2020, 5, 4, tzinfo=UTC)
+    live_item.is_low_data = False
+    live_item.save(update_fields=["title", "published_at", "is_low_data"])
+    live_item.skills.clear()
+    original_fields = (
+        live_item.title,
+        live_item.published_at,
+        live_item.is_low_data,
+    )
+
+    call_command("seed_demo", verbosity=0)
+    live_item.refresh_from_db()
+    first_seed_fields = (
+        live_item.title,
+        live_item.published_at,
+        live_item.is_low_data,
+    )
+    assert first_seed_fields == original_fields
+    assert live_item.skills.filter(name="HTML").exists()
+    assert Item.objects.filter(normalized_link=normalize_link(entry["link"])).count() == 1
+
+    call_command("seed_demo", verbosity=0)
+    live_item.refresh_from_db()
+    assert (
+        live_item.title,
+        live_item.published_at,
+        live_item.is_low_data,
+    ) == first_seed_fields
+    assert live_item.skills.filter(name="HTML").exists()
+    assert Item.objects.filter(normalized_link=normalize_link(entry["link"])).count() == 1
+
+
+def test_fresh_fixture_seed_label_is_idempotent_and_live_ingest_dedupes():
+    import json
+    from pathlib import Path
+
+    from content.ingestion import ingest_entries, normalize_link
+    from content.matching import load_config
+    from content.models import Item, Source
+
+    config = load_config()
+    feed = next(feed for feed in config["feeds"] if feed["key"] == "fcc_html")
+    fixture_path = (
+        Path(__file__).resolve().parents[2]
+        / "content"
+        / "tests"
+        / "fixtures"
+        / "feeds"
+        / "fcc_html.json"
+    )
+    entry = json.loads(fixture_path.read_text(encoding="utf-8"))[0]
+    normalized_link = normalize_link(entry["link"])
+
+    call_command("seed_demo", verbosity=0)
+    call_command("seed_demo", verbosity=0)
+
+    item = Item.objects.get(normalized_link=normalized_link)
+    assert item.title.count("(sample content)") == 1
+    assert Item.objects.filter(normalized_link=normalized_link).count() == 1
+    item_id = item.pk
+
+    result = ingest_entries(
+        Source.objects.get(url=feed["url"]),
+        feed,
+        [entry],
+        item.fetched_at,
+        config,
+    )
+
+    assert result["created"] == 0
+    assert result["duplicates_merged"] == 1
+    assert Item.objects.filter(normalized_link=normalized_link).count() == 1
+    assert Item.objects.get(normalized_link=normalized_link).pk == item_id
+
+
 def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
     call_command("seed_demo", verbosity=0)
     pathway = Pathway.objects.get(title="Data Analyst")

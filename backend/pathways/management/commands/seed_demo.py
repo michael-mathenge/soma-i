@@ -4,8 +4,15 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from content.ingestion import ingest_entries
-from content.matching import load_config
+from content.ingestion import (
+    _matched_skills,
+    clean_summary,
+    ingest_entries,
+    normalize_link,
+    pathway_matches,
+    safe_http_link,
+)
+from content.matching import load_config, plain_text
 from content.models import Item, Skill, Source
 from content.sources import SOURCES
 from learners.models import LearnerProfile
@@ -365,12 +372,52 @@ class Command(BaseCommand):
             entries = json.loads(
                 (fixture_dir / f"{feed_key}.json").read_text(encoding="utf-8")
             )
-            ingest_entries(source, feed, entries, FIXED_SAMPLE_DATE, config)
+            entries_to_ingest = []
+            new_normalized_links = set()
             for entry in entries:
-                item = Item.objects.filter(url=entry.get("link", "").strip()).first()
-                if item is None or not set(feed["pathways"]).intersection(
-                    item.pathway_keys
-                ):
+                original_link = safe_http_link(entry.get("link", ""))
+                if original_link is None:
+                    entries_to_ingest.append(entry)
+                    continue
+                title = plain_text(entry.get("title", "")).strip()[:300]
+                summary = clean_summary(
+                    entry.get(
+                        "summary", entry.get("description", entry.get("excerpt", ""))
+                    )
+                )
+                if not title or not pathway_matches(feed, title, summary, config):
+                    continue
+
+                normalized_link = normalize_link(original_link)
+                item = (
+                    Item.objects.filter(normalized_link=normalized_link)
+                    .order_by("pk")
+                    .first()
+                )
+                if item is None:
+                    item = Item.objects.filter(url=original_link).order_by("pk").first()
+                guid = str(entry.get("id", entry.get("guid", ""))).strip()
+                if item is None and guid:
+                    item = (
+                        Item.objects.filter(source=source, guid=guid)
+                        .order_by("pk")
+                        .first()
+                    )
+                if item is not None:
+                    item.skills.add(*_matched_skills(title, summary))
+                    continue
+
+                entries_to_ingest.append(entry)
+                new_normalized_links.add(normalized_link)
+
+            ingest_entries(source, feed, entries_to_ingest, FIXED_SAMPLE_DATE, config)
+            for normalized_link in new_normalized_links:
+                item = (
+                    Item.objects.filter(normalized_link=normalized_link)
+                    .order_by("pk")
+                    .first()
+                )
+                if item is None:
                     continue
                 if not item.title.endswith(SAMPLE_CONTENT_LABEL):
                     item.title = f"{item.title}{SAMPLE_CONTENT_LABEL}"
