@@ -7,17 +7,36 @@ import {
   resolve,
   sep,
 } from "node:path";
+import { existsSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 
 const testsDirectory = dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = resolve(testsDirectory, "../..");
 const backendDatabasePath = resolve(repositoryRoot, "backend", "db.sqlite3");
 const repositoryDatabasePath = resolve(repositoryRoot, "db.sqlite3");
-const projectDatabasePaths = [backendDatabasePath, repositoryDatabasePath];
+const defaultProjectDatabasePaths = [backendDatabasePath, repositoryDatabasePath];
 const temporaryDirectory = resolve(tmpdir());
 const temporaryPrefix = "somai-playwright-";
 
-export function assertIsolatedDatabase(databaseUrl) {
+function isInside(directory, filePath) {
+  const relativePath = relative(directory, filePath);
+  return (
+    relativePath !== ".." &&
+    !relativePath.startsWith(`..${sep}`) &&
+    !isAbsolute(relativePath)
+  );
+}
+
+function samePath(left, right) {
+  return process.platform === "win32"
+    ? left.toLowerCase() === right.toLowerCase()
+    : left === right;
+}
+
+export function assertIsolatedDatabase(
+  databaseUrl,
+  { projectDatabasePaths = defaultProjectDatabasePaths } = {},
+) {
   if (
     typeof databaseUrl !== "string" ||
     databaseUrl.length === 0 ||
@@ -52,10 +71,8 @@ export function assertIsolatedDatabase(databaseUrl) {
     ? resolve(databasePath)
     : resolve(repositoryRoot, databasePath);
 
-  const projectPathMatch = projectDatabasePaths.some((projectDatabasePath) =>
-    process.platform === "win32"
-      ? projectDatabasePath.toLowerCase() === databasePath.toLowerCase()
-      : projectDatabasePath === databasePath,
+  const projectPathMatch = defaultProjectDatabasePaths.some((projectPath) =>
+    samePath(projectPath, databasePath),
   );
   if (projectPathMatch) {
     throw new Error(
@@ -88,6 +105,32 @@ export function assertIsolatedDatabase(databaseUrl) {
   ) {
     throw new Error(
       'Playwright SQLite database must be under a "somai-playwright-*" folder.',
+    );
+  }
+
+  const realTemporaryDirectory = realpathSync(temporaryDirectory);
+  const realParentDirectory = realpathSync(dirname(databasePath));
+  const realDatabasePath = existsSync(databasePath)
+    ? realpathSync(databasePath)
+    : resolve(realParentDirectory, basename(databasePath));
+  const realProjectDatabasePaths = projectDatabasePaths.map((projectPath) =>
+    existsSync(projectPath) ? realpathSync(projectPath) : resolve(projectPath),
+  );
+  if (
+    !isInside(realTemporaryDirectory, realParentDirectory) ||
+    !isInside(realTemporaryDirectory, realDatabasePath)
+  ) {
+    throw new Error(
+      "Playwright SQLite database must resolve inside the OS temp directory.",
+    );
+  }
+  if (
+    realProjectDatabasePaths.some((projectPath) =>
+      samePath(projectPath, realDatabasePath),
+    )
+  ) {
+    throw new Error(
+      "Playwright must never use backend/db.sqlite3 or repository-root db.sqlite3.",
     );
   }
 

@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { test } from "node:test";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 
 import { assertIsolatedDatabase } from "./e2e-database-guard.js";
@@ -137,26 +145,60 @@ test("rejects a missing database URL", () => {
 });
 
 test("accepts a database under a somai-playwright temp folder", () => {
-  const databasePath = join(
-    tmpdir(),
-    "somai-playwright-guard-test",
-    "test.sqlite3",
-  );
-  assert.equal(
-    assertIsolatedDatabase(sqliteUrl(databasePath)),
-    resolve(databasePath),
-  );
+  const directory = mkdtempSync(join(tmpdir(), "somai-playwright-guard-test-"));
+  const databasePath = join(directory, "test.sqlite3");
+  try {
+    assert.equal(
+      assertIsolatedDatabase(sqliteUrl(databasePath)),
+      resolve(databasePath),
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test("allows nesting below the first somai-playwright-* temp folder", () => {
-  const databasePath = join(
-    tmpdir(),
-    "somai-playwright-nested-test",
-    "sub",
-    "test.sqlite3",
-  );
-  assert.equal(
-    assertIsolatedDatabase(sqliteUrl(databasePath)),
-    resolve(databasePath),
-  );
+  const directory = mkdtempSync(join(tmpdir(), "somai-playwright-nested-test-"));
+  const nestedDirectory = join(directory, "sub");
+  mkdirSync(nestedDirectory);
+  const databasePath = join(nestedDirectory, "test.sqlite3");
+  try {
+    assert.equal(
+      assertIsolatedDatabase(sqliteUrl(databasePath)),
+      resolve(databasePath),
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects a symlink to a project database stand-in", (context) => {
+  const scratchDirectory = mkdtempSync(join(tmpdir(), "somai-guard-symlink-"));
+  const projectDatabase = join(scratchDirectory, "project", "backend", "db.sqlite3");
+  const linkDirectory = join(scratchDirectory, "somai-playwright-link");
+  const linkedDatabase = join(linkDirectory, "test.sqlite3");
+  mkdirSync(dirname(projectDatabase), { recursive: true });
+  mkdirSync(linkDirectory);
+  writeFileSync(projectDatabase, "temporary database stand-in");
+  try {
+    try {
+      symlinkSync(projectDatabase, linkedDatabase, "file");
+    } catch (error) {
+      if (["EPERM", "EACCES", "UNKNOWN", "ENOTSUP"].includes(error.code)) {
+        context.skip(`symlink creation unavailable without elevation (${error.code})`);
+        return;
+      }
+      throw error;
+    }
+    assert.equal(existsSync(linkedDatabase), true);
+    assert.throws(
+      () =>
+        assertIsolatedDatabase(sqliteUrl(linkedDatabase), {
+          projectDatabasePaths: [projectDatabase],
+        }),
+      /must never use backend\/db\.sqlite3/,
+    );
+  } finally {
+    rmSync(scratchDirectory, { recursive: true, force: true });
+  }
 });
