@@ -73,6 +73,36 @@ def test_recommendations_prefer_low_data_for_the_requested_skill():
     ]
 
 
+def test_fixture_recommendations_keep_low_data_ahead_of_stronger_beginner_score():
+    skill = Skill.objects.create(name="Python", slug="python")
+    source = Source.objects.create(
+        name="freeCodeCamp Python",
+        url="https://www.freecodecamp.org/news/tag/python/rss/",
+        credibility_note="Fixture feed",
+    )
+    low_data_item = Item.objects.create(
+        title="Python reference material",
+        url="https://example.test/python-reference",
+        published_at="2026-01-01T00:00:00Z",
+        source=source,
+        is_low_data=True,
+    )
+    low_data_item.skills.add(skill)
+    stronger_beginner_item = Item.objects.create(
+        title="Python for beginners: step by step fundamentals",
+        url="https://example.test/python-beginners",
+        published_at="2026-01-02T00:00:00Z",
+        source=source,
+        is_low_data=False,
+    )
+    stronger_beginner_item.skills.add(skill)
+
+    assert [item.title for item in recommendations(skill)] == [
+        "Python reference material",
+        "Python for beginners: step by step fundamentals",
+    ]
+
+
 def test_dump_seed_picks_returns_seed_owned_picks_without_urls():
     call_command("seed_demo", verbosity=0)
     output = StringIO()

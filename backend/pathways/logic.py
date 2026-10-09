@@ -57,10 +57,13 @@ def recommendations(skill, limit=5):
     ]
     ranked_fixtures = sorted(
         (items[index] for index in fixture_slots),
-        key=lambda item: ranking_key(
-            item,
-            source_for_url(item.source.url, config)["source_type"],
-            config,
+        key=lambda item: (
+            not item.is_low_data,
+            ranking_key(
+                item,
+                source_for_url(item.source.url, config)["source_type"],
+                config,
+            ),
         ),
     )
     for index, item in zip(fixture_slots, ranked_fixtures):
