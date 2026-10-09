@@ -168,7 +168,9 @@ class Command(BaseCommand):
         ]
         for title, summary, names, url in examples:
             sample_title = f"{title} (demo)"
-            item = Item.objects.filter(url=url, title=sample_title).order_by("pk").first()
+            item = (
+                Item.objects.filter(url=url, title=sample_title).order_by("pk").first()
+            )
             if item is None:
                 legacy_url = LEGACY_DEMO_URLS[sample_title]
                 item = (
