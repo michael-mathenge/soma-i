@@ -15,14 +15,11 @@ class Command(BaseCommand):
             pathway["title"]: pathway["skills"] for pathway in CANONICAL_PATHWAYS
         }
         canonical_skills = {
-            skill_name
-            for skills in pathway_skills.values()
-            for skill_name in skills
+            skill_name for skills in pathway_skills.values() for skill_name in skills
         }
         items = (
             Item.objects.filter(
-                Q(title__endswith=" (demo)")
-                | Q(title__endswith=" (sample content)"),
+                Q(title__endswith=" (demo)") | Q(title__endswith=" (sample content)"),
                 skills__name__in=canonical_skills,
             )
             .distinct()

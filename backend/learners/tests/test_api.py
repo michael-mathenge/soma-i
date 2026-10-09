@@ -239,7 +239,9 @@ def test_seed_demo_leaves_live_normalized_match_unchanged_and_adds_missing_skill
         rights=feed.get("rights", "not stated"),
         level=feed.get("level", "mixed"),
     )
-    ingest_entries(source, feed, [entry_variant], datetime(2025, 1, 1, tzinfo=UTC), config)
+    ingest_entries(
+        source, feed, [entry_variant], datetime(2025, 1, 1, tzinfo=UTC), config
+    )
     live_item = Item.objects.get(normalized_link=normalize_link(entry["link"]))
     live_item.title = "Live title must stay unchanged"
     live_item.published_at = datetime(2020, 5, 4, tzinfo=UTC)
@@ -261,7 +263,9 @@ def test_seed_demo_leaves_live_normalized_match_unchanged_and_adds_missing_skill
     )
     assert first_seed_fields == original_fields
     assert live_item.skills.filter(name="HTML").exists()
-    assert Item.objects.filter(normalized_link=normalize_link(entry["link"])).count() == 1
+    assert (
+        Item.objects.filter(normalized_link=normalize_link(entry["link"])).count() == 1
+    )
 
     call_command("seed_demo", verbosity=0)
     live_item.refresh_from_db()
@@ -271,7 +275,9 @@ def test_seed_demo_leaves_live_normalized_match_unchanged_and_adds_missing_skill
         live_item.is_low_data,
     ) == first_seed_fields
     assert live_item.skills.filter(name="HTML").exists()
-    assert Item.objects.filter(normalized_link=normalize_link(entry["link"])).count() == 1
+    assert (
+        Item.objects.filter(normalized_link=normalize_link(entry["link"])).count() == 1
+    )
 
 
 def test_fresh_fixture_seed_label_is_idempotent_and_live_ingest_dedupes():
@@ -371,8 +377,7 @@ def test_seed_demo_provides_picks_for_each_data_analyst_skill():
     call_command("seed_demo", verbosity=0)
 
     seeded_items = [
-        Item.objects.get(url=url, title=title)
-        for url, title in DATA_ANALYST_DEMO_KEYS
+        Item.objects.get(url=url, title=title) for url, title in DATA_ANALYST_DEMO_KEYS
     ]
     seeded_item_ids = [item.pk for item in seeded_items]
     expected_counts = {
@@ -383,9 +388,9 @@ def test_seed_demo_provides_picks_for_each_data_analyst_skill():
     }
     for skill_name, expected_count in expected_counts.items():
         assert (
-            Item.objects.filter(
-                pk__in=seeded_item_ids, skills__name=skill_name
-            ).distinct().count()
+            Item.objects.filter(pk__in=seeded_item_ids, skills__name=skill_name)
+            .distinct()
+            .count()
             == expected_count
         )
 
@@ -396,8 +401,7 @@ def test_pathways_list_omits_seeded_picks_and_stays_under_1500_bytes(seeded):
     assert response.status_code == 200
     assert len(response.content) < 1500
     assert all(
-        set(pathway)
-        == {"id", "title", "description", "target_outcome", "locale"}
+        set(pathway) == {"id", "title", "description", "target_outcome", "locale"}
         for pathway in response.data
     )
 
@@ -415,9 +419,7 @@ def test_demo_items_have_only_canonical_pathway_skills():
 
     call_command("seed_demo", verbosity=0)
     canonical_skills = {
-        skill_name
-        for pathway in CANONICAL_PATHWAYS
-        for skill_name in pathway["skills"]
+        skill_name for pathway in CANONICAL_PATHWAYS for skill_name in pathway["skills"]
     }
 
     for item in Item.objects.filter(title__endswith="(demo)"):
@@ -518,12 +520,16 @@ def test_noncanonical_item_skills_are_filtered_without_changing_recommendations(
     assert next_response.data["items"][0]["id"] == item.pk
     for response in (dashboard, next_response):
         payload = next(
-            item_json for item_json in response.data["items"] if item_json["id"] == item.pk
+            item_json
+            for item_json in response.data["items"]
+            if item_json["id"] == item.pk
         )
         assert payload["skills"] == ["SQL"]
         assert "SEO" not in payload["skills"]
         assert "Marketing Analytics" not in payload["skills"]
-    assert [recommended.pk for recommended in recommendations(sql_skill, 3)] == ranked_ids
+    assert [
+        recommended.pk for recommended in recommendations(sql_skill, 3)
+    ] == ranked_ids
     assert {"SEO", "Marketing Analytics"} <= set(
         item.skills.values_list("name", flat=True)
     )
@@ -538,7 +544,9 @@ def test_dashboard_round_robin_covers_four_skills_deduplicates_and_is_determinis
     from learners import api as learners_api
 
     pathway = seeded["Data Analyst"]
-    skills = [step.skill for step in pathway.steps.select_related("skill").order_by("order")]
+    skills = [
+        step.skill for step in pathway.steps.select_related("skill").order_by("order")
+    ]
     source = Item.objects.first().source
     learner = LearnerProfile.objects.create(
         display_name="Round robin learner", chosen_pathway=pathway
@@ -591,9 +599,7 @@ def test_dashboard_round_robin_covers_four_skills_deduplicates_and_is_determinis
     ]
     assert len(item_ids) == len(set(item_ids))
     returned_skills = {
-        skill_name
-        for item in first.data["items"]
-        for skill_name in item["skills"]
+        skill_name for item in first.data["items"] for skill_name in item["skills"]
     }
     assert set(first.data["remaining"]) <= returned_skills
     shared_pick = next(item for item in first.data["items"] if item["id"] == shared.pk)

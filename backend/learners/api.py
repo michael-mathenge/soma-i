@@ -14,9 +14,7 @@ from pathways.logic import completed_items, progress_for, recommendations
 from pathways.models import Checkpoint, CheckpointRecord, ItemRecord, Pathway
 
 CANONICAL_SKILL_NAMES = frozenset(
-    skill_name
-    for pathway in CANONICAL_PATHWAYS
-    for skill_name in pathway["skills"]
+    skill_name for pathway in CANONICAL_PATHWAYS for skill_name in pathway["skills"]
 )
 
 
@@ -195,12 +193,12 @@ def dashboard(request):
         return error
     state = progress_for(learner)
     done_ids = completed_items(learner)
-    picks_by_skill = [
-        recommendations(skill, 3) for skill in state["remaining"]
-    ]
+    picks_by_skill = [recommendations(skill, 3) for skill in state["remaining"]]
     recommended = []
     for index in range(max((len(items) for items in picks_by_skill), default=0)):
-        recommended.extend(items[index] for items in picks_by_skill if index < len(items))
+        recommended.extend(
+            items[index] for items in picks_by_skill if index < len(items)
+        )
     seen = set()
     recommended = [
         item for item in recommended if not (item.pk in seen or seen.add(item.pk))
