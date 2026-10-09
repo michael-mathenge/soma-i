@@ -40,12 +40,12 @@ function App() {
   const t = language === "sw" ? sw : en;
   const refresh = useCallback(async () => {
     try {
-      const [me, paths] = await Promise.all([
+      const [me, pathwayResponse] = await Promise.all([
         api.get("/me/"),
         api.get("/pathways/"),
       ]);
       setLearner(me.data);
-      setPathways(paths.data);
+      setPathways(pathwayResponse.data);
       setError("");
     } catch {
       setLearner(null);
@@ -100,7 +100,14 @@ function App() {
           />
           <Route
             path="/pathway"
-            element={<Dashboard learner={learner} refresh={refresh} t={t} />}
+            element={
+              <Dashboard
+                learner={learner}
+                pathways={pathways}
+                refresh={refresh}
+                t={t}
+              />
+            }
           />
           <Route path="/items" element={<ItemList t={t} />} />
           <Route path="/checkpoint/:id" element={<CheckpointPage t={t} />} />
@@ -195,16 +202,14 @@ function Onboarding({ pathways, t, language, setLang, refresh }) {
   );
 }
 
-function Dashboard({ learner, refresh, t }) {
+function Dashboard({ learner, pathways = [], refresh, t }) {
   const [data, setData] = useState(null);
-  const [paths, setPaths] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
     api
       .get("/dashboard/")
       .then((r) => setData(r.data))
       .catch(() => setData(null));
-    api.get("/pathways/").then((r) => setPaths(r.data));
   }, [learner]);
   async function action(name) {
     try {
@@ -272,7 +277,7 @@ function Dashboard({ learner, refresh, t }) {
                 setData((await api.get("/dashboard/")).data);
               }}
             >
-              {paths.map((p) => (
+              {pathways.map((p) => (
                 <option key={p.id} value={p.id}>
                   {localText(t, p.title)}
                 </option>
