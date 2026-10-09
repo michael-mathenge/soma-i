@@ -10,7 +10,7 @@
 ## Setup and commands (PowerShell)
 - Use Python 3.12 and Node 20 or newer. Create a venv: `py -3.12 -m venv .venv`; activate with `\.venv\Scripts\Activate.ps1`.
 - Backend: `\.venv\Scripts\python.exe -m pip install -r requirements.txt`; `\.venv\Scripts\python.exe backend\manage.py migrate`; `\.venv\Scripts\python.exe backend\manage.py seed_demo`; `\.venv\Scripts\python.exe backend\manage.py runserver`.
-- Never run `manage.py`, the Django shell or seed commands without `DATABASE_URL` pointing at a temporary SQLite file under the OS temp directory, and never open `backend/db.sqlite3`. If a temp path cannot be created, stop and report; do not fall back to the default database.
+- Never run `manage.py`, the Django shell or seed commands without `DATABASE_URL` pointing at a temporary SQLite file under the OS temp directory, and never open `db.sqlite3` at the repository root or `backend/db.sqlite3`. If a temp path cannot be created, stop and report; do not fall back to the default database.
 - Print the `DATABASE_URL` in use before any database-backed command.
 - Backend checks: from `backend`, run `..\.venv\Scripts\python.exe -m pytest`; from project root use `\.venv\Scripts\python.exe -m pytest backend`.
 - Frontend: `Set-Location frontend`; `npm install`; `npm run dev`; `npm run build`; `npm run test:e2e`.
