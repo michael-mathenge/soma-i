@@ -12,6 +12,8 @@ import { tmpdir } from "node:os";
 const testsDirectory = dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = resolve(testsDirectory, "../..");
 const backendDatabasePath = resolve(repositoryRoot, "backend", "db.sqlite3");
+const repositoryDatabasePath = resolve(repositoryRoot, "db.sqlite3");
+const projectDatabasePaths = [backendDatabasePath, repositoryDatabasePath];
 const temporaryDirectory = resolve(tmpdir());
 const temporaryPrefix = "somai-playwright-";
 
@@ -50,12 +52,15 @@ export function assertIsolatedDatabase(databaseUrl) {
     ? resolve(databasePath)
     : resolve(repositoryRoot, databasePath);
 
-  const projectPathMatch =
+  const projectPathMatch = projectDatabasePaths.some((projectDatabasePath) =>
     process.platform === "win32"
-      ? backendDatabasePath.toLowerCase() === databasePath.toLowerCase()
-      : backendDatabasePath === databasePath;
+      ? projectDatabasePath.toLowerCase() === databasePath.toLowerCase()
+      : projectDatabasePath === databasePath,
+  );
   if (projectPathMatch) {
-    throw new Error("Playwright must never use backend/db.sqlite3.");
+    throw new Error(
+      "Playwright must never use backend/db.sqlite3 or repository-root db.sqlite3.",
+    );
   }
 
   const relativeToTemp = relative(temporaryDirectory, databasePath);

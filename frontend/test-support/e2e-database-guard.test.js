@@ -20,6 +20,14 @@ test("rejects the project database path", () => {
   );
 });
 
+test("rejects the repository-root database path", () => {
+  const projectDatabase = join(repositoryRoot, "db.sqlite3");
+  assert.throws(
+    () => assertIsolatedDatabase(sqliteUrl(projectDatabase)),
+    /must never use backend\/db\.sqlite3 or repository-root db\.sqlite3/,
+  );
+});
+
 test(
   "rejects a case-variant project database path on Windows",
   { skip: process.platform !== "win32" },
@@ -28,6 +36,18 @@ test(
     assert.throws(
       () => assertIsolatedDatabase(sqliteUrl(projectDatabase)),
       /must never use backend\/db\.sqlite3/,
+    );
+  },
+);
+
+test(
+  "rejects a case-variant repository-root database path on Windows",
+  { skip: process.platform !== "win32" },
+  () => {
+    const projectDatabase = join(repositoryRoot, "DB.SQLITE3");
+    assert.throws(
+      () => assertIsolatedDatabase(sqliteUrl(projectDatabase)),
+      /repository-root db\.sqlite3/,
     );
   },
 );
