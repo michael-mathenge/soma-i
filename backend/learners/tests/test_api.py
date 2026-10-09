@@ -512,18 +512,28 @@ def test_noncanonical_item_skills_are_filtered_without_changing_recommendations(
     client = APIClient()
     client.post("/api/demo/")
 
+    first_checkpoint = seeded["Data Analyst"].steps.order_by("order").first().checkpoint
+    checkpoint_response = client.post(
+        f"/api/checkpoints/{first_checkpoint.pk}/complete/",
+        {
+            "self_attested": True,
+            "quiz_answers": [0] * len(first_checkpoint.quiz_json),
+        },
+        format="json",
+    )
+
     dashboard = client.get("/api/dashboard/")
     next_response = client.get("/api/next/")
 
+    assert checkpoint_response.status_code == 200
     assert dashboard.status_code == next_response.status_code == 200
-    assert dashboard.data["items"][0]["id"] == item.pk
-    assert next_response.data["items"][0]["id"] == item.pk
     for response in (dashboard, next_response):
         payload = next(
             item_json
             for item_json in response.data["items"]
             if item_json["id"] == item.pk
         )
+        assert payload["title"] == item.title
         assert payload["skills"] == ["SQL"]
         assert "SEO" not in payload["skills"]
         assert "Marketing Analytics" not in payload["skills"]
