@@ -399,6 +399,37 @@ def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
     assert amina.reminder_opt_in is True
 
 
+def test_seed_demo_renames_only_lowest_duplicate_web_developer_pathway():
+    legacy_steps = ("HTML", "CSS", "JavaScript", "Accessibility")
+    legacy_rows = []
+    for description in ("Lowest legacy row", "Later legacy duplicate"):
+        pathway = Pathway.objects.create(
+            title="Web Developer",
+            description=description,
+            target_outcome="Old web outcome",
+        )
+        legacy_rows.append(pathway)
+        for order, name in enumerate(legacy_steps, start=1):
+            skill, _ = Skill.objects.get_or_create(
+                slug=name.lower().replace(" ", "-"), defaults={"name": name}
+            )
+            PathwaySkill.objects.create(pathway=pathway, skill=skill, order=order)
+
+    call_command("seed_demo", verbosity=0)
+
+    lowest, later = legacy_rows
+    lowest.refresh_from_db()
+    later.refresh_from_db()
+    assert lowest.title == CANONICAL_PATHWAYS[1]["title"]
+    assert later.title == "Web Developer"
+    assert Pathway.objects.filter(title="Web Developer").count() == 1
+    response = APIClient().get("/api/pathways/")
+    assert response.status_code == 200
+    assert [path["title"] for path in response.data] == [
+        pathway["title"] for pathway in CANONICAL_PATHWAYS
+    ]
+
+
 def test_health_endpoint_is_public():
     response = APIClient().get("/api/health/")
     assert response.status_code == 200
