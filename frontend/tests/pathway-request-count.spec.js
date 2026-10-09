@@ -48,3 +48,89 @@ test("signed-in dashboard requests pathways at most once", async ({ page }) => {
 
   expect(pathwayRequests.length).toBeLessThanOrEqual(1);
 });
+
+test("unauthenticated refresh reuses the original pathways request after a 401", async ({
+  page,
+}) => {
+  const pathwayRequests = watchPathwayRequests(page);
+  await page.route("**/api/me/", (route) =>
+    route.fulfill({ status: 401, json: { detail: "Authentication required." } }),
+  );
+  await page.route("**/api/pathways/", (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 1,
+          title: "Data Analyst",
+          target_outcome: "Junior Data Analyst",
+        },
+      ],
+    }),
+  );
+
+  await page.goto("/");
+
+  await expect(
+    page.getByLabel("Learning pathway").locator("option").filter({
+      hasText: /Data Analyst/,
+    }),
+  ).toHaveCount(1);
+  expect(pathwayRequests).toHaveLength(1);
+});
+
+test("refresh retries a failed pathways request once", async ({ page }) => {
+  const pathwayRequests = watchPathwayRequests(page);
+  let attempts = 0;
+  await page.route("**/api/me/", (route) =>
+    route.fulfill({ status: 401, json: { detail: "Authentication required." } }),
+  );
+  await page.route("**/api/pathways/", (route) => {
+    attempts += 1;
+    if (attempts === 1) {
+      return route.fulfill({ status: 503, json: { detail: "Unavailable." } });
+    }
+    return route.fulfill({
+      json: [
+        {
+          id: 1,
+          title: "Data Analyst",
+          target_outcome: "Junior Data Analyst",
+        },
+      ],
+    });
+  });
+
+  await page.goto("/");
+
+  await expect(
+    page.getByLabel("Learning pathway").locator("option").filter({
+      hasText: /Data Analyst/,
+    }),
+  ).toHaveCount(1);
+  expect(pathwayRequests).toHaveLength(2);
+});
+
+test("refresh retries a failed pathways request once and settles if it fails again", async ({
+  page,
+}) => {
+  const pathwayRequests = watchPathwayRequests(page);
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await page.route("**/api/me/", (route) =>
+    route.fulfill({ status: 401, json: { detail: "Authentication required." } }),
+  );
+  await page.route("**/api/pathways/", (route) =>
+    route.fulfill({ status: 503, json: { detail: "Unavailable." } }),
+  );
+
+  await page.goto("/");
+
+  await expect(
+    page.getByRole("heading", { name: "Choose a pathway" }),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel("Learning pathway").locator("option"),
+  ).toHaveCount(1);
+  expect(pathwayRequests).toHaveLength(2);
+  expect(pageErrors).toEqual([]);
+});

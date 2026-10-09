@@ -30,6 +30,28 @@ function checkpointTitle(t, value) {
     : value;
 }
 
+let pathwayRequestInFlight = null;
+let pathwayResponseCache = null;
+function getPathways() {
+  if (pathwayResponseCache) return Promise.resolve(pathwayResponseCache);
+  if (!pathwayRequestInFlight) {
+    const request = api.get("/pathways/").then((response) => {
+      pathwayResponseCache = response;
+      return response;
+    });
+    pathwayRequestInFlight = request;
+    request.then(
+      () => {
+        if (pathwayRequestInFlight === request) pathwayRequestInFlight = null;
+      },
+      () => {
+        if (pathwayRequestInFlight === request) pathwayRequestInFlight = null;
+      },
+    );
+  }
+  return pathwayRequestInFlight;
+}
+
 function App() {
   const [language, setLanguage] = useState(
     localStorage.getItem("somai-language") || "en",
@@ -39,10 +61,13 @@ function App() {
   const [error, setError] = useState("");
   const t = language === "sw" ? sw : en;
   const refresh = useCallback(async () => {
+    let pathwayRequest;
     try {
+      const meRequest = api.get("/me/");
+      pathwayRequest = getPathways();
       const [me, pathwayResponse] = await Promise.all([
-        api.get("/me/"),
-        api.get("/pathways/"),
+        meRequest,
+        pathwayRequest,
       ]);
       setLearner(me.data);
       setPathways(pathwayResponse.data);
@@ -50,9 +75,14 @@ function App() {
     } catch {
       setLearner(null);
       try {
-        setPathways((await api.get("/pathways/")).data);
+        const pathwayResponse = await pathwayRequest;
+        setPathways(pathwayResponse.data);
       } catch {
-        setPathways([]);
+        try {
+          setPathways((await getPathways()).data);
+        } catch {
+          setPathways([]);
+        }
       }
     }
   }, []);
