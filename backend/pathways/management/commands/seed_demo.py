@@ -37,6 +37,12 @@ DATA_ANALYST_DEMO_KEYS = {
         "Organize a small dataset (demo)",
     ),
 }
+EXCLUDED_SEED_FIXTURE_SKILLS = {
+    (
+        "https://www.freecodecamp.org/news/how-to-build-a-reading-focused-blog-with-python-markdown-and-github-pages-for-free/",
+        "Data Visualisation",
+    ),
+}
 QUIZ = [
     {
         "question": "Which action best shows this skill?",
@@ -410,3 +416,18 @@ class Command(BaseCommand):
                     item.title = f"{item.title}{SAMPLE_CONTENT_LABEL}"
                 item.is_low_data = True
                 item.save(update_fields=["title", "is_low_data"])
+
+            for link, skill_name in EXCLUDED_SEED_FIXTURE_SKILLS:
+                if not any(
+                    normalize_link(entry.get("link", "")) == normalize_link(link)
+                    for entry in entries
+                ):
+                    continue
+                item = (
+                    Item.objects.filter(normalized_link=normalize_link(link))
+                    .order_by("pk")
+                    .first()
+                )
+                if item is not None and item.title.endswith(SAMPLE_CONTENT_LABEL):
+                    skill = Skill.objects.get(name=skill_name)
+                    item.skills.remove(skill)

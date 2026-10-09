@@ -1,13 +1,16 @@
 import json
 from io import StringIO
+from pathlib import Path
 
 import pytest
 from django.core.management import call_command
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
+from content.ingestion import normalize_link
 from content.models import Item, Skill, Source
 from learners.models import LearnerProfile
+from pathways.constants import CANONICAL_PATHWAYS
 from pathways.logic import progress_for, recommendations
 from pathways.models import CheckpointRecord, Pathway, PathwaySkill
 
@@ -104,3 +107,35 @@ def test_dump_seed_picks_prefetches_item_skills_without_n_plus_one_queries():
 
     assert json.loads(output.getvalue())
     assert len(queries) == 2
+
+
+def test_data_analyst_declared_picks_are_nonempty_and_exclude_python_fixtures():
+    call_command("seed_demo", verbosity=0)
+    output = StringIO()
+    call_command("dump_seed_picks", stdout=output)
+
+    picks = json.loads(output.getvalue())["Data Analyst"]
+    assert all(picks[skill] for skill in CANONICAL_PATHWAYS[0]["skills"])
+
+    fixture_path = (
+        Path(__file__).resolve().parents[2]
+        / "content"
+        / "tests"
+        / "fixtures"
+        / "feeds"
+        / "fcc_python.json"
+    )
+    python_links = {
+        normalize_link(entry["link"])
+        for entry in json.loads(fixture_path.read_text(encoding="utf-8"))
+    }
+    python_item_ids = set(
+        Item.objects.filter(normalized_link__in=python_links).values_list(
+            "pk", flat=True
+        )
+    )
+    assert not any(
+        item["id"] in python_item_ids
+        for skill_picks in picks.values()
+        for item in skill_picks
+    )
