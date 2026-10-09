@@ -493,7 +493,6 @@ def test_noncanonical_item_skills_are_filtered_without_changing_recommendations(
     from content.models import Item, Skill
     from pathways.logic import recommendations
 
-    pathway = seeded["Data Analyst"]
     sql_skill = Skill.objects.get(name="SQL")
     seo, _ = Skill.objects.get_or_create(slug="seo", defaults={"name": "SEO"})
     marketing, _ = Skill.objects.get_or_create(
