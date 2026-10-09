@@ -176,3 +176,81 @@ def test_seed_demo_preserves_live_item_sharing_a_demo_url():
     item.refresh_from_db()
     assert item.title == "Live MIT research article"
     assert list(item.skills.values_list("name", flat=True)) == ["SQL"]
+
+
+def test_seed_demo_handwritten_samples_share_one_source_and_distinct_links():
+    from pathways.management.commands.seed_demo import SAMPLE_SOURCE_URL
+
+    call_command("seed_demo", verbosity=0)
+
+    samples = list(
+        Item.objects.filter(title__endswith="(demo)", url__contains="#demo-")
+        .select_related("source")
+        .order_by("title")
+    )
+    assert len(samples) == 5
+    assert len({item.url for item in samples}) == 5
+    assert {item.normalized_link for item in samples} == {None}
+    assert {item.source.name for item in samples} == {"SOMA.i sample content"}
+    source = samples[0].source
+    assert source.url == SAMPLE_SOURCE_URL
+    assert source.attribution == "SOMA.i"
+    assert source.rights == "not stated"
+    assert source.level == "beginner"
+
+
+def test_seed_demo_upgrade_repoints_all_legacy_rows_and_preserves_live_collision():
+    from pathways.management.commands.seed_demo import (
+        LEGACY_DEMO_URLS,
+        SAMPLE_SOURCE_URL,
+    )
+
+    legacy_source = Source.objects.create(
+        name="Legacy demo source",
+        url="https://example.test/legacy-demo-source-upgrade",
+        credibility_note="Legacy hand-written demo source.",
+    )
+    legacy_rows = []
+    for title, legacy_url in LEGACY_DEMO_URLS.items():
+        if title == "Organize a small dataset (demo)":
+            continue
+        legacy_rows.append(
+            Item.objects.create(
+                title=title,
+                url=legacy_url,
+                normalized_link=normalize_link(legacy_url),
+                published_at="2020-01-01T00:00:00Z",
+                source=legacy_source,
+                is_low_data=True,
+            )
+        )
+    sql, _ = Skill.objects.get_or_create(slug="sql", defaults={"name": "SQL"})
+    live_item = Item.objects.create(
+        title="Live MIT research article",
+        url=LEGACY_DEMO_URLS["Organize a small dataset (demo)"],
+        published_at="2020-01-01T00:00:00Z",
+        source=legacy_source,
+        is_low_data=False,
+    )
+    live_item.skills.add(sql)
+
+    call_command("seed_demo", verbosity=0)
+
+    expected_links = {
+        "Spreadsheet skills for clear data (demo)": "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-skills",
+        "Practice spreadsheet formulas (demo)": "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-formulas",
+        "Organize a small dataset (demo)": "https://github.com/michael-mathenge/soma-i#demo-small-dataset",
+        "CSS layout foundations (demo)": "https://github.com/michael-mathenge/soma-i#demo-css-layout",
+        "JavaScript essentials (demo)": "https://github.com/michael-mathenge/soma-i#demo-javascript-essentials",
+    }
+    samples = [Item.objects.get(title=title) for title in expected_links]
+    assert {item.url for item in samples} == set(expected_links.values())
+    assert {item.normalized_link for item in samples} == {None}
+    assert {item.source.url for item in samples} == {SAMPLE_SOURCE_URL}
+    assert all(Item.objects.filter(pk=item.pk).exists() for item in legacy_rows)
+
+    live_item.refresh_from_db()
+    assert live_item.url == LEGACY_DEMO_URLS["Organize a small dataset (demo)"]
+    assert live_item.title == "Live MIT research article"
+    assert live_item.is_low_data is False
+    assert list(live_item.skills.values_list("name", flat=True)) == ["SQL"]

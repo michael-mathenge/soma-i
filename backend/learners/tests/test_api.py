@@ -176,7 +176,7 @@ def test_seed_demo_fixture_picks_are_offline_low_data_and_labeled():
 
     fixed_date = datetime(2026, 1, 1, tzinfo=UTC)
     data_item = Item.objects.get(
-        url="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content"
+        url="https://github.com/michael-mathenge/soma-i#demo-spreadsheet-skills"
     )
     assert data_item.title == "Spreadsheet skills for clear data (demo)"
     assert data_item.published_at == fixed_date
@@ -345,14 +345,30 @@ def test_seed_demo_repairs_only_seed_owned_data_analyst_demo_dates():
         is_low_data=False,
     )
 
+    legacy_source = Source.objects.create(
+        name="Legacy demo source",
+        url="https://example.test/legacy-demo-source",
+        credibility_note="Legacy hand-written demo source.",
+    )
+    old_seed_items = [
+        Item.objects.create(
+            title="Spreadsheet skills for clear data (demo)",
+            url="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
+            published_at=datetime(2020, 1, 1, tzinfo=UTC),
+            source=legacy_source,
+            is_low_data=True,
+        ),
+        Item.objects.create(
+            title="Practice spreadsheet formulas (demo)",
+            url="https://www.freecodecamp.org/news/sql-tutorial/",
+            published_at=datetime(2020, 1, 1, tzinfo=UTC),
+            source=legacy_source,
+            is_low_data=True,
+        ),
+    ]
+
     call_command("seed_demo", verbosity=0)
 
-    old_seed_items = [
-        Item.objects.get(
-            url="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content"
-        ),
-        Item.objects.get(url="https://www.freecodecamp.org/news/sql-tutorial/"),
-    ]
     old_date = timezone.now()
     Item.objects.filter(pk__in=[item.pk for item in old_seed_items]).update(
         published_at=old_date

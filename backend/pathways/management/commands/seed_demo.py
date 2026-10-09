@@ -14,7 +14,6 @@ from content.ingestion import (
 )
 from content.matching import load_config, plain_text
 from content.models import Item, Skill, Source
-from content.sources import SOURCES
 from learners.models import LearnerProfile
 from opportunities.models import Opportunity
 from pathways.constants import CANONICAL_PATHWAYS, FIXTURE_FEEDS
@@ -25,17 +24,25 @@ LEGACY_FRONTEND_TITLE = "Web Developer"
 SAMPLE_CONTENT_LABEL = " (sample content)"
 DATA_ANALYST_DEMO_KEYS = {
     (
-        "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
+        "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-skills",
         "Spreadsheet skills for clear data (demo)",
     ),
     (
-        "https://www.freecodecamp.org/news/sql-tutorial/",
+        "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-formulas",
         "Practice spreadsheet formulas (demo)",
     ),
     (
-        "https://news.mit.edu/rss/research",
+        "https://github.com/michael-mathenge/soma-i#demo-small-dataset",
         "Organize a small dataset (demo)",
     ),
+}
+SAMPLE_SOURCE_URL = "https://github.com/michael-mathenge/soma-i"
+LEGACY_DEMO_URLS = {
+    "Spreadsheet skills for clear data (demo)": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
+    "Practice spreadsheet formulas (demo)": "https://www.freecodecamp.org/news/sql-tutorial/",
+    "Organize a small dataset (demo)": "https://news.mit.edu/rss/research",
+    "CSS layout foundations (demo)": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics",
+    "JavaScript essentials (demo)": "https://www.freecodecamp.org/news/learn-javascript-full-course/",
 }
 EXCLUDED_SEED_FIXTURE_SKILLS = {
     (
@@ -115,61 +122,82 @@ class Command(BaseCommand):
                     },
                 )
 
-        configs = {config["name"]: config for config in SOURCES}
-        sources = {}
-        for name, config in configs.items():
-            sources[name], _ = Source.objects.get_or_create(
-                url=config["url"], defaults=config
-            )
+        sample_source, _ = Source.objects.update_or_create(
+            url=SAMPLE_SOURCE_URL,
+            defaults={
+                "name": "SOMA.i sample content",
+                "credibility_note": "Hand-written sample content for the SOMA.i demo; not from an external feed.",
+                "attribution": "SOMA.i",
+                "rights": "not stated",
+                "level": "beginner",
+                "language": "en",
+                "active": True,
+            },
+        )
         examples = [
             (
                 "Spreadsheet skills for clear data",
                 "Work with rows, columns, formulas, and summaries.",
                 ["Spreadsheets", "SQL"],
-                "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
-                "MDN Blog",
+                "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-skills",
             ),
             (
                 "Practice spreadsheet formulas",
                 "Use formulas to summarize a small dataset.",
                 ["Spreadsheets", "SQL", "Data Visualisation", "Statistics"],
-                "https://www.freecodecamp.org/news/sql-tutorial/",
-                "freeCodeCamp News",
+                "https://github.com/michael-mathenge/soma-i#demo-spreadsheet-formulas",
             ),
             (
                 "Organize a small dataset",
                 "Sort and filter example records before analysis.",
                 ["Spreadsheets", "SQL", "Statistics"],
-                "https://news.mit.edu/rss/research",
-                "MIT News Research",
+                "https://github.com/michael-mathenge/soma-i#demo-small-dataset",
             ),
             (
                 "CSS layout foundations",
                 "Use CSS to style and arrange a simple page.",
                 ["CSS", "HTML"],
-                "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics",
-                "MDN Blog",
+                "https://github.com/michael-mathenge/soma-i#demo-css-layout",
             ),
             (
                 "JavaScript essentials",
                 "Add interaction with beginner JavaScript concepts.",
                 ["JavaScript", "HTML"],
-                "https://www.freecodecamp.org/news/learn-javascript-full-course/",
-                "freeCodeCamp News",
+                "https://github.com/michael-mathenge/soma-i#demo-javascript-essentials",
             ),
         ]
-        for title, summary, names, url, source_name in examples:
-            item, created = Item.objects.get_or_create(
-                url=url,
-                defaults={
-                    "title": f"{title} (demo)",
-                    "summary": summary,
-                    "published_at": FIXED_SAMPLE_DATE,
-                    "source": sources[source_name],
-                    "estimated_minutes": 8,
-                    "is_low_data": True,
-                },
-            )
+        for title, summary, names, url in examples:
+            sample_title = f"{title} (demo)"
+            item = Item.objects.filter(url=url, title=sample_title).order_by("pk").first()
+            if item is None:
+                legacy_url = LEGACY_DEMO_URLS[sample_title]
+                item = (
+                    Item.objects.filter(url=legacy_url, title=sample_title)
+                    .order_by("pk")
+                    .first()
+                )
+            created = item is None
+            if created:
+                if Item.objects.filter(url=url).exists():
+                    continue
+                item = Item(
+                    url=url,
+                    title=sample_title,
+                    summary=summary,
+                    published_at=FIXED_SAMPLE_DATE,
+                    source=sample_source,
+                    estimated_minutes=8,
+                    is_low_data=True,
+                )
+            else:
+                item.url = url
+                item.title = sample_title
+                item.summary = summary
+                item.source = sample_source
+                item.estimated_minutes = 8
+                item.is_low_data = True
+            item.normalized_link = None
+            item.save()
             for name in names:
                 if name not in skill_by_name:
                     slug = name.lower().replace(" ", "-")
@@ -177,8 +205,7 @@ class Command(BaseCommand):
                         slug=slug, defaults={"name": name}
                     )
             assigned_skills = [skill_by_name[name] for name in names]
-            seed_key = (url, f"{title} (demo)")
-            if created or (item.url, item.title) == seed_key:
+            if created or item.title == sample_title:
                 # Replace legacy marketing tags on seed-owned demos with their pathway skills.
                 item.skills.set(assigned_skills)
             if (url, item.title) in DATA_ANALYST_DEMO_KEYS:
