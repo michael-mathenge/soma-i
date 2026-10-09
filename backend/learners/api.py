@@ -13,6 +13,12 @@ from pathways.constants import CANONICAL_PATHWAYS
 from pathways.logic import completed_items, progress_for, recommendations
 from pathways.models import Checkpoint, CheckpointRecord, ItemRecord, Pathway
 
+CANONICAL_SKILL_NAMES = frozenset(
+    skill_name
+    for pathway in CANONICAL_PATHWAYS
+    for skill_name in pathway["skills"]
+)
+
 
 def item_json(item, done_ids=None, reference_date=None):
     if reference_date is None:
@@ -32,7 +38,11 @@ def item_json(item, done_ids=None, reference_date=None):
         "summary": item.summary,
         "published_at": item.published_at.isoformat(),
         "source": item.source.name,
-        "skills": list(item.skills.values_list("name", flat=True)),
+        "skills": list(
+            item.skills.filter(name__in=CANONICAL_SKILL_NAMES)
+            .order_by("pk")
+            .values_list("name", flat=True)
+        ),
         "estimated_minutes": item.estimated_minutes,
         "is_low_data": item.is_low_data,
         "done": item.pk in (done_ids or set()),

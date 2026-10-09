@@ -485,6 +485,51 @@ def test_seed_demo_does_not_strip_live_item_skills():
     )
 
 
+def test_noncanonical_item_skills_are_filtered_without_changing_recommendations(
+    seeded,
+):
+    from django.utils import timezone
+
+    from content.models import Item, Skill
+    from pathways.logic import recommendations
+
+    pathway = seeded["Data Analyst"]
+    sql_skill = Skill.objects.get(name="SQL")
+    seo, _ = Skill.objects.get_or_create(slug="seo", defaults={"name": "SEO"})
+    marketing, _ = Skill.objects.get_or_create(
+        slug="marketing-analytics", defaults={"name": "Marketing Analytics"}
+    )
+    item = Item.objects.create(
+        title="A canonical pick with noncanonical tags",
+        url="https://api-skills.example.test/pick",
+        summary="A test pick for canonical skill filtering.",
+        published_at=timezone.now(),
+        source=Item.objects.first().source,
+    )
+    item.skills.add(sql_skill, seo, marketing)
+    ranked_ids = [recommended.pk for recommended in recommendations(sql_skill, 3)]
+    client = APIClient()
+    client.post("/api/demo/")
+
+    dashboard = client.get("/api/dashboard/")
+    next_response = client.get("/api/next/")
+
+    assert dashboard.status_code == next_response.status_code == 200
+    assert dashboard.data["items"][0]["id"] == item.pk
+    assert next_response.data["items"][0]["id"] == item.pk
+    for response in (dashboard, next_response):
+        payload = next(
+            item_json for item_json in response.data["items"] if item_json["id"] == item.pk
+        )
+        assert payload["skills"] == ["SQL"]
+        assert "SEO" not in payload["skills"]
+        assert "Marketing Analytics" not in payload["skills"]
+    assert [recommended.pk for recommended in recommendations(sql_skill, 3)] == ranked_ids
+    assert {"SEO", "Marketing Analytics"} <= set(
+        item.skills.values_list("name", flat=True)
+    )
+
+
 def test_dashboard_round_robin_covers_four_skills_deduplicates_and_is_deterministic(
     seeded, monkeypatch
 ):
