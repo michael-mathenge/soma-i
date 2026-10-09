@@ -153,3 +153,26 @@ def test_data_analyst_manual_demo_items_have_no_other_pathway_skills():
     for url, title in DATA_ANALYST_DEMO_KEYS:
         item = Item.objects.get(url=url, title=title)
         assert not item.skills.filter(name__in=other_pathway_skills).exists()
+
+
+def test_seed_demo_preserves_live_item_sharing_a_demo_url():
+    source = Source.objects.create(
+        name="Live research feed",
+        url="https://news.mit.edu/rss/research",
+        credibility_note="Live ingested feed",
+    )
+    sql = Skill.objects.get_or_create(slug="sql", defaults={"name": "SQL"})[0]
+    item = Item.objects.create(
+        title="Live MIT research article",
+        url="https://news.mit.edu/rss/research",
+        published_at="2026-01-01T00:00:00Z",
+        is_low_data=False,
+        source=source,
+    )
+    item.skills.add(sql)
+
+    call_command("seed_demo", verbosity=0)
+
+    item.refresh_from_db()
+    assert item.title == "Live MIT research article"
+    assert list(item.skills.values_list("name", flat=True)) == ["SQL"]

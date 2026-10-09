@@ -177,10 +177,10 @@ class Command(BaseCommand):
                         slug=slug, defaults={"name": name}
                     )
             assigned_skills = [skill_by_name[name] for name in names]
-            if created or item.title == f"{title} (demo)":
+            seed_key = (url, f"{title} (demo)")
+            if created or (item.url, item.title) == seed_key:
+                # Replace legacy marketing tags on seed-owned demos with their pathway skills.
                 item.skills.set(assigned_skills)
-            else:
-                item.skills.add(*assigned_skills)
             if (url, item.title) in DATA_ANALYST_DEMO_KEYS:
                 if item.published_at != FIXED_SAMPLE_DATE:
                     item.published_at = FIXED_SAMPLE_DATE
