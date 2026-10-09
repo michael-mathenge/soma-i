@@ -1,10 +1,40 @@
+import { spawnSync } from "node:child_process";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
+import { assertIsolatedDatabase } from "../test-support/e2e-database-guard.js";
 import { resetE2ESeed } from "./reset-e2e-seed.js";
+
+const testsDirectory = dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = resolve(testsDirectory, "../..");
+const backendDirectory = resolve(repositoryRoot, "backend");
+const python =
+  process.env.PYTHON || resolve(repositoryRoot, ".venv", "Scripts", "python.exe");
+
+function loadDeclaredSeedPicks() {
+  const databaseUrl = process.env.SOMAI_E2E_DATABASE_URL;
+  const databasePath = assertIsolatedDatabase(databaseUrl);
+  const validatedDatabaseUrl = `sqlite:///${databasePath.replaceAll("\\", "/")}`;
+  const result = spawnSync(
+    python,
+    [resolve(backendDirectory, "manage.py"), "dump_seed_picks"],
+    {
+      cwd: backendDirectory,
+      env: { ...process.env, DATABASE_URL: validatedDatabaseUrl },
+      encoding: "utf8",
+    },
+  );
+  if (result.status !== 0) {
+    throw new Error(result.stderr || result.stdout || "Failed to dump seed picks.");
+  }
+  return JSON.parse(result.stdout);
+}
 
 test("dashboard cards use seeded picks for each remaining skill", async ({
   page,
   request,
 }) => {
+  const declaredPicks = loadDeclaredSeedPicks();
   const pathwaysResponse = await request.get("/api/pathways/");
   expect(pathwaysResponse.ok()).toBeTruthy();
   const pathways = await pathwaysResponse.json();
@@ -34,22 +64,22 @@ test("dashboard cards use seeded picks for each remaining skill", async ({
     expect([...visibleTitles].sort()).toEqual([...dashboardTitles].sort());
 
     const remainingSkills = dashboard.remaining;
-    const declaredUrls = new Set(
+    const declaredIds = new Set(
       remainingSkills.flatMap((skill) =>
-        (pathway.seeded_picks[skill] ?? []).map((pick) => pick.url),
+        (declaredPicks[pathway.title]?.[skill] ?? []).map((pick) => pick.id),
       ),
     );
     for (const item of dashboard.items) {
-      expect(declaredUrls.has(item.url)).toBeTruthy();
+      expect(declaredIds.has(item.id)).toBeTruthy();
     }
 
     for (const skill of remainingSkills) {
-      const declaredForSkill = pathway.seeded_picks[skill] ?? [];
+      const declaredForSkill = declaredPicks[pathway.title]?.[skill] ?? [];
       if (declaredForSkill.length === 0) continue;
-      const expectedUrls = new Set(declaredForSkill.map((pick) => pick.url));
+      const expectedIds = new Set(declaredForSkill.map((pick) => pick.id));
       expect(
         dashboard.items.some(
-          (item) => item.skills.includes(skill) && expectedUrls.has(item.url),
+          (item) => item.skills.includes(skill) && expectedIds.has(item.id),
         ),
         `${pathway.title} should show a seeded pick for ${skill}`,
       ).toBeTruthy();

@@ -390,6 +390,18 @@ def test_seed_demo_provides_picks_for_each_data_analyst_skill():
         )
 
 
+def test_pathways_list_omits_seeded_picks_and_stays_under_1500_bytes(seeded):
+    response = APIClient().get("/api/pathways/")
+
+    assert response.status_code == 200
+    assert len(response.content) < 1500
+    assert all(
+        set(pathway)
+        == {"id", "title", "description", "target_outcome", "locale"}
+        for pathway in response.data
+    )
+
+
 def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
     call_command("seed_demo", verbosity=0)
     pathway = Pathway.objects.get(title="Data Analyst")

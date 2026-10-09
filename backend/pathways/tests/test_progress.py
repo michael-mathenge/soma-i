@@ -1,4 +1,10 @@
+import json
+from io import StringIO
+
 import pytest
+from django.core.management import call_command
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from content.models import Item, Skill, Source
 from learners.models import LearnerProfile
@@ -61,3 +67,40 @@ def test_recommendations_prefer_low_data_for_the_requested_skill():
         "Short text guide",
         "Online video",
     ]
+
+
+def test_dump_seed_picks_returns_seed_owned_picks_without_urls():
+    call_command("seed_demo", verbosity=0)
+    output = StringIO()
+
+    call_command("dump_seed_picks", stdout=output)
+
+    picks = json.loads(output.getvalue())
+    analyst_spreadsheets = picks["Data Analyst"]["Spreadsheets"]
+    assert any(
+        item["title"] == "Spreadsheet skills for clear data (demo)"
+        for item in analyst_spreadsheets
+    )
+    assert all(
+        item["title"].endswith(("(demo)", "(sample content)"))
+        for pathway in picks.values()
+        for skill_picks in pathway.values()
+        for item in skill_picks
+    )
+    assert all(
+        "url" not in item
+        for pathway in picks.values()
+        for skill_picks in pathway.values()
+        for item in skill_picks
+    )
+
+
+def test_dump_seed_picks_prefetches_item_skills_without_n_plus_one_queries():
+    call_command("seed_demo", verbosity=0)
+    output = StringIO()
+
+    with CaptureQueriesContext(connection) as queries:
+        call_command("dump_seed_picks", stdout=output)
+
+    assert json.loads(output.getvalue())
+    assert len(queries) == 2
