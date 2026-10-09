@@ -166,6 +166,7 @@ class Command(BaseCommand):
                 "https://github.com/michael-mathenge/soma-i#demo-javascript-essentials",
             ),
         ]
+        legacy_url_collisions = 0
         for title, summary, names, url in examples:
             sample_title = f"{title} (demo)"
             item = (
@@ -179,6 +180,13 @@ class Command(BaseCommand):
                     .first()
                 )
             created = item is None
+            if (
+                not created
+                and item.url != url
+                and Item.objects.filter(url=url).exclude(pk=item.pk).exists()
+            ):
+                legacy_url_collisions += 1
+                continue
             if created:
                 if Item.objects.filter(url=url).exists():
                     continue
@@ -214,6 +222,10 @@ class Command(BaseCommand):
                 if item.published_at != FIXED_SAMPLE_DATE:
                     item.published_at = FIXED_SAMPLE_DATE
                     item.save(update_fields=["published_at"])
+
+        self.stdout.write(
+            f"Skipped {legacy_url_collisions} legacy demo row(s) due to destination URL conflicts."
+        )
 
         self._seed_fixture_items()
 

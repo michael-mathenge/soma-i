@@ -256,6 +256,51 @@ def test_seed_demo_upgrade_repoints_all_legacy_rows_and_preserves_live_collision
     assert list(live_item.skills.values_list("name", flat=True)) == ["SQL"]
 
 
+def test_seed_demo_skips_legacy_row_when_sample_url_is_taken(capsys):
+    from pathways.management.commands.seed_demo import LEGACY_DEMO_URLS
+
+    legacy_title = "CSS layout foundations (demo)"
+    legacy_url = LEGACY_DEMO_URLS[legacy_title]
+    sample_url = "https://github.com/michael-mathenge/soma-i#demo-css-layout"
+    legacy_source = Source.objects.create(
+        name="Legacy demo source",
+        url="https://example.test/legacy-demo-source-url-conflict",
+        credibility_note="Legacy hand-written demo source.",
+    )
+    live_source = Source.objects.create(
+        name="Live destination source",
+        url="https://example.test/live-destination-source",
+        credibility_note="Live ingested item.",
+    )
+    legacy_item = Item.objects.create(
+        title=legacy_title,
+        url=legacy_url,
+        published_at="2020-01-01T00:00:00Z",
+        source=legacy_source,
+    )
+    live_item = Item.objects.create(
+        title="Live article at sample destination",
+        url=sample_url,
+        published_at="2026-01-01T00:00:00Z",
+        source=live_source,
+        is_low_data=False,
+    )
+
+    call_command("seed_demo", verbosity=0)
+
+    legacy_item.refresh_from_db()
+    live_item.refresh_from_db()
+    assert (legacy_item.url, legacy_item.title) == (legacy_url, legacy_title)
+    assert (live_item.url, live_item.title) == (
+        sample_url,
+        "Live article at sample destination",
+    )
+    assert live_item.source == live_source
+    assert "Skipped 1 legacy demo row(s) due to destination URL conflicts." in (
+        capsys.readouterr().out
+    )
+
+
 def test_seeded_functional_css_summary_keeps_200_character_fixture_excerpt():
     call_command("seed_demo", verbosity=0)
     item = Item.objects.get(
