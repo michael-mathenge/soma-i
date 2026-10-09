@@ -172,6 +172,12 @@ progress {
 .item-card h3 {
   margin-top: 0;
 }
+.item-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
 fieldset {
   border: 1px solid #d5dfda;
   border-radius: 8px;

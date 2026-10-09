@@ -254,3 +254,13 @@ def test_seed_demo_upgrade_repoints_all_legacy_rows_and_preserves_live_collision
     assert live_item.title == "Live MIT research article"
     assert live_item.is_low_data is False
     assert list(live_item.skills.values_list("name", flat=True)) == ["SQL"]
+
+
+def test_seeded_functional_css_summary_keeps_200_character_fixture_excerpt():
+    call_command("seed_demo", verbosity=0)
+    item = Item.objects.get(
+        url="https://www.freecodecamp.org/news/atomic-and-functional-css/"
+    )
+
+    print(f"Functional CSS stored summary length: {len(item.summary)}")
+    assert len(item.summary) == 200

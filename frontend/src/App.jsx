@@ -342,7 +342,7 @@ function Cards({ items = [], t, doneCallback }) {
               item.title
             )}
           </h3>
-          <p>{item.summary}</p>
+          <p className="item-summary">{item.summary}</p>
           <p className="meta">
             {[item.source, item.is_low_data && t.lowData]
               .filter(Boolean)
