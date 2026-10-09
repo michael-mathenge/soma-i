@@ -125,7 +125,7 @@ class Command(BaseCommand):
             (
                 "Spreadsheet skills for clear data",
                 "Work with rows, columns, formulas, and summaries.",
-                ["Spreadsheets", "SQL", "HTML", "Accessibility"],
+                ["Spreadsheets", "SQL"],
                 "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
                 "MDN Blog",
             ),

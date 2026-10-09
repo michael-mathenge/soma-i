@@ -12,6 +12,7 @@ from content.models import Item, Skill, Source
 from learners.models import LearnerProfile
 from pathways.constants import CANONICAL_PATHWAYS
 from pathways.logic import progress_for, recommendations
+from pathways.management.commands.seed_demo import DATA_ANALYST_DEMO_KEYS
 from pathways.models import CheckpointRecord, Pathway, PathwaySkill
 
 pytestmark = pytest.mark.django_db
@@ -139,3 +140,16 @@ def test_data_analyst_declared_picks_are_nonempty_and_exclude_python_fixtures():
         for skill_picks in picks.values()
         for item in skill_picks
     )
+
+
+def test_data_analyst_manual_demo_items_have_no_other_pathway_skills():
+    call_command("seed_demo", verbosity=0)
+    other_pathway_skills = {
+        skill_name
+        for pathway in CANONICAL_PATHWAYS[1:]
+        for skill_name in pathway["skills"]
+    }
+
+    for url, title in DATA_ANALYST_DEMO_KEYS:
+        item = Item.objects.get(url=url, title=title)
+        assert not item.skills.filter(name__in=other_pathway_skills).exists()
