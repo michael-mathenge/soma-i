@@ -402,6 +402,77 @@ def test_pathways_list_omits_seeded_picks_and_stays_under_1500_bytes(seeded):
     )
 
 
+def test_dashboard_round_robin_covers_four_skills_deduplicates_and_is_deterministic(
+    seeded, monkeypatch
+):
+    from django.utils import timezone
+
+    from content.models import Item
+    from learners import api as learners_api
+
+    pathway = seeded["Data Analyst"]
+    skills = [step.skill for step in pathway.steps.select_related("skill").order_by("order")]
+    source = Item.objects.first().source
+    learner = LearnerProfile.objects.create(
+        display_name="Round robin learner", chosen_pathway=pathway
+    )
+    client = APIClient()
+    session = client.session
+    session["learner_id"] = learner.pk
+    session.save()
+
+    item_lists = {}
+    for skill in skills:
+        item_lists[skill.name] = []
+        for index in range(3):
+            item = Item.objects.create(
+                title=f"Round robin {skill.name} {index}",
+                url=f"https://round-robin.example/{skill.slug}-{index}",
+                summary="A deterministic dashboard pick.",
+                published_at=timezone.now(),
+                source=source,
+            )
+            item.skills.add(skill)
+            item_lists[skill.name].append(item)
+
+    shared = item_lists[skills[0].name][0]
+    shared.skills.add(skills[1])
+    item_lists[skills[1].name][0] = shared
+    monkeypatch.setattr(
+        learners_api,
+        "recommendations",
+        lambda skill, limit=5: item_lists[skill.name][:limit],
+    )
+
+    first = client.get("/api/dashboard/")
+    second = client.get("/api/dashboard/")
+
+    assert first.status_code == second.status_code == 200
+    assert first.data["remaining"] == [skill.name for skill in skills]
+    item_ids = [item["id"] for item in first.data["items"]]
+    assert len(item_ids) == 8
+    assert item_ids == [item["id"] for item in second.data["items"]]
+    assert item_ids == [
+        shared.pk,
+        item_lists[skills[2].name][0].pk,
+        item_lists[skills[3].name][0].pk,
+        item_lists[skills[0].name][1].pk,
+        item_lists[skills[1].name][1].pk,
+        item_lists[skills[2].name][1].pk,
+        item_lists[skills[3].name][1].pk,
+        item_lists[skills[0].name][2].pk,
+    ]
+    assert len(item_ids) == len(set(item_ids))
+    returned_skills = {
+        skill_name
+        for item in first.data["items"]
+        for skill_name in item["skills"]
+    }
+    assert set(first.data["remaining"]) <= returned_skills
+    shared_pick = next(item for item in first.data["items"] if item["id"] == shared.pk)
+    assert shared_pick["skills"] == [skills[0].name, skills[1].name]
+
+
 def test_seed_demo_keeps_existing_duplicate_rows_and_updates_lowest_id_match():
     call_command("seed_demo", verbosity=0)
     pathway = Pathway.objects.get(title="Data Analyst")
