@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { assertIsolatedDatabase } from "../test-support/e2e-database-guard.js";
 
 const testsDirectory = dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = resolve(testsDirectory, "../..");
@@ -10,9 +11,7 @@ const python =
 
 export function resetE2ESeed() {
   const databaseUrl = process.env.SOMAI_E2E_DATABASE_URL;
-  if (!databaseUrl?.startsWith("sqlite:///")) {
-    throw new Error("Playwright must use its isolated temporary SQLite database.");
-  }
+  assertIsolatedDatabase(databaseUrl);
   console.log(`Resetting fresh Playwright seed in ${databaseUrl}`);
   for (const args of [
     ["flush", "--noinput"],

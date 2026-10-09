@@ -1,15 +1,17 @@
 import { defineConfig } from "@playwright/test";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { assertIsolatedDatabase } from "./test-support/e2e-database-guard.js";
 
 const inheritedDatabaseDirectory = process.env.SOMAI_E2E_DB_DIR;
-const databaseDirectory = inheritedDatabaseDirectory?.startsWith(
-  join(tmpdir(), "somai-playwright-"),
-)
+const candidateDatabaseDirectory = inheritedDatabaseDirectory
   ? inheritedDatabaseDirectory
   : mkdtempSync(join(tmpdir(), "somai-playwright-"));
-const databasePath = join(databaseDirectory, "test.sqlite3");
+const candidateDatabasePath = join(candidateDatabaseDirectory, "test.sqlite3");
+const candidateDatabaseUrl = `sqlite:///${candidateDatabasePath.replaceAll("\\", "/")}`;
+const databasePath = assertIsolatedDatabase(candidateDatabaseUrl);
+const databaseDirectory = dirname(databasePath);
 const databaseUrl = `sqlite:///${databasePath.replaceAll("\\", "/")}`;
 const apiPort = "8127";
 const uiPort = "4177";
