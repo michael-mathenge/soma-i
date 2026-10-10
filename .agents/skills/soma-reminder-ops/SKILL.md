@@ -7,7 +7,7 @@ description: Report newly due SOMA.i learning reminders and optionally create on
 
 Use this skill for an hourly review of due checkpoint reminders in the SOMA.i repository.
 
-1. From the repository root, run `\.venv\Scripts\python.exe backend\manage.py reminder_ops --json` once and capture its JSON output. The command reads reminder data in dry-run mode, applies the checked-in rules, suppresses recent repeats, and appends its local JSONL log. It does not send reminders or write to the application database.
+1. From the repository root, run `.\.venv\Scripts\python.exe backend\manage.py reminder_ops --json` once and capture its JSON output. Set `DATABASE_URL` to a temporary or operational database copy; never point it at either repository `db.sqlite3`. The command reads reminder data in dry-run mode, applies the checked-in rules, suppresses recent repeats, and appends its local JSONL log. It does not send reminders or write to the application database.
 2. If `alerts` is empty, reply `No alerts.` and do not create a Gmail draft. Otherwise, print each string in `alert_lines` verbatim.
 3. If a Gmail draft tool is available, create exactly one draft using `draft.subject` and `draft.body` verbatim. Include `draft.to` only when it is non-empty. Do not compose or expand the body from database content. If Gmail is unavailable, skip the draft and keep the alert report.
 
