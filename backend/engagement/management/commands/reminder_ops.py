@@ -10,7 +10,9 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from engagement.management.commands.send_reminders import Command as SendRemindersCommand
+from engagement.management.commands.send_reminders import (
+    Command as SendRemindersCommand,
+)
 
 RULES_PATH = (
     Path(settings.BASE_DIR).parent
