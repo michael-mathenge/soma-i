@@ -99,7 +99,9 @@ def load_rules(path):
     except OSError as error:
         raise CommandError(f"Cannot read rules file {path}: {error}") from error
     except json.JSONDecodeError as error:
-        raise CommandError(f"Rules file {path} is not valid JSON: {error.msg}.") from error
+        raise CommandError(
+            f"Rules file {path} is not valid JSON: {error.msg}."
+        ) from error
 
     if not isinstance(rules_data, dict) or set(rules_data) != {"version", "rules"}:
         raise CommandError(
@@ -171,7 +173,13 @@ def _read_log(path):
                 or type(learner_id) is not int
             ):
                 raise ValueError("invalid event fields")
-        except (UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+        except (
+            UnicodeDecodeError,
+            json.JSONDecodeError,
+            KeyError,
+            TypeError,
+            ValueError,
+        ):
             malformed_count += 1
             continue
         events.append((event_time, rule_id, learner_id))
@@ -205,14 +213,18 @@ def create_gmail_draft(gmail_connector, payload):
 
 
 class Command(BaseCommand):
-    help = "Evaluate due reminder rules and report new alerts without sending reminders."
+    help = (
+        "Evaluate due reminder rules and report new alerts without sending reminders."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--rules", default=str(RULES_PATH), help="Path to the reminder rules JSON."
         )
         parser.add_argument(
-            "--log", default=str(LOG_PATH), help="Path to the repeat-suppression JSONL log."
+            "--log",
+            default=str(LOG_PATH),
+            help="Path to the repeat-suppression JSONL log.",
         )
         parser.add_argument(
             "--now",
@@ -277,7 +289,9 @@ class Command(BaseCommand):
                         )
                         log_file.write(line)
             except OSError as error:
-                raise CommandError(f"Cannot append JSONL log {log_path}: {error}") from error
+                raise CommandError(
+                    f"Cannot append JSONL log {log_path}: {error}"
+                ) from error
 
         alert_lines = [format_alert_line(alert) for alert in alerts]
         draft_payload = build_draft_payload(

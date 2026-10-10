@@ -36,7 +36,9 @@ SKILL_DIR = REPO_ROOT / ".agents" / "skills" / "soma-reminder-ops"
 def local_temp_dir():
     local_dir = REPO_ROOT / ".local"
     local_dir.mkdir(exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="test-reminder-ops-", dir=local_dir) as path:
+    with tempfile.TemporaryDirectory(
+        prefix="test-reminder-ops-", dir=local_dir
+    ) as path:
         yield Path(path)
 
 
@@ -111,9 +113,7 @@ def test_send_reminders_dry_run_sends_and_logs_nothing(monkeypatch):
 
 
 @pytest.mark.parametrize("database_kind", ["root", "backend"])
-def test_reminder_ops_refuses_repository_database_paths(
-    database_kind, monkeypatch
-):
+def test_reminder_ops_refuses_repository_database_paths(database_kind, monkeypatch):
     database_dir = REPO_ROOT if database_kind == "root" else Path(settings.BASE_DIR)
     database_path = database_dir / "db.sqlite3"
 
@@ -226,7 +226,10 @@ def test_skill_file_has_front_matter_and_no_secrets():
     assert (REPO_ROOT / "backend" / "manage.py").is_file()
     assert "DATABASE_URL" in skill_text
     assert "never point it at either repository `db.sqlite3`" in skill_text
-    assert "If Gmail is unavailable, skip the draft and keep the alert report." in skill_text
+    assert (
+        "If Gmail is unavailable, skip the draft and keep the alert report."
+        in skill_text
+    )
 
 
 def test_reminder_ops_returns_one_alert_per_due_learner(local_temp_dir):
