@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import tempfile
 from datetime import UTC, datetime, timedelta
@@ -132,6 +133,33 @@ def test_reminder_ops_refuses_repository_database_paths(
             call_command("reminder_ops", verbosity=0)
 
 
+@pytest.mark.skipif(
+    os.name != "nt",
+    reason="Upper-case path alias behavior is specific to Windows filesystems.",
+)
+@pytest.mark.parametrize("database_kind", ["root", "backend"])
+def test_reminder_ops_refuses_uppercase_repository_database_paths(
+    database_kind, monkeypatch
+):
+    database_dir = REPO_ROOT if database_kind == "root" else Path(settings.BASE_DIR)
+    database_path = Path(str(database_dir / "db.sqlite3").upper())
+
+    def reject_connection(*_args, **_kwargs):
+        pytest.fail("reminder_ops attempted to open a database connection")
+
+    monkeypatch.setattr(BaseDatabaseWrapper, "get_new_connection", reject_connection)
+    with override_settings(
+        DATABASES={
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": str(database_path),
+            }
+        }
+    ):
+        with pytest.raises(CommandError, match="Refusing to read a repository"):
+            call_command("reminder_ops", verbosity=0)
+
+
 def test_rules_file_schema_is_validated(local_temp_dir):
     rules_path = SKILL_DIR / "rules.json"
     rules = load_rules(rules_path)
@@ -145,6 +173,37 @@ def test_rules_file_schema_is_validated(local_temp_dir):
     )
     with pytest.raises(CommandError, match="repeat_suppression_hours"):
         load_rules(invalid_path)
+
+
+def test_rules_allow_disabled_extras_but_reject_multiple_enabled(local_temp_dir):
+    rules_path = local_temp_dir / "multiple-rules.json"
+    rules_path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "rules": [
+                    {
+                        "id": "active-one",
+                        "enabled": True,
+                        "repeat_suppression_hours": 24,
+                    },
+                    {
+                        "id": "inactive",
+                        "enabled": False,
+                        "repeat_suppression_hours": 12,
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert len(load_rules(rules_path)) == 2
+
+    rules_data = json.loads(rules_path.read_text(encoding="utf-8"))
+    rules_data["rules"][1]["enabled"] = True
+    rules_path.write_text(json.dumps(rules_data), encoding="utf-8")
+    with pytest.raises(CommandError, match="at most one enabled rule"):
+        load_rules(rules_path)
 
 
 def test_skill_file_has_front_matter_and_no_secrets():
@@ -240,6 +299,84 @@ def test_reminder_ops_suppresses_repeats_until_cooldown_expires(local_temp_dir):
     assert second["alerts"] == []
     assert len(third["alerts"]) == 1
     assert len(log_path.read_text(encoding="utf-8").splitlines()) == 2
+
+
+def test_reminder_ops_skips_corrupt_middle_log_line_and_warns(local_temp_dir):
+    learner = _seed_due_learner()
+    log_path = local_temp_dir / "alerts.jsonl"
+    rule_id = "weekly-due-reminder"
+    log_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "alerted_at": "2030-01-08T12:00:00+00:00",
+                        "rule_id": rule_id,
+                        "learner_id": learner.pk,
+                    }
+                ),
+                '{"private":"DO NOT ECHO THIS RAW LOG TEXT"',
+                json.dumps({"alerted_at": "2030-01-08T12:15:00+00:00"}),
+                json.dumps(
+                    {
+                        "alerted_at": "2030-01-08T12:30:00+00:00",
+                        "rule_id": rule_id,
+                        "learner_id": 999999,
+                    }
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    output = StringIO()
+
+    call_command(
+        "reminder_ops",
+        "--json",
+        "--log",
+        str(log_path),
+        "--now",
+        "2030-01-08T13:00:00+00:00",
+        stdout=output,
+    )
+
+    payload = json.loads(output.getvalue())
+    assert payload["alerts"] == []
+    assert payload["warnings"] == ["Skipped 2 malformed log line(s)."]
+    assert set(payload) == {
+        "evaluated_at",
+        "alerts",
+        "alert_lines",
+        "draft",
+        "warnings",
+    }
+    assert "DO NOT ECHO THIS RAW LOG TEXT" not in output.getvalue()
+
+
+def test_reminder_ops_separates_append_after_truncated_log_line(local_temp_dir):
+    _seed_due_learner()
+    log_path = local_temp_dir / "truncated.jsonl"
+    truncated_line = b'{"private truncated record":'
+    log_path.write_bytes(truncated_line)
+    output = StringIO()
+
+    call_command(
+        "reminder_ops",
+        "--json",
+        "--log",
+        str(log_path),
+        "--now",
+        "2030-01-08T12:00:00+00:00",
+        stdout=output,
+    )
+
+    payload = json.loads(output.getvalue())
+    assert len(payload["alerts"]) == 1
+    assert payload["warnings"] == ["Skipped 1 malformed log line(s)."]
+    lines = log_path.read_bytes().splitlines()
+    assert lines[0] == truncated_line
+    assert json.loads(lines[1])["rule_id"] == "weekly-due-reminder"
 
 
 def test_reminder_ops_rejects_log_path_outside_local_or_temp():
