@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "weekly-due-reminder",
+      "enabled": true,
+      "repeat_suppression_hours": 24
+    }
+  ]
+}
