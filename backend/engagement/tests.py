@@ -85,6 +85,30 @@ def test_dry_run_json_omits_phone_numbers_and_display_names():
     assert ReminderLog.objects.filter(learner=learner).count() == before_count
 
 
+def test_send_reminders_dry_run_sends_and_logs_nothing(monkeypatch):
+    learner = _seed_due_learner()
+    before_count = ReminderLog.objects.filter(learner=learner).count()
+
+    def fail_if_sender_is_created(*_args, **_kwargs):
+        pytest.fail("dry-run created an SMS sender")
+
+    monkeypatch.setenv("SOMA_SENDER", "africastalking")
+    monkeypatch.setattr(
+        "engagement.management.commands.send_reminders.AfricasTalkingSender",
+        fail_if_sender_is_created,
+    )
+    monkeypatch.setattr(
+        "engagement.management.commands.send_reminders.ConsoleSender",
+        fail_if_sender_is_created,
+    )
+    output = StringIO()
+
+    call_command("send_reminders", "--dry-run", stdout=output)
+
+    assert output.getvalue() == "Would send 1 reminder(s).\n"
+    assert ReminderLog.objects.filter(learner=learner).count() == before_count
+
+
 @pytest.mark.parametrize("database_kind", ["root", "backend"])
 def test_reminder_ops_refuses_repository_database_paths(
     database_kind, monkeypatch
@@ -135,6 +159,59 @@ def test_skill_file_has_front_matter_and_no_secrets():
         r"['\"]?[A-Za-z0-9/_+=.-]{12,}",
         skill_text,
     )
+    command = re.search(r"`([^`]*manage\.py reminder_ops --json)`", skill_text)
+    assert command is not None
+    command_parts = command.group(1).split()
+    assert command_parts[0].startswith(".\\")
+    assert command_parts[1] == r"backend\manage.py"
+    assert (REPO_ROOT / "backend" / "manage.py").is_file()
+    assert "DATABASE_URL" in skill_text
+    assert "never point it at either repository `db.sqlite3`" in skill_text
+    assert "If Gmail is unavailable, skip the draft and keep the alert report." in skill_text
+
+
+def test_reminder_ops_returns_one_alert_per_due_learner(local_temp_dir):
+    amina = _seed_due_learner()
+    second_learner = LearnerProfile.objects.create(
+        display_name="Second Due Learner",
+        reminder_opt_in=True,
+        chosen_pathway=amina.chosen_pathway,
+    )
+    output = StringIO()
+    call_command(
+        "reminder_ops",
+        "--json",
+        "--log",
+        str(local_temp_dir / "alerts.jsonl"),
+        "--now",
+        "2030-01-08T12:00:00+00:00",
+        stdout=output,
+    )
+
+    payload = json.loads(output.getvalue())
+    learner_ids = [alert["learner_id"] for alert in payload["alerts"]]
+    assert sorted(learner_ids) == sorted([amina.pk, second_learner.pk])
+
+
+def test_reminder_ops_reports_alerts_without_gmail(local_temp_dir, monkeypatch):
+    _seed_due_learner()
+    monkeypatch.delenv("SOMA_REMINDER_DRAFT_TO", raising=False)
+    output = StringIO()
+
+    call_command(
+        "reminder_ops",
+        "--json",
+        "--log",
+        str(local_temp_dir / "alerts.jsonl"),
+        "--now",
+        "2030-01-08T12:00:00+00:00",
+        stdout=output,
+    )
+
+    payload = json.loads(output.getvalue())
+    assert payload["alerts"]
+    assert payload["alert_lines"]
+    assert payload["draft"]["body"] == payload["alert_lines"][0]
 
 
 def test_reminder_ops_suppresses_repeats_until_cooldown_expires(local_temp_dir):
