@@ -2,13 +2,13 @@
 
 ## Purpose and what it never does
 
-This document describes how to prepare and manually verify a local scheduled run of the `soma-reminder-ops` skill. It does not mean a schedule has been created.
+This document describes how to prepare and manually verify a local scheduled run of the `soma-reminder-ops` skill. A schedule was created and run during Task 4; it is paused now (see Run history).
 
 The workflow reports due checkpoint reminders from a database copy and appends repeat-suppression events to a JSONL log. It never sends SMS or email and never writes to the application database. If Gmail is connected, the skill may create one digest draft; it must never send a message or read mail. The live Gmail plugin path has not been verified.
 
 ## Prerequisites
 
-- Work from the `soma-i` repository root. Create the scheduled task inside the `soma-i` project so its working directory is the repository root.
+- Work from the `soma-i` repository root. The scheduled task runs with the working directory named in its prompt (C:/dev/soma-i); the Scheduled form has no project field.
 - Have the repository-root demo database at `db.sqlite3`. This is the copy source. The obsolete `backend\db.sqlite3` file is not the source.
 - The destination `.local\soma-reminder-demo-copy.sqlite3` is ignored by the `.local/` and `*.sqlite3` rules in `.gitignore` (lines 6 and 18).
 - The command defaults to `.agents\skills\soma-reminder-ops\rules.json` for `--rules` and `.local\soma-reminder-ops\alerts.jsonl` for `--log` (`backend\engagement\management\commands\reminder_ops.py`, lines 17–25 and 220–228).
@@ -77,6 +77,8 @@ Remove-Item "$env:TEMP\soma-reminder-alerts.jsonl" -ErrorAction SilentlyContinue
 
 The scheduled run's temp folder was not separately verified.
 
+For manual runs without --log, the default log is `.local\soma-reminder-ops\alerts.jsonl`. Clear it with: `Remove-Item -LiteralPath .\.local\soma-reminder-ops\alerts.jsonl -ErrorAction SilentlyContinue`
+
 ## Run history (what actually happened)
 
 - Run 1 (scheduled, with the first prompt): failed with "The directory name is invalid. (os error 267)". The Scheduled form has no project field, so the run had no valid folder.
@@ -87,9 +89,9 @@ The scheduled run's temp folder was not separately verified.
 
 ## Scheduled view and limitations
 
-Fill in the exact wording and screenshot details after creating and inspecting the task yourself. This document makes no claim about the Codex app's current interface or that a schedule exists.
+The wording below was copied from the Scheduled view during the first run. The evidence below was recorded from the schedule I created; it is paused now.
 
-- Create the schedule inside the `soma-i` project so the working directory is the repository root.
+- The Scheduled form has no project field, so the prompt itself names the working directory.
 - A local schedule requires the machine and Codex app to be running.
 - The database copy can become stale; refresh it manually when appropriate.
 - Run one instance at a time. Overlapping runs can produce a duplicate alert line or draft; nothing is ever sent.
@@ -103,12 +105,12 @@ Fill in the exact wording and screenshot details after creating and inspecting t
 | Recurrence and time zone | Hourly, set with Repeat: Interval. The Interval form shows no time zone. The form's default was every 30 minutes and I changed it to hourly. |
 | Local versus cloud | Run on this computer, switched on. |
 | Screenshot location | docs/images/scheduled-task.png (the thread) and docs/images/scheduled-task-paused.png (the paused task). |
-| Pause wording | [FILL IN: exact pause wording or action you see] |
+| Pause wording | I paused the task from the Scheduled view. The row now reads "Paused · Hourly", and its "..." menu offers Resume, Run now, Edit, Share and Delete. |
 | Gmail connected | Not tested. No draft was created and the run result did not mention Gmail. |
 
-![The scheduled task thread: two failed runs, then the working prompt and the alert](images/scheduled-task.png)
+![The scheduled task thread: the permission error from the second run, the working prompt, and the alert from the third run](images/scheduled-task.png)
 ![The task after I paused it](images/scheduled-task-paused.png)
 
 ## Pause the schedule
 
-[FILL IN: record the exact pause wording or action after inspecting the Scheduled view.]
+I paused the task from the Scheduled view. The row now reads "Paused · Hourly", and its "..." menu offers Resume, Run now, Edit, Share and Delete.
