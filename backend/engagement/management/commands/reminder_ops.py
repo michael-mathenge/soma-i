@@ -135,22 +135,31 @@ def load_rules(path):
                 f"{prefix} field 'repeat_suppression_hours' must be a positive integer."
             )
         validated.append(rule)
+    if sum(rule["enabled"] for rule in validated) > 1:
+        raise CommandError("Rules may contain at most one enabled rule.")
     return validated
 
 
 def _read_log(path):
     if not path.exists():
-        return []
+        return [], 0
     events = []
+    malformed_count = 0
     try:
-        lines = path.read_text(encoding="utf-8").splitlines()
+        lines = path.read_bytes().splitlines()
     except OSError as error:
         raise CommandError(f"Cannot read JSONL log {path}: {error}") from error
-    for line_number, line in enumerate(lines, start=1):
+    for line in lines:
         if not line.strip():
             continue
         try:
-            event = json.loads(line)
+            event = json.loads(line.decode("utf-8"))
+            if not isinstance(event, dict) or set(event) != {
+                "alerted_at",
+                "rule_id",
+                "learner_id",
+            }:
+                raise ValueError("invalid event shape")
             event_time = parse_datetime(event["alerted_at"])
             rule_id = event["rule_id"]
             learner_id = event["learner_id"]
@@ -158,15 +167,15 @@ def _read_log(path):
                 event_time is None
                 or timezone.is_naive(event_time)
                 or not isinstance(rule_id, str)
+                or not rule_id.strip()
                 or type(learner_id) is not int
             ):
                 raise ValueError("invalid event fields")
-        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
-            raise CommandError(
-                f"Invalid JSONL reminder event at {path}:{line_number}."
-            ) from error
+        except (UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+            malformed_count += 1
+            continue
         events.append((event_time, rule_id, learner_id))
-    return events
+    return events, malformed_count
 
 
 def format_alert_line(alert):
@@ -225,7 +234,7 @@ class Command(BaseCommand):
         preview.stdout = preview_output
         preview.handle(dry_run=True, json=True)
         candidate_data = json.loads(preview_output.getvalue())
-        prior_events = _read_log(log_path)
+        prior_events, malformed_log_lines = _read_log(log_path)
         alerts = []
         events_to_log = []
 
@@ -255,9 +264,18 @@ class Command(BaseCommand):
         if events_to_log:
             try:
                 log_path.parent.mkdir(parents=True, exist_ok=True)
-                with log_path.open("a", encoding="utf-8", newline="\n") as log_file:
+                with log_path.open("a+b") as log_file:
+                    log_file.seek(0, os.SEEK_END)
+                    if log_file.tell():
+                        log_file.seek(-1, os.SEEK_END)
+                        if log_file.read(1) != b"\n":
+                            log_file.seek(0, os.SEEK_END)
+                            log_file.write(b"\n")
                     for event in events_to_log:
-                        log_file.write(json.dumps(event, ensure_ascii=False) + "\n")
+                        line = (json.dumps(event, ensure_ascii=False) + "\n").encode(
+                            "utf-8"
+                        )
+                        log_file.write(line)
             except OSError as error:
                 raise CommandError(f"Cannot append JSONL log {log_path}: {error}") from error
 
@@ -270,6 +288,11 @@ class Command(BaseCommand):
             "alerts": alerts,
             "alert_lines": alert_lines,
             "draft": draft_payload,
+            "warnings": (
+                [f"Skipped {malformed_log_lines} malformed log line(s)."]
+                if malformed_log_lines
+                else []
+            ),
         }
         if options.get("json"):
             self.stdout.write(json.dumps(result, ensure_ascii=False))
