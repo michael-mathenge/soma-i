@@ -12,13 +12,17 @@ from pathways.logic import progress_for
 class Command(BaseCommand):
     help = "Print due weekly reminders for opted-in learners."
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.clock = timezone.now
+
     def handle(self, *args, **options):
         sender = (
             AfricasTalkingSender()
             if __import__("os").getenv("SOMA_SENDER") == "africastalking"
             else ConsoleSender()
         )
-        cutoff = timezone.now() - timedelta(days=7)
+        cutoff = self.clock() - timedelta(days=7)
         count = 0
         for learner in LearnerProfile.objects.filter(
             reminder_opt_in=True, chosen_pathway__isnull=False
