@@ -2,6 +2,8 @@
 
 **Purpose:** Help a learner connect short, curated lessons to practical skills, visible progress, and a plausible next step.
 
+**Primary Track 3:** Guidance, Pathways and Opportunity.
+
 ## One learner
 
 - **ASSUMPTION:** Amina Demo is 23.
