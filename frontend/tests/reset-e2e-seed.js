@@ -2,12 +2,16 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { assertIsolatedDatabase } from "../test-support/e2e-database-guard.js";
+import { resolvePython } from "../../backend/python-resolution.mjs";
 
 const testsDirectory = dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = resolve(testsDirectory, "../..");
 const backendDirectory = resolve(repositoryRoot, "backend");
-const python =
-  process.env.PYTHON || resolve(repositoryRoot, ".venv", "Scripts", "python.exe");
+const python = resolvePython(
+  process.env.PYTHON,
+  resolve(repositoryRoot, ".venv", "Scripts", "python.exe"),
+);
+const pythonPrefix = python === "py" ? ["-3.12"] : [];
 
 export function resetE2ESeed() {
   const databaseUrl = process.env.SOMAI_E2E_DATABASE_URL;
@@ -19,7 +23,7 @@ export function resetE2ESeed() {
   ]) {
     const result = spawnSync(
       python,
-      [resolve(backendDirectory, "manage.py"), ...args],
+      [...pythonPrefix, resolve(backendDirectory, "manage.py"), ...args],
       {
         cwd: backendDirectory,
         env: {

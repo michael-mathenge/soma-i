@@ -9,6 +9,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "test:e2e": "playwright test",
     "test:e2e:guard": "node --test test-support/e2e-database-guard.test.js",
+    "test:e2e:robustness": "node --test test-support/e2e-global-teardown.test.js test-support/python-resolution.test.mjs scripts/clean-e2e.test.mjs",
     "clean:e2e": "node scripts/clean-e2e.mjs",
     "lint": "eslint src tests",
     "format": "prettier --write \"src/**/*.{js,jsx,json,css}\" \"tests/**/*.js\" \"*.{js,json,html}\""
