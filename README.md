@@ -208,6 +208,8 @@ One incident shaped the safeguards: a Codex probe fell back through `.env` to th
 
 [PLANS.md](docs/PLANS.md) records validation results and remaining evidence gaps.
 
+Read the [AI-use disclosure](docs/AI-usage.md) for the owner’s account of AI contributions, decisions and limitations.
+
 ## Track and operating-constraint mapping
 
 | Track or constraint | What the repository demonstrates | Remaining limit |

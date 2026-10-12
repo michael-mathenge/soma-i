@@ -40,7 +40,7 @@
 
 **Fallback:** “If the Codex App cannot be shown, summarize the skill and Scheduled task and point to their documented acceptance checks.”
 
-**Expand:** Show the `SOMA.i Reminder Ops` skill, the active `SOMA.i Reminder Dispatch` automation, and its completed **Run now** result. Note that the local automation requires the Codex App to stay open and the sender remains console-only.
+**Expand:** Show the `SOMA.i Reminder Ops` skill, the documented successful reminder-alert run and the intentionally paused hourly schedule in `docs/SCHEDULED_TASK.md`. Note that the local automation requires the Codex App to stay open and reminder delivery is console-only and live Gmail drafting is not tested. Do not describe the schedule as active.
 
 ## 6. next
 
@@ -49,3 +49,7 @@
 **Fallback:** “Our next step is learner validation; we will not present assumptions as proven impact.”
 
 **Expand:** Invite questions about learner research, how to broaden curated pathway coverage, and what evidence would justify later work. Keep the stated out-of-scope items unchanged.
+
+## Recording checklist
+
+Use a fresh OS-temp database for rehearsal and recording. Show the actual seeded Amina checkpoint result, source traceability, sample-opportunity labels and the language switch. Do not claim offline reload, measured retention, accessibility compliance, hiring probability or production readiness. The 60-second and 3–5-minute versions are local suggestions; official video limits and the submission destination are still awaiting confirmation. Rehearse before starting Loom and review the final playback and sharing permissions before submission.

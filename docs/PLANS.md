@@ -44,8 +44,35 @@ Update each status and validation result as work progresses. All work is on a mi
 - PR #9 conflicted after PR #8 advanced `main` to `bba3e9d`. `git log --oneline -4 origin/main` identified the merged README and product-brief changes. The resolution retains main's track positioning, persona, RSS/pathway/reminder evidence, demo script, owner workflow account, constraint table and detailed limits; it incorporates PR #9's setup safeguards, exact limits/AI-assistance paragraphs and fresh validation summary. `PRODUCT_BRIEF.md` is imported from main unchanged, not edited as part of this resolution.
 - Documentation-only reconciliation: backend/frontend suites are **not tested again**; the results above remain the actual earlier outputs for unchanged application code. `git diff --name-only origin/main -- backend frontend` returned no paths. PowerShell parser and UTF-8/CRLF checks pass for the final documents; `git diff --check` returns exit 0. The existing untracked frontend lockfile is untouched. PR #9 remains unmerged.
 
+## README submission plan completion - 2026-10-12
+
+- Status: done. PR [#9](https://github.com/michael-mathenge/soma-i/pull/9) is merged into `main` at `a298e95`. Confirmed with `git fetch origin main`, `git log --oneline -3 origin/main` and `git rev-parse origin/main`. `git diff --exit-code origin/main HEAD -- README.md docs/PLANS.md` returned exit 0 before this completion entry, confirming the reviewed documents are on main. The earlier unmerged statements above describe their historical checkpoints.
+- Completed: setup safeguards, server-window database reuse, frontend check instructions, Chrome/cleanup guidance, approved limits and Codex-assistance text, dated validation, conflict reconciliation, commit/push, PR description and extended merge description. Main's capstone narrative and product-brief change were preserved.
+- Validation remains the actual 2026-10-12 results above: backend 117 passed (four warnings), guard 16 passed and one skipped, robustness 14 passed, lint/build exit 0 (106.2 KB), and Playwright 16 passed with exit 0 and the expected temporary-database warning. Post-merge application checks are **not tested**; no tests or database commands were run for this completion update.
+- Remaining evidence gaps: required E6/E7 UI Network screenshots and external tracker update are still pending; Python 3.12 environment creation, interactive setup prompts, offline reload and live Gmail drafting remain **not tested**. Real-learner validation and production features remain outside the completed README submission scope. The interrupted sandbox-command limitation remains recorded above.
+- Local completion update: only `docs/PLANS.md` edited; UTF-8/CRLF preserved and `git diff --check` returned exit 0. The pre-existing untracked frontend/package-lock.json remains untouched. This completion entry is uncommitted and has not been pushed.
+
+## Honest AI-use disclosure - 2026-10-12
+
+- The owner's supplied disclosure is preserved verbatim in `docs/AI-usage.md`, linked from README.md's Built with Codex section. The full disclosure was removed from README.md at the owner's request. It covers human decisions, Claude/Codex contributions, review and approval workflow, database-safety mistakes, recorded validation and remaining product assumptions. Supporting evidence remains in README.md's workflow account and the validation entries above.
+- Documentation only: application checks are **not tested again**. `git diff --check` returned exit 0; UTF-8/CRLF byte checks passed for README.md, docs/PLANS.md and docs/AI-usage.md; a byte comparison confirmed the moved disclosure is unchanged. The previously approved local completion entry is preserved. No commit, push or database command was performed for this addition; the pre-existing untracked frontend/package-lock.json remains untouched.
+
 ## Later
 
 - Production SMS provider delivery and durable user accounts.
 - Broader curated feed and live opportunity aggregation.
 - Cross-device synchronization and deployment hardening.
+
+## Submission execution plan - 2026-10-12
+
+1. Spec/demo reconciliation: documentation edited to reflect current pathways, paused hourly alert schedule, separate seeded-Amina rehearsal and optional tracker evidence. Diff check passes; runtime validation not tested again at this checkpoint.
+2. Reflection and skill scan: owner confirmed idea origin and personal lesson; incorporated in docs/REFLECTION.md. Static scan complete in docs/SKILL_SCAN.md, with an unresolved skill command-format finding. Do not invoke that skill unattended as written.
+3. Fresh OS-temp rehearsal: completed with explicit DATABASE_URL printed before management commands. Browser observation verified seeded Amina at 25% progress, SQL checkpoint submission, SQL unlocked, Data Visualisation next checkpoint, Low data cards, sample Junior Data Analyst opportunity and Kiswahili settings. Screens captured under ignored .local/submission; no repository database opened for this rehearsal.
+4. Video: generated narration requested by owner; seven WAV scenes total 266.9 seconds. Local WebM assembly is in progress using captured UI states and synthetic narration; this is not a continuous screen recording. Loom is signed in, but Upload a video redirects to a paid upgrade; no purchase made. Owner explicitly requires confirmation before video upload or project submission.
+5. Publication and submission: destination https://andela-lms.vercel.app/course/c/090e67fd-efc1-4dea-bef6-56067ae6c6bf/capstone/submit inspected while signed in. It requests video (MP4/MOV/WebM, maximum 500 MB; recommended about five minutes) and GitHub repository URL; no reflection field or deadline visible. Form warns submission locks the project. Do not upload video or submit until owner confirms the reviewed video. Preserve the existing frontend/package-lock.json.
+
+## Submission rehearsal evidence - 2026-10-12
+
+- Database: sqlite:///C:/Users/micha/AppData/Local/Temp/somai-rehearsal-e166d933-9aef-4a04-9790-0e4cd2021c36/demo.sqlite3. Fresh migrate/seed commands completed without errors. reminder_ops --json with an OS-temp JSONL log returned Amina's SQL-checkpoint alert, then alerts: [] on repeat; REMINDER_OPS_FIRST_EXIT=0 and REMINDER_OPS_SECOND_EXIT=0. send_reminders printed Amina's English console reminder and Sent 1 reminder(s), then Sent 0 reminder(s); SEND_FIRST_EXIT=0 and SEND_SECOND_EXIT=0. No Gmail draft or production SMS was created.
+- Browser rehearsal: Open the demo learner showed Data Analyst progress 25%, completed Spreadsheets and next SQL checkpoint. Submitting the three answers and demo attestation navigated to /next and displayed You unlocked: SQL, Data Visualisation checkpoint, low-data reading cards and labelled sample opportunity. Settings switched to Kiswahili with translated navigation and weekly reminder checkbox. The database was reset with flush --noinput and seed_demo only after its exact path was verified under OS temp, to repeat the captured walkthrough.
+- Full backend/frontend suites are not tested again during this preparation; earlier recorded results remain historical. Deadline remains unconfirmed.
