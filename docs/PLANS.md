@@ -39,6 +39,11 @@ Update each status and validation result as work progresses. All work is on a mi
 - Not tested: dependency/browser installation, activation-policy changes, interactive README prompts, live feed ingestion, reminder execution, PostgreSQL, offline behavior beyond existing automated coverage, and real-learner product assumptions. Black and Ruff were not run; no screenshot claims are made.
 - Documentation checks: `git diff --check` returned exit 0; Python byte checks confirmed UTF-8 and CRLF for both documents. `git status --short` showed exactly ` M README.md`, ` M docs/PLANS.md`, and the pre-existing `?? frontend/package-lock.json`. No commit, push, or merge was performed.
 
+## README conflict reconciliation - 2026-10-12
+
+- PR #9 conflicted after PR #8 advanced `main` to `bba3e9d`. `git log --oneline -4 origin/main` identified the merged README and product-brief changes. The resolution retains main's track positioning, persona, RSS/pathway/reminder evidence, demo script, owner workflow account, constraint table and detailed limits; it incorporates PR #9's setup safeguards, exact limits/AI-assistance paragraphs and fresh validation summary. `PRODUCT_BRIEF.md` is imported from main unchanged, not edited as part of this resolution.
+- Documentation-only reconciliation: backend/frontend suites are **not tested again**; the results above remain the actual earlier outputs for unchanged application code. `git diff --name-only origin/main -- backend frontend` returned no paths. PowerShell parser and UTF-8/CRLF checks pass for the final documents; `git diff --check` returns exit 0. The existing untracked frontend lockfile is untouched. PR #9 remains unmerged.
+
 ## Later
 
 - Production SMS provider delivery and durable user accounts.
