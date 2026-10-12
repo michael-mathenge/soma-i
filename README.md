@@ -14,49 +14,41 @@ Use Windows PowerShell, Python 3.12 and Node 20 or newer. The contributor guide 
 
 Configuration names are `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DATABASE_URL` and `SOMA_SENDER`. Optional sandbox configuration uses `AFRICASTALKING_USERNAME` and `AFRICASTALKING_API_KEY`; delivery is stubbed. See [.env.example](.env.example), [settings](backend/soma/settings.py) and [senders](backend/engagement/senders.py). No provider credentials are needed for the console demo.
 
-The commands below create a temporary SQLite database and explicitly override the repository database defaults. Never use either repository `db.sqlite3` for these commands. Commands were inspected during this documentation plan, **not tested**.
-
-**PowerShell — clone and prepare the environment**
+**PowerShell — clone**
 
 ```powershell
 git clone https://github.com/michael-mathenge/soma-i.git
 Set-Location soma-i
-py -3.12 -m venv .venv
-& ./.venv/Scripts/Activate.ps1
-python -c "import sys; assert sys.prefix != sys.base_prefix, 'Project virtual environment is not active'; print(sys.executable)"
-node --version
-python -m pip install -r requirements.txt
 ```
 
-**PowerShell — initialize and start the backend, from the repository root**
+Install Python 3.12 and Node 20 or newer. Check the installed versions, then run setup from the repository root:
+
+Create an isolated SQLite database under the OS temporary directory. Stop if temporary-directory creation fails; do not use a repository database. Keep this setup window open so the backend window can reuse the printed database URL. Development settings come from `.env`; the explicit `DATABASE_URL` below overrides its database setting. Copy `.env.example` only when `.env` does not already exist.
+
+**PowerShell — prepare environment and seed temporary database**
 
 ```powershell
-$somaDemoDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ('soma-i-demo-' + [guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Path $somaDemoDirectory -ErrorAction Stop | Out-Null
-$somaDemoDatabase = Join-Path $somaDemoDirectory 'demo.sqlite3'
-$env:DATABASE_URL = 'sqlite:///' + $somaDemoDatabase.Replace('\', '/')
+$ErrorActionPreference = 'Stop'
+python --version
+node --version
+py -3.12 -m venv .venv
+./.venv/Scripts/Activate.ps1
+python -c "import sys; assert sys.prefix != sys.base_prefix, 'Project virtual environment is not active'; print(sys.executable)"
+python -m pip install -r requirements.txt
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+$setupDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("somai-setup-" + [guid]::NewGuid())
+try { New-Item -ItemType Directory -Path $setupDirectory -ErrorAction Stop | Out-Null } catch { throw "Temporary database directory could not be created; stop setup." }
+$env:DATABASE_URL = "sqlite:///" + (Join-Path $setupDirectory "demo.sqlite3").Replace('\', '/')
 $env:SOMA_SENDER = 'console'
 Write-Output $env:DATABASE_URL
-& ./.venv/Scripts/python.exe backend/manage.py migrate
+python backend/manage.py migrate
+if ($LASTEXITCODE -ne 0) { throw "Migrations failed; stop setup." }
 Write-Output $env:DATABASE_URL
-& ./.venv/Scripts/python.exe backend/manage.py seed_demo
-Write-Output $env:DATABASE_URL
-& ./.venv/Scripts/python.exe backend/manage.py runserver
+python backend/manage.py seed_demo
+if ($LASTEXITCODE -ne 0) { throw "Demo seed failed; stop setup." }
 ```
 
-Keep that backend window open. Start the frontend in a second PowerShell window opened at the repository root.
-
-**PowerShell — frontend**
-
-```powershell
-Set-Location frontend
-npm install
-npm run dev
-```
-
-Open the URL printed by Vite. The demo-entry labels are defined in the [English](frontend/src/i18n/en.json) and [Kiswahili](frontend/src/i18n/sw.json) translations.
-
-If script policy blocks virtual-environment activation or npm, run the following in that window, then retry.
+If PowerShell blocks activation, run this in the same window, then retry activation and the virtual-environment check. The same session-only policy step can address npm script-policy blocking in its window.
 
 **PowerShell — session-only script-policy troubleshooting**
 
@@ -64,28 +56,91 @@ If script policy blocks virtual-environment activation or npm, run the following
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 ```
 
-The test server ignores an inherited `PYTHON` value unless it names an existing file; see [Python resolution](backend/python-resolution.mjs), fixed in commit `e2f0296`.
+In a frontend PowerShell window, select the cloned repository root when prompted, then start Vite. This window does not run database commands and needs no database configuration.
 
-**PowerShell — checks from the repository root**
+**PowerShell — frontend**
 
 ```powershell
-$somaCheckDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ('soma-i-check-' + [guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Path $somaCheckDirectory -ErrorAction Stop | Out-Null
-$somaCheckDatabase = Join-Path $somaCheckDirectory 'test.sqlite3'
-$env:DATABASE_URL = 'sqlite:///' + $somaCheckDatabase.Replace('\', '/')
-Write-Output $env:DATABASE_URL
-& ./.venv/Scripts/python.exe -m pytest backend
+$ErrorActionPreference = 'Stop'
+$repositoryRoot = Read-Host "Enter the full path to the cloned soma-i repository"
+Set-Location -LiteralPath $repositoryRoot -ErrorAction Stop
 Set-Location frontend
-npm run build
-npm run test:e2e:guard
-npx playwright install chromium
+npm install
+npm run dev
+```
+
+In a backend PowerShell window, select the same repository root and paste the exact `DATABASE_URL` printed by setup when prompted. Verify that its temporary database exists before starting Django.
+
+**PowerShell — backend using setup database**
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$repositoryRoot = Read-Host "Enter the full path to the cloned soma-i repository"
+Set-Location -LiteralPath $repositoryRoot -ErrorAction Stop
+$env:DATABASE_URL = Read-Host "Paste the DATABASE_URL printed by setup"
+$tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+if (-not $env:DATABASE_URL.StartsWith('sqlite:///')) { throw "Use the setup SQLite URL." }
+$databasePath = [System.IO.Path]::GetFullPath($env:DATABASE_URL.Substring(10))
+if (-not $databasePath.StartsWith($tempRoot, [System.StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $databasePath -PathType Leaf)) { throw "Use the existing setup database under the OS temporary directory." }
+$env:SOMA_SENDER = 'console'
 Write-Output $env:DATABASE_URL
+./.venv/Scripts/python.exe backend/manage.py runserver
+```
+
+Open the Vite URL printed by the frontend command and select **Open the demo learner**
+(in Kiswahili: **Fungua mwanafunzi wa majaribio**). The labels are defined in the [English](frontend/src/i18n/en.json) and [Kiswahili](frontend/src/i18n/sw.json) translations.
+
+The test server ignores an inherited `PYTHON` value unless it names an existing file; see [Python resolution](backend/python-resolution.mjs), fixed in commit `e2f0296`.
+
+For backend checks, use the setup PowerShell window at the repository root with its temporary `DATABASE_URL` still set:
+
+**PowerShell — backend checks**
+
+```powershell
+Write-Output $env:DATABASE_URL
+./.venv/Scripts/python.exe -m pytest backend
+```
+
+For frontend checks, use the frontend window in `frontend`. Playwright creates its own isolated OS-temp SQLite database and prints its URL. Free ports 8127 and 4177 before running it: inspect any listeners, then stop the owning servers in their original windows. Do not stop an unfamiliar process. Server reuse is disabled in the config, so `PW_REUSE_SERVER` has no effect.
+
+**PowerShell — frontend checks with installed Chrome**
+
+```powershell
+npm run test:e2e:guard
+npm run test:e2e:robustness
+npm run lint
+npm run build
+netstat -ano -p tcp | Select-String ':8127 |:4177 '
+$env:PLAYWRIGHT_CHANNEL = 'chrome'
 npm run test:e2e
 ```
 
-Playwright creates its own temporary database through [its configuration](frontend/playwright.config.js). Ports 8127 and 4177 must be free; the current configuration does not reuse existing servers.
+`PLAYWRIGHT_CHANNEL=chrome` uses installed Google Chrome. To use Playwright's Chromium instead, remove the channel variable and install that browser if it is missing:
 
-[docs/PLANS.md](docs/PLANS.md) records 117 backend tests passing, 16 database-guard tests passing with one symlink-permission skip, a 106.2 KB gzipped build against a 200 KB budget, and clean Black/Ruff checks. It records 16 Playwright tests passing with a teardown failure. Commit `e2f0296` fixes cleanup handling; the later exit-0 result was **not verified** for this README. These checks were **not tested** during documentation planning.
+**PowerShell — optional Playwright Chromium**
+
+```powershell
+Remove-Item Env:PLAYWRIGHT_CHANNEL -ErrorAction SilentlyContinue
+npx playwright install chromium
+npm run test:e2e
+```
+
+On Windows, a locked temporary database can produce a cleanup warning after teardown retries; an otherwise successful run still exits successfully.
+
+To ingest live feeds or preview due reminders, use the setup window at the repository root with its temporary database URL:
+
+**PowerShell — ingestion and console reminders**
+
+```powershell
+Write-Output $env:DATABASE_URL
+./.venv/Scripts/python.exe backend/manage.py ingest_feeds
+Write-Output $env:DATABASE_URL
+./.venv/Scripts/python.exe backend/manage.py send_reminders
+```
+
+Tests use local XML fixtures and do not require network access. Set `DATABASE_URL` to a PostgreSQL URL and configure the matching driver for a later database switch.
+
+The 2026-10-12 entry in [docs/PLANS.md](docs/PLANS.md) records fresh temporary-database migrations, seed and startup checks, 117 backend tests passing, 16 guard tests passing with one skip, 14 robustness tests passing, lint, a 106.2 KB build, and 16 Playwright tests passing with exit code 0. Playwright used installed Chrome and child-only folder-valued `PYTHON`; teardown emitted the expected temporary-database warning. The log also records an interrupted sandbox-command limitation and items not tested, including Python 3.12 environment creation and interactive setup prompts.
 
 ## How it works
 
@@ -131,6 +186,14 @@ Offline reload is **not tested** and is not part of this demo promise. [PLANS.md
 
 ## Built with Codex
 
+Codex assisted with planning, implementation, tests, documentation, and
+debugging, including Windows Playwright cleanup and Python resolution.
+This repository contains AI-assisted code. Changes were developed through
+scoped requests and checked using backend tests, node:test suites, lint,
+production builds, and Playwright runs. Test results demonstrate the
+checked scenarios; they do not establish production readiness or validate
+the product assumptions with real learners.
+
 The following workflow account is mine as the project owner; repository commits verify the artifacts, not which assistant authored each line.
 
 I chose the idea, Amina’s assumed learner profile, Primary Track 3, the three pathways and the boundaries: no real SMS, accounts, live opportunity aggregation or deployment. I decided which review findings to fix, accept or defer.
@@ -162,6 +225,19 @@ One incident shaped the safeguards: a Codex probe fell back through `.env` to th
 
 ## Known limits
 
+SOMA.i is a local proof of concept using anonymous sessions rather than
+durable user accounts. Opportunities are labelled sample examples, not
+live vacancies. Reminder delivery uses console output; production SMS
+delivery, deployment, and live opportunity aggregation are outside scope.
+
+Offline support covers the cached app shell and previously viewed reading
+data. Progress submissions require connectivity. The demo persona and
+product assumptions still need validation with real learners.
+
+On Windows, Playwright may leave its isolated temporary database behind
+when the file remains locked. Teardown retries briefly, then warns without
+failing an otherwise successful run.
+
 - Amina and the retention problem are assumptions. Learner research and measured impact are **not done**; [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) makes no statistical claim.
 - Recommendations remain thin for API Development and Testing. `test_seed_demo_fixture_picks_are_offline_low_data_and_labeled` accepts a minimum of one fixture pick for those skills, versus two for the others.
 - Lesson cards hide reading minutes. “Low data” is a fixed content flag, not a bandwidth measurement; see the card-metadata test and ingestion code.
@@ -170,6 +246,6 @@ One incident shaped the safeguards: a Codex probe fell back through `.env` to th
 - Service-worker caching exists, but offline reload is **not tested**. No offline progress-submission queue is implemented in [sw.js](frontend/public/sw.js).
 - The scheduled task is documented as paused. Copies can become stale, overlapping runs can duplicate alerts or drafts, and live Gmail drafting is **not tested**.
 - Real SMS, accounts, live opportunity aggregation and deployment are outside this capstone. Production privacy/security hardening is **not done**.
-- The current PostgreSQL path and fresh execution of the README commands are **not tested**.
+- The current PostgreSQL path, Python 3.12 environment creation and interactive setup prompts are **not tested**; the fresh setup/startup and automated checks listed above were run on 2026-10-12.
 
 Licensed under the MIT License; see [LICENSE](LICENSE).
