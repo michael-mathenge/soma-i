@@ -1,6 +1,6 @@
 # SOMA.i Codex Accelerator Capstone Spec
 
-## Outcome
+## Original capstone outcome
 
 Strengthen the existing SOMA.i proof of concept around one learner journey: Amina Demo completes a Data Analyst checkpoint and can see how her progress leads to relevant learning and a possible next step. Treat the biography and the 2–3 week drop-off problem in `PRODUCT_BRIEF.md` as assumptions, not research findings. Do not build real SMS delivery, accounts, live opportunity aggregation, or deployment.
 
