@@ -24,7 +24,8 @@ a {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+summary:focus-visible {
   outline: 3px solid #ef9d28;
   outline-offset: 2px;
 }
@@ -177,6 +178,23 @@ progress {
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
+}
+.item-provenance {
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.item-provenance summary {
+  cursor: pointer;
+}
+.item-provenance dl {
+  margin: 0.5rem 0;
+}
+.item-provenance dt {
+  font-weight: 600;
+}
+.item-provenance dd {
+  margin: 0 0 0.5rem;
 }
 fieldset {
   border: 1px solid #d5dfda;

@@ -48,6 +48,14 @@ def item_json(item, done_ids=None, reference_date=None):
         "date_source": item.date_source,
         "age_days": age_days,
         "pathway_keys": item.pathway_keys,
+        "content_date": (
+            item.published_at.date().isoformat()
+            if age_days is not None and age_days >= 0
+            else None
+        ),
+        "source_url": safe_http_link(item.source.url) or "",
+        # A reported licence string is not verified public-reuse permission.
+        "source_reuse_verified": False,
         "source_attribution": item.source.attribution,
         "source_rights": item.source.rights,
         "source_stale": stale["stale"],

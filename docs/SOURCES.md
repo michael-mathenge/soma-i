@@ -1,5 +1,7 @@
 # RSS sources
 
+**Current release status (2026-10-13): C1 is BLOCKED.** The October 8 registry checks below are historical demo evidence, not production rights approval. The dated C1 review at the end governs new public-beta use; none of the 11 registered feeds is cleared for production ingestion or excerpt republication.
+
 The registry is maintained in `backend/content/feeds.json`. The feed checks
 below were run on 8 October 2026 and returned HTTP 200. Counts and dates are
 feed evidence, not a guarantee that a publisher will keep the endpoint
@@ -41,3 +43,75 @@ not article bodies. Feed text is treated as untrusted input.
 None of these sources is locally African. The local layer is the Ajiri
 opportunities story and its sample opportunity data; the RSS content itself
 does not claim local relevance.
+
+## C1 RSS rights verification - 2026-10-13
+
+### Verdict and evidence boundaries
+
+**Desk review recorded; C1 release gate BLOCKED.** All 11 registry entries still declare rights as not stated. Availability and free reading do not establish permission to automate retrieval or republish feed text. No registered feed passes both rights and current operational verification in this task. Do not activate these feeds for the public beta on the strength of the historical HTTP 200 table.
+
+The reviewed publisher/platform groups are freeCodeCamp, Real Python, CSS-Tricks/DigitalOcean and DEV/Forem. Seven freeCodeCamp topic feeds count as one publisher, and DEV tag feeds as one platform, not independent publishers per tag. Author identity and independent editorial provenance need item-level checks. The brief requires at least two independent publishers per pathway and three resources per skill; the spec also requires manual verification across at least three independent publishers. Reviewing three sets of terms is not the same as obtaining three approved sources or proving curriculum coverage.
+
+All source links below were reviewed on 2026-10-13 (Africa/Nairobi). Web research results may use indexed/cached publisher pages. A research-tool error is recorded as such: it is not a measured origin outage or proof that the feed is gone. No fresh parsed entry counts, full-feed dates, HTTP status sweep or scheduled ingestion were obtained. The October 8 counts/dates remain historical.
+
+No publisher contact, signup, licence purchase, scraping, database access or ingestion command occurred. Article/policy pages were read for research; no full articles, images or feed payloads were saved to the repository. No access restriction was bypassed. Application tests: **not tested** (documentation-only).
+
+### Registered endpoint inventory and current decision
+
+A = freeCodeCamp automation/reuse permission unresolved; B = Real Python public-reuse permission unresolved; C = CSS-Tricks current policy/access unresolved; D = DEV default copying/public-display restriction. These are production decisions, not changes to backend/content/feeds.json.
+
+| Registry key | Exact endpoint | Research-tool result on 2026-10-13 | Production decision |
+|---|---|---|---|
+| fcc_data_analysis | [Data Analysis RSS](https://www.freecodecamp.org/news/tag/data-analysis/rss/) | Cache miss; no parsed XML | BLOCKED A |
+| fcc_sql | [SQL RSS](https://www.freecodecamp.org/news/tag/sql/rss/) | Cache miss; no parsed XML | BLOCKED A |
+| fcc_python | [Python RSS](https://www.freecodecamp.org/news/tag/python/rss/) | Unsupported application/xml; no parsed XML | BLOCKED A |
+| fcc_javascript | [JavaScript RSS](https://www.freecodecamp.org/news/tag/javascript/rss/) | Cache miss; no parsed XML | BLOCKED A |
+| fcc_git | [Git RSS](https://www.freecodecamp.org/news/tag/git/rss/) | Cache miss; no parsed XML | BLOCKED A |
+| fcc_css | [CSS RSS](https://www.freecodecamp.org/news/tag/css/rss/) | Cache miss; no parsed XML | BLOCKED A |
+| fcc_html | [HTML RSS](https://www.freecodecamp.org/news/tag/html/rss/) | Cache miss; no parsed XML | BLOCKED A |
+| realpython | [Real Python Atom](https://realpython.com/atom.xml) | Unsupported application/xml; no parsed XML | BLOCKED B |
+| csstricks | [CSS-Tricks RSS](https://css-tricks.com/feed/) | Tool reported 403 Forbidden; no parsed XML | BLOCKED C |
+| devto_sql | [DEV SQL RSS](https://dev.to/feed/tag/sql) | Not accessible through research tool | BLOCKED D |
+| devto_beginners | [DEV beginners RSS](https://dev.to/feed/tag/beginners) | Not accessible through research tool | BLOCKED D |
+
+### Publisher policy findings
+
+**A - freeCodeCamp.** [Terms of Service](https://www.freecodecamp.org/news/terms-of-service/) (page dated May 25, 2018) restrict automated access/monitoring except public search-engine indexing. They retain contributor ownership and leave other permissions to contributors. No RSS-specific exception or permission for SOMA.i public excerpt storage was verified. [Copyright policy](https://www.freecodecamp.org/news/copyright-policy/) describes takedowns, not a blanket reuse licence. The [repository BSD licence](https://github.com/freeCodeCamp/freeCodeCamp/blob/main/LICENSE.md) covers that software; it cannot establish News article rights. The [curriculum announcement](https://www.freecodecamp.org/news/building-a-data-science-curriculum-with-advanced-math-and-machine-learning) describes CC-BY-SA coursework, not a licence for every News contributor article. Require a documented RSS access basis and applicable item/excerpt licence before activation. Preserve original URL, publisher, author and supplied notices; attribution alone cannot cure missing permission. Public News reading is supported by the [publisher's mission statement](https://www.freecodecamp.org/news), but free access is a separate gate.
+
+**B - Real Python.** [Terms](https://realpython.com/terms/) (last updated September 22, 2026) reserve intellectual-property rights and limit copying/display of portions to one's own non-commercial use or ordering. No exception permitting a public SOMA.i excerpt catalogue was verified. A non-commercial project is not automatically the same as personal use. Require an applicable syndication/reuse grant before public storage/display. Attribution should identify Real Python, the named author and original resource URL, with any required notices. [The homepage](https://realpython.com/) mixes articles, courses and membership offerings; a feed inclusion or visible course overview does not prove the full learning resource is freely accessible. No account/payment was used.
+
+**C - CSS-Tricks.** The current [licence endpoint](https://css-tricks.com/license/) and homepage/feed could not be verified through the tool; the licence/feed returned 403. Indexed official [RSS discussion](https://css-tricks.com/is-having-an-rss-feed-just-giving-content-away-for-free/) (February 7, 2020) describes syndication and programmatic post lists. It is not a verified current, item-specific excerpt grant. An indexed [About page](https://css-tricks.com/about/) says the site is powered by DigitalOcean. A third-party copy of an older permissive Chris Coyier licence was found but is not accepted as current publisher evidence. Do not infer article rights from old code/design permission. Require current publisher policy, authorship/licence scope and accessible feed evidence; retain author, CSS-Tricks and the original URL if later approved. Free article access for current items remains unverified.
+
+**D - DEV.** [Terms](https://dev.to/terms) grant temporary personal non-commercial viewing and restrict copying, transfer/mirroring and public display, including non-commercial display. They also reserve brand/logo uses and require contributors to own posting rights. This does not grant SOMA.i a general RSS republication licence. Both tag feeds remain blocked for automated public ingestion/excerpt reuse absent an applicable permission that resolves platform and author scope. An individual author's explicit licence would need verification for that item; it cannot clear all tag-feed entries. Preserve author identity, DEV, source URL, licence/notice evidence and original canonical provenance when supplied. Do not use DEV logos or imply endorsement. A public tag page can be read without login, but article-level English/free access and suitability remain separate checks.
+
+These are conservative project gate decisions based on published evidence, not claims that RSS itself transfers copyright or that a particular statutory exception applies. The 300-character cap is a product maximum, not a legal safe harbour. Unknown, contradictory or inaccessible permission evidence means no copied excerpt; linking/metadata use also needs its own approved basis rather than bypassing a blocked feed.
+
+### Limited manual reading and date checks
+
+| Publisher | Official sample read | Observation and limit |
+|---|---|---|
+| freeCodeCamp | [SQL subqueries article](https://www.freecodecamp.org/news/how-to-work-with-subqueries-in-sql/) | Tool exposed substantive English article content without login; Abdullah Rufai, August 17, 2026. The prerequisite section requires prior SQL knowledge. One article is not a whole-feed access/rights check or beginner curriculum approval. |
+| Real Python | [Python first steps article](https://realpython.com/python-first-steps/) | Tool exposed substantive English article content without login; Leodanis Pozo Ramos, updated October 13, 2025. The separately listed course is a different resource; membership pricing exists. No full-course access claim is made. |
+| DEV | [SQL tag listing](https://dev.to/t/sql) | Public English titles, authors and tags were visible; opening the selected execution-order article failed through the tool. Full article/free access, absolute publication date and excerpt rights were not verified. |
+| CSS-Tricks | [Homepage](https://css-tricks.com/) | Tool reported 403; no current article-access or date claim. |
+
+The sample dates above are within 24 months of this check; that does not establish pathway coverage. Prefer the resource's absolute published/updated date over relative listing ages, and record which supplied it. Fetch time cannot make content fresh. English tag names do not prove English article content (the SQL listing also includes a Spanish course). Paywalled/logged-in destinations, missing/future/conflicting dates and unknown author/licence information require item-level review; older foundations require explicit evergreen classification. No destination-page bandwidth was measured, so the existing low-data flag is not such evidence.
+
+### Historical candidates and licence scope
+
+The rejected/retired table above stays as history. No previously rejected feed is reactivated by C1, and its old staleness date is not a current check. MDN documentation has an [official attribution/licensing policy](https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license) allowing documented reuse under CC-BY-SA with attribution and exceptions; it does not by itself prove rights for the separate MDN Blog feed that historically carried a reserved-rights notice. The attempted MDN Blog and web.dev feed opens were unsuccessful in this tool. Neither is approved as a replacement. MIT News, HubSpot and the other retired variants were not re-fetched or newly rights-cleared; no scraping, paid content or silent substitute was introduced.
+
+### Required handoff to C2/C3 and release
+
+Read-only code evidence: backend/content/feeds.json has 11 entries with rights not stated. backend/content/ingestion.py defines a 300-character summary cap, cleans and stores excerpts in ingest_entries, and processes feed content for word counts. backend/content/management/commands/ingest_feeds.py copies the rights string into source metadata; the inspected path does not gate fetching/storage on verified permission. Thus the historical assertion that feeds supply only summaries must not be assumed universally. A feed can include article bodies even when the database saves only an excerpt.
+
+This documentation does not implement a guard or alter active flags/data. Before any public-beta ingestion, a separately scoped implementation must enforce permission before fetching and before copied text is persisted or exposed. Unknown/revoked permissions must fail closed. C2 needs visible source/author/canonical URL and licence/permission evidence, review date/scope, date provenance and correction/takedown handling. C3 needs an approved endpoint allowlist, bounded requests/size/time/retries, redirects and destination checks, conditional requests where available, and honest failure reporting. A robots file or HTTP 200 cannot substitute for reuse terms.
+
+C1 can pass only when:
+
+- A documented applicable permission clears automated feed access and the specific public metadata/excerpt use, including authors and third-party materials; policy ambiguities are resolved without treating a software licence as an article licence.
+- Permitted endpoints are checked with bounded RSS/Atom requests, parsed successfully and dated; item links/English/free access, author/canonical provenance and staleness are verified. Do not scrape article bodies or work around access controls.
+- At least three independent publishers satisfy the manual source-verification gate; each proposed pathway separately meets its two-publisher/three-resources-per-skill requirements and original checkpoint rules.
+- Unknown/unapproved entries cannot be activated, their text cannot leak through old data or caches, and permission revocation/takedown can be handled without erasing historical provenance.
+
+Publisher clarification/contact, if needed, requires a separately authorized action; no messages were sent. Until those gates pass, C2/C3 may build the approved controls but must not label candidate sources verified. O1 remains blocked independently; C1 research is not deployment or public-release approval.

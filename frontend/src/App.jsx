@@ -328,6 +328,57 @@ function Dashboard({ learner, pathways = [], refresh, t }) {
   );
 }
 
+function ItemProvenance({ item, t }) {
+  const text = (key) => t[key] || en[key];
+  const dateOnly = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+      ? null
+      : date.toISOString().slice(0, 10);
+  };
+  const contentDate =
+    item.date_source === "published" || item.date_source === "updated"
+      ? dateOnly(item.content_date)
+      : null;
+  const retrievedDate = dateOnly(item.fetched_at);
+  return (
+    <details className="item-provenance" lang={t === sw ? "en" : undefined}>
+      <summary>{text("sourceDetails")}</summary>
+      <dl>
+        <dt>{text("attribution")}</dt>
+        <dd>{item.source_attribution || text("attributionUnavailable")}</dd>
+        <dt>
+          {item.date_source === "updated" ? text("updated") : text("published")}
+        </dt>
+        <dd>
+          {contentDate ? (
+            <time dateTime={contentDate}>{contentDate}</time>
+          ) : (
+            text("publicationDateUnavailable")
+          )}
+        </dd>
+        {retrievedDate && (
+          <>
+            <dt>{text("retrieved")}</dt>
+            <dd>
+              <time dateTime={retrievedDate}>{retrievedDate}</time>
+            </dd>
+          </>
+        )}
+        <dt>{text("reportedRights")}</dt>
+        <dd>{item.source_rights || text("rightsUnavailable")}</dd>
+      </dl>
+      <p>{text("reuseUnverified")}</p>
+      {item.source_url && (
+        <a href={item.source_url} target="_blank" rel="noreferrer">
+          {text("sourceFeed")}
+        </a>
+      )}
+    </details>
+  );
+}
+
 function Cards({ items = [], t, doneCallback }) {
   return (
     <div className="cards">
@@ -348,6 +399,7 @@ function Cards({ items = [], t, doneCallback }) {
               .filter(Boolean)
               .join(" · ")}
           </p>
+          <ItemProvenance item={item} t={t} />
           <p>{item.skills.join(" · ")}</p>
           {!item.done && (
             <button onClick={() => doneCallback?.(item.id)}>
