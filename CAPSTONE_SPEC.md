@@ -1,6 +1,6 @@
 # SOMA.i Codex Accelerator Capstone Spec
 
-## Outcome
+## Original capstone outcome
 
 Strengthen the existing SOMA.i proof of concept around one learner journey: Amina Demo completes a Data Analyst checkpoint and can see how her progress leads to relevant learning and a possible next step. Treat the biography and the 2–3 week drop-off problem in `PRODUCT_BRIEF.md` as assumptions, not research findings. Do not build real SMS delivery, accounts, live opportunity aggregation, or deployment.
 
@@ -48,3 +48,22 @@ npm run test:e2e
 ```
 
 The local Scheduled task is additionally checked in the Codex App through the **Automations → SOMA.i Reminder Dispatch → Run now** click path. It must finish without an approval prompt; the Codex App must remain open for the task to run on schedule.
+
+## Approved public-beta release contract - 2026-10-13
+
+The owner-approved public-beta scope in PRODUCT_BRIEF.md supersedes the original capstone's account/deployment/route restrictions for the listed production tasks. The original capstone acceptance history remains above; it is not proof of current production readiness. Canonical pathway code currently defines Data Analyst, Frontend Developer and Backend/Python Developer (backend/pathways/constants.py:1-25), rather than the older pathway names in the historical criteria.
+
+### Required release behavior
+
+- English-first real RSS content with verified source rights, attribution, free access and dates. No scraping or full-article storage. Automatic topic-based pathway publication uses the coverage/curriculum thresholds in PRODUCT_BRIEF.md; original pathways are not exempt and new pathways are not limited to three.
+- Mobile-first catalogue, onboarding, dashboard, reading/checkpoint/result and account/settings journeys. Guest access and skip/restart/switch remain available. Runtime JS/CSS gzip must be strictly below 204800 bytes; the existing budget command is frontend/scripts/report-gzip.js:15-19. UI incremental allowances total 35 KiB and are estimates, not measured results.
+- Optional verified email/password accounts, CSRF-protected guest and account mutations, owner isolation, rate limits, secure cookies, production secrets/headers and a disabled shared demo endpoint. Free account recovery must be verified before release.
+- Offline support caches only the public app shell/catalogue metadata; no personalized dashboard/profile responses or offline completion queue. Cross-user cache isolation and honest offline errors are release gates.
+- Durable PostgreSQL, daily encrypted backups with seven-copy retention, a demonstrated isolated restore and proposed 24-hour RPO/RTO. Six-hour ingestion needs overlap prevention, bounded retries and operational failure reporting, independent of the owner's desktop.
+- A verified zero-new-charge deployment on the existing domain, with explicitly disclosed quota/sleep/cold-start limits. The proposed Render/Neon/GitHub Actions/Brevo/Cloudflare R2 stack is a candidate, not verified eligibility or current pricing. Stop deployment if required free services cannot meet privacy and cost constraints.
+
+### Additional quality gates
+
+Existing pytest, Playwright, database-guard/robustness, lint, build, owner-only Black check and Ruff gates remain required; add a non-writing Prettier check. Tests use fixtures and no live network. Separate manual source verification must cover at least three independent publishers. Proposed axe checks must report zero known WCAG 2.2 AA violations and resolve applicable incomplete findings. Manual checks cover keyboard journeys, focus, announcements, 200% text zoom, 320 px reflow and NVDA. Warm mobile Lighthouse median of three runs must meet performance 90, accessibility 100, best practices 95 and public-page SEO 90; LCP at most 2.5 s, CLS at most 0.1, TBT at most 200 ms. These proposed gates are not tested.
+
+The approved branch/file execution order and gate status live in docs/PLANS.md. No new product behavior or service is claimed implemented by this documentation amendment.
