@@ -56,8 +56,8 @@ Baseline: main at 391881e. The owner approved the evidence-based plan and execut
 
 | Order | Gate | Branch | Risk | Task | Status |
 |---|---|---|---|---|---|
-| 0 | G0 | docs/working-rules | high | Governance scope and database exceptions | documented; PR pending |
-| 1 | O1 | codex/free-tier-verification | high | Verify free-service terms, quotas and cost controls | pending |
+| 0 | G0 | docs/working-rules | high | Governance scope and database exceptions | merged PR #11; verified 2026-10-13 |
+| 1 | O1 | codex/free-tier-verification | high | Verify free-service terms, quotas and cost controls | research complete; release gate BLOCKED; see FREE_TIER_VERIFICATION.md |
 | 2 | C1 | codex/rss-rights-verification | high | Verify candidate feeds and permitted reuse | pending |
 | 3 | C2 | codex/content-provenance | medium | Expose permitted provenance metadata | pending |
 | 4 | C3 | codex/feed-fetch-hardening | high | Harden fetch destination and ingestion failures | pending |
@@ -86,3 +86,11 @@ Baseline: main at 391881e. The owner approved the evidence-based plan and execut
 - Python static document checks returned GOVERNANCE_CONSISTENCY_CHECK=PASS and UTF-8/CRLF/conflict-marker checks passed for all five documents. git diff --check returned DIFF_CHECK_EXIT=0. Application tests: not tested (documentation-only task). All original documents grew; no file was replaced with a shorter document.
 
 - Governance branch synchronization: git fetch origin main reported a298e95. git merge --no-commit --no-ff origin/main merged its newer README/product-brief/validation history without conflicts. Those upstream changes are preserved, not additional application edits. git diff origin/main -- backend frontend returned no tracked application changes; the pre-existing untracked lockfile remains separate.
+
+## O1 free-tier verification - 2026-10-13
+
+- Starting checks confirmed docs/working-rules at 3beee75de1019c0499b8ffda93044a54de148633. GitHub REST PR #11 returned merged=true, closed, merge commit 6c70bf494dd1b7cee4f989f315bd99d267690c7b; git fetch origin main advanced origin/main to that commit and git merge-base --is-ancestor returned exit 0. Created codex/free-tier-verification from origin/main; local main remains 391881e8818eff2cb99255d14b8d2de82054cf6b.
+- Read AGENTS.md, PRODUCT_BRIEF.md, CAPSTONE_SPEC.md, docs/DECISIONS.md and this plan. Only docs/FREE_TIER_VERIFICATION.md and this file change; prior history is retained apart from updating current G0/O1 table status.
+- [O1 evidence and verdict](FREE_TIER_VERIFICATION.md): dated official-source research complete; infrastructure/release gate BLOCKED. R2 has subscription/overage billing without a verified hard zero-charge cutoff. Render production guidance needs resolution; GitHub schedules cannot guarantee six-hour execution. Neon current 1 GB pricing supersedes older 0.5 GB guidance. Brevo transactional approval/domain authentication, all account cost controls, privacy/retention and operational backup/recovery gates remain open.
+- No service accounts, agreements, payment methods, provisioning, DNS changes, email sends, database access or deployments. Application tests: **not tested** (documentation-only); provider operations/account eligibility: **not tested**. No Black, build or application suites run.
+- Documentation validation: strict UTF-8 decoding, CRLF-only line endings and conflict-marker checks returned UTF8_CRLF_MARKERS=PASS for both files. O1_CONSISTENCY_HISTORY_MAIN_LOCKFILE=PASS checked provider/gate/date/evidence markers, preserved origin/main planning prefix except the two status cells, unchanged local main and unchanged SHA256 A453D1D238289C19F6AE1F573F4D253EE084252DD63ACF6FCF190D0967A57F95 for the pre-existing lockfile. git diff --check exited 0. GitHub REST repository metadata returned REPOSITORY_VISIBILITY=public; no account billing settings were inspected.
