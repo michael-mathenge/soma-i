@@ -42,5 +42,16 @@
   "nextNoCheckpoint": "Complete a checkpoint to see your next steps.",
   "loading": "Loading…",
   "error": "Please try again. Your progress is saved when online.",
+  "sourceDetails": "Source details",
+  "attribution": "Attribution",
+  "attributionUnavailable": "Attribution unavailable",
+  "published": "Published",
+  "updated": "Updated",
+  "retrieved": "Retrieved",
+  "publicationDateUnavailable": "Publication date unavailable",
+  "reportedRights": "Reported rights",
+  "rightsUnavailable": "Not stated",
+  "reuseUnverified": "Reuse permission not verified",
+  "sourceFeed": "Source feed",
   "saved": "Settings saved."
 }
