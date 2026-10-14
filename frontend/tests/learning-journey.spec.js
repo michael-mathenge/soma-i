@@ -71,6 +71,7 @@ async function fixtures(page, override) {
       writes.push({ path, body: request.postDataJSON() });
     if (override && (await override(route, path))) return;
     const reads = {
+      "/api/csrf/": { csrf_token: "offline-csrf-fixture" },
       "/api/me/": {
         id: 1,
         chosen_pathway: 1,

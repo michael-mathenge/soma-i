@@ -59,7 +59,10 @@ test("direct /next load shows matched sample opportunities", async ({
   page,
 }) => {
   await page.addInitScript(() => sessionStorage.clear());
-  const response = await page.request.post("/api/demo/");
+  const csrf = await (await page.request.get("/api/csrf/")).json();
+  const response = await page.request.post("/api/demo/", {
+    headers: { "X-CSRFToken": csrf.csrf_token },
+  });
   expect(response.ok()).toBeTruthy();
 
   await page.goto("/next");
