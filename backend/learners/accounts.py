@@ -38,7 +38,7 @@ def account(request):
             {
                 "authenticated": True,
                 "email": identity.email if identity else "",
-                "email_verified": False,
+                "email_verified": bool(identity and identity.email_verified_at),
             }
         )
     if request.method == "DELETE":

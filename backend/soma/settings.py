@@ -57,3 +57,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+SOMA_ACCOUNT_EMAIL_MODE = _environment_values.get("SOMA_ACCOUNT_EMAIL_MODE", "disabled")
+if SOMA_ACCOUNT_EMAIL_MODE not in {"disabled", "memory"} or (
+    _configuration["SOMA_ENV"] not in {"development", "test"}
+    and SOMA_ACCOUNT_EMAIL_MODE != "disabled"
+):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        "SOMA_ACCOUNT_EMAIL_MODE: only disabled or local memory preview is supported"
+    )
