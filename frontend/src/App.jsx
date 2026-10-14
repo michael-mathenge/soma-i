@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Link,
   Navigate,
+  NavLink,
   Route,
   Routes,
   useNavigate,
@@ -98,15 +99,28 @@ function App() {
   };
   return (
     <div className="app-shell">
+      <a
+        className="skip-link"
+        href="#main-content"
+        lang={language === "sw" ? "en" : undefined}
+      >
+        {en.skipToContent}
+      </a>
       <header className="site-header">
         <Link to="/" className="brand" aria-label="SOMA.i home">
           {t.brand}
         </Link>
         <span>{t.tagline}</span>
         <nav aria-label="Main navigation">
-          <Link to="/pathway">{t.dashboard}</Link>
-          <Link to="/items">{t.items}</Link>
-          <Link to="/settings">{t.settings}</Link>
+          <NavLink to="/pathway" end>
+            {t.dashboard}
+          </NavLink>
+          <NavLink to="/items" end>
+            {t.items}
+          </NavLink>
+          <NavLink to="/settings" end>
+            {t.settings}
+          </NavLink>
         </nav>
       </header>
       {error && (
@@ -114,7 +128,7 @@ function App() {
           {t.error}
         </p>
       )}
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Routes>
           <Route
             path="/"
