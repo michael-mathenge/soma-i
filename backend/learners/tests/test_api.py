@@ -101,7 +101,7 @@ def test_seed_demo_is_repeatable_and_opts_amina_into_english_weekly_reminders():
     assert amina.phone == ""
 
 
-def test_seed_demo_upgrades_old_seed_without_losing_amina_progress():
+def test_seed_demo_preserves_legacy_curriculum_and_amina_progress():
     old_pathways = {
         "Data Analyst": ["Spreadsheets", "SQL", "Data Visualisation", "Statistics"],
         "Web Developer": ["HTML", "CSS", "JavaScript", "Accessibility"],
@@ -158,7 +158,10 @@ def test_seed_demo_upgrades_old_seed_without_losing_amina_progress():
     assert frontend.title == CANONICAL_PATHWAYS[1]["title"]
     assert list(
         frontend.steps.order_by("order").values_list("skill__name", flat=True)
-    ) == list(CANONICAL_PATHWAYS[1]["skills"])
+    ) == list(CANONICAL_PATHWAYS[1]["skills"][:4])
+    first_checkpoint.refresh_from_db()
+    assert first_checkpoint.criteria == "Practice"
+    assert first_checkpoint.quiz_json == []
 
     response = APIClient().get("/api/pathways/")
     assert response.status_code == 200
@@ -191,10 +194,7 @@ def test_seed_demo_fixture_picks_are_offline_low_data_and_labeled():
             ).distinct()
             assert (
                 sum(pathway["title"] in item.pathway_keys for item in picks) >= minimum
-            ), (
-                f"{pathway['title']} / {skill_name} should have at least "
-                f"{minimum} picks"
-            )
+            ), f"{pathway['title']} / {skill_name} should have at least {minimum} picks"
 
 
 def test_seed_demo_leaves_live_normalized_match_unchanged_and_adds_missing_skill():
@@ -503,7 +503,7 @@ def test_seed_demo_does_not_strip_live_item_skills():
     )
 
 
-def test_noncanonical_item_skills_are_filtered_without_changing_recommendations(
+def test_non_catalogue_item_skills_are_filtered_without_changing_recommendations(
     seeded,
 ):
     from django.utils import timezone
@@ -783,3 +783,21 @@ def test_quiz_must_have_three_answers_and_due_reminders_are_opt_in_and_bilingual
     assert "Masomo" in message
     assert len("SOMA.i: " + message) <= 160
     assert ReminderLog.objects.filter(learner=learner).count() == 2
+
+
+def test_pathway_list_reads_database_publication_state_instead_of_title_whitelist(
+    seeded,
+):
+    pathway = seeded["Data Analyst"]
+    pathway.enrollment_open = False
+    pathway.save(update_fields=["enrollment_open"])
+    response = APIClient().get("/api/pathways/")
+    assert response.status_code == 200
+    assert [entry["id"] for entry in response.data] == [
+        seeded["Frontend Developer"].pk,
+        seeded["Backend/Python Developer"].pk,
+    ]
+    assert all(
+        set(entry) == {"id", "title", "description", "target_outcome", "locale"}
+        for entry in response.data
+    )
