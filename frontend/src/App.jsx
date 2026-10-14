@@ -6,7 +6,9 @@ import {
   Route,
   Routes,
   useNavigate,
+  useLocation,
   useParams,
+  useSearchParams,
 } from "react-router-dom";
 import api from "./api";
 import en from "./i18n/en.json";
@@ -54,6 +56,7 @@ function getPathways() {
 }
 
 function App() {
+  const loadLearner = useLocation().pathname !== "/catalogue";
   const [language, setLanguage] = useState(
     localStorage.getItem("somai-language") || "en",
   );
@@ -88,8 +91,8 @@ function App() {
     }
   }, []);
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (loadLearner) refresh();
+  }, [refresh, loadLearner]);
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
@@ -112,6 +115,13 @@ function App() {
         </Link>
         <span>{t.tagline}</span>
         <nav aria-label="Main navigation">
+          <NavLink
+            to="/catalogue"
+            end
+            lang={language === "sw" ? "en" : undefined}
+          >
+            {en.catalogue}
+          </NavLink>
           <NavLink to="/pathway" end>
             {t.dashboard}
           </NavLink>
@@ -153,6 +163,7 @@ function App() {
               />
             }
           />
+          <Route path="/catalogue" element={<Catalogue t={t} />} />
           <Route path="/items" element={<ItemList t={t} />} />
           <Route path="/checkpoint/:id" element={<CheckpointPage t={t} />} />
           <Route path="/next" element={<NextPage t={t} />} />
@@ -176,9 +187,152 @@ function App() {
   );
 }
 
+function Catalogue({ t }) {
+  const [params, setParams] = useSearchParams();
+  const query = params.get("q") || "";
+  const rawPage = params.get("page") || "1";
+  const page =
+    /^[1-9]\d{0,5}$/.test(rawPage) || rawPage === "1000000"
+      ? Number(rawPage)
+      : 1;
+  const [search, setSearch] = useState(query);
+  const [state, setState] = useState({ loading: true });
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    setSearch(query);
+  }, [query]);
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    setState({ loading: true });
+    api
+      .get("/pathways/", {
+        params: { page, q: query },
+        signal: controller.signal,
+      })
+      .then(({ data }) => {
+        if (active) setState({ data });
+      })
+      .catch(() => {
+        if (active) setState({ error: true });
+      });
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [query, page, retry]);
+  function navigatePage(next) {
+    setParams({ ...(query ? { q: query } : {}), page: String(next) });
+  }
+  const data = state.data;
+  return (
+    <section className="stack" lang={t === sw ? "en" : undefined}>
+      <div className="panel stack">
+        <h1>{en.catalogue}</h1>
+        <p>{en.catalogueIntro}</p>
+        <form
+          className="toolbar"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setParams({
+              ...(search.trim() ? { q: search.trim() } : {}),
+              page: "1",
+            });
+          }}
+        >
+          <label>
+            {en.searchTopics}
+            <input
+              type="search"
+              maxLength={120}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </label>
+          <button>{en.search}</button>
+          <button
+            type="button"
+            className="quiet"
+            onClick={() => {
+              setSearch("");
+              setParams({ page: "1" });
+            }}
+          >
+            {en.clearSearch}
+          </button>
+        </form>
+      </div>
+      <div aria-live="polite" aria-atomic="true">
+        {state.loading && <p role="status">{en.loading}</p>}
+        {state.error && (
+          <div className="panel">
+            <p role="alert">{en.catalogueError}</p>
+            <button onClick={() => setRetry((value) => value + 1)}>
+              {en.retry}
+            </button>
+          </div>
+        )}
+        {data && (
+          <p role="status">
+            {data.count} {en.topicsFound} | {en.page} {data.page}
+          </p>
+        )}
+      </div>
+      {data && (
+        <>
+          {data.results.length === 0 && <p className="panel">{en.noTopics}</p>}
+          <div className="cards catalogue-cards">
+            {data.results.map((topic) => (
+              <article className="panel stack" key={topic.id}>
+                <h2>{topic.title}</h2>
+                {topic.is_demo && <p className="eyebrow">{en.demoTopic}</p>}
+                <p>{topic.description}</p>
+                <p>{topic.target_outcome}</p>
+                <Link
+                  className="button"
+                  to={`/?pathway=${topic.id}`}
+                  aria-label={`${en.choosePathway}: ${topic.title}`}
+                >
+                  {en.choosePathway}
+                </Link>
+              </article>
+            ))}
+          </div>
+          <nav className="toolbar" aria-label={en.cataloguePages}>
+            <button
+              className="quiet"
+              disabled={page <= 1}
+              onClick={() => navigatePage(page - 1)}
+            >
+              {en.previousPage}
+            </button>
+            <button
+              className="quiet"
+              disabled={!data.has_next}
+              onClick={() => navigatePage(page + 1)}
+            >
+              {en.nextPage}
+            </button>
+          </nav>
+        </>
+      )}
+    </section>
+  );
+}
+
 function Onboarding({ pathways, t, language, setLang, refresh }) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const requested = params.get("pathway");
   const [selected, setSelected] = useState("");
+  useEffect(() => {
+    if (
+      requested &&
+      pathways.some((pathway) => String(pathway.id) === requested)
+    ) {
+      setSelected(requested);
+    }
+  }, [requested, pathways]);
   const [name, setName] = useState("");
   async function start(event) {
     event.preventDefault();

@@ -54,5 +54,19 @@
   "rightsUnavailable": "Not stated",
   "reuseUnverified": "Reuse permission not verified",
   "sourceFeed": "Source feed",
-  "saved": "Settings saved."
+  "saved": "Settings saved.",
+  "catalogue": "Explore topics",
+  "catalogueIntro": "Browse available learning pathways. Demo topics illustrate the learning journey; they are not verified public-beta curricula.",
+  "searchTopics": "Search topics",
+  "search": "Search",
+  "clearSearch": "Clear search",
+  "catalogueError": "Topics could not be loaded. Try again.",
+  "retry": "Retry",
+  "topicsFound": "topics found",
+  "page": "Page",
+  "noTopics": "No topics on this page. Try another search or return to the previous page.",
+  "demoTopic": "Demo topic",
+  "cataloguePages": "Topic catalogue pages",
+  "previousPage": "Previous page",
+  "nextPage": "Next page"
 }
