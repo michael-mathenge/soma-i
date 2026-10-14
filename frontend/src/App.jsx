@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Link,
   Navigate,
@@ -62,6 +62,7 @@ function App() {
   );
   const [learner, setLearner] = useState(null);
   const [pathways, setPathways] = useState([]);
+  const [pathwayStatus, setPathwayStatus] = useState("loading");
   const [error, setError] = useState("");
   const t = language === "sw" ? sw : en;
   const refresh = useCallback(async () => {
@@ -75,17 +76,21 @@ function App() {
       ]);
       setLearner(me.data);
       setPathways(pathwayResponse.data);
+      setPathwayStatus("ready");
       setError("");
     } catch {
       setLearner(null);
       try {
         const pathwayResponse = await pathwayRequest;
         setPathways(pathwayResponse.data);
+        setPathwayStatus("ready");
       } catch {
         try {
           setPathways((await getPathways()).data);
+          setPathwayStatus("ready");
         } catch {
           setPathways([]);
+          setPathwayStatus("error");
         }
       }
     }
@@ -145,6 +150,7 @@ function App() {
             element={
               <Onboarding
                 pathways={pathways}
+                pathwayStatus={pathwayStatus}
                 t={t}
                 language={language}
                 setLang={setLang}
@@ -320,8 +326,110 @@ function Catalogue({ t }) {
   );
 }
 
-function Onboarding({ pathways, t, language, setLang, refresh }) {
+// Reads may be retried explicitly. Writes are never replayed automatically.
+function useJourneyData(endpoint, identity = null) {
+  const [state, setState] = useState({ loading: true, data: null });
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    setState({ loading: true, data: null });
+    api
+      .get(endpoint, { signal: controller.signal })
+      .then(({ data }) => {
+        if (active) setState({ data });
+      })
+      .catch((error) => {
+        if (active)
+          setState({
+            unauthenticated: error.response?.status === 401,
+            error: error.response?.status !== 401,
+            data: null,
+          });
+      });
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [endpoint, identity, attempt]);
+  return {
+    ...state,
+    retry: () => setAttempt((value) => value + 1),
+    update: (transform) =>
+      setState((old) =>
+        old.data == null ? old : { ...old, data: transform(old.data) },
+      ),
+  };
+}
+function useJourneyAction() {
+  const locked = useRef(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState(false);
+  async function run(work) {
+    if (locked.current) return;
+    locked.current = true;
+    setPending(true);
+    setError(false);
+    try {
+      await work();
+    } catch {
+      setError(true);
+    } finally {
+      locked.current = false;
+      setPending(false);
+    }
+  }
+  return { pending, error, run };
+}
+function ActionFeedback({ action, t }) {
+  if (!action.pending && !action.error) return null;
+  return (
+    <div lang={t === sw ? "en" : undefined}>
+      {action.pending && <p role="status">{en.savingProgress}</p>}
+      {action.error && (
+        <p role="alert" className="notice">
+          {en.actionUnconfirmed}
+        </p>
+      )}
+    </div>
+  );
+}
+function JourneyState({ state, title, t }) {
+  return (
+    <section className="panel stack">
+      <h1>{title}</h1>
+      {state.loading ? (
+        <p role="status">{t.loading}</p>
+      ) : state.error ? (
+        <div lang={t === sw ? "en" : undefined}>
+          <p role="alert">{en.journeyLoadError}</p>
+          <button onClick={state.retry}>{en.retry}</button>
+        </div>
+      ) : (
+        <>
+          <p lang={t === sw ? "en" : undefined}>{en.chooseToBegin}</p>
+          <Link className="button" to="/">
+            {t.choosePathway}
+          </Link>
+        </>
+      )}
+    </section>
+  );
+}
+function completedLesson(items, id) {
+  return items.map((item) => (item.id === id ? { ...item, done: true } : item));
+}
+
+function Onboarding({
+  pathways,
+  pathwayStatus,
+  t,
+  language,
+  setLang,
+  refresh,
+}) {
   const navigate = useNavigate();
+  const action = useJourneyAction();
   const [params] = useSearchParams();
   const requested = params.get("pathway");
   const [selected, setSelected] = useState("");
@@ -336,7 +444,7 @@ function Onboarding({ pathways, t, language, setLang, refresh }) {
   const [name, setName] = useState("");
   async function start(event) {
     event.preventDefault();
-    try {
+    action.run(async () => {
       await api.post("/me/", {
         display_name: name || "Learner",
         preferred_language: language,
@@ -344,14 +452,14 @@ function Onboarding({ pathways, t, language, setLang, refresh }) {
       });
       await refresh();
       navigate("/pathway");
-    } catch {}
+    });
   }
   async function demo() {
-    try {
+    action.run(async () => {
       await api.post("/demo/");
       await refresh();
       navigate("/pathway");
-    } catch {}
+    });
   }
   return (
     <section className="panel hero">
@@ -360,7 +468,19 @@ function Onboarding({ pathways, t, language, setLang, refresh }) {
       <p>
         {t.tagline}. {t.intro}
       </p>
-      <form onSubmit={start} className="stack">
+      <p lang={t === sw ? "en" : undefined}>{en.guestJourney}</p>
+      {pathwayStatus === "loading" && <p role="status">{t.loading}</p>}
+      {pathwayStatus === "error" && (
+        <div lang={t === sw ? "en" : undefined}>
+          <p role="alert">{en.catalogueError}</p>
+          <button onClick={refresh}>{en.retry}</button>
+        </div>
+      )}
+      {pathwayStatus === "ready" && !pathways.length && (
+        <p lang={t === sw ? "en" : undefined}>{en.noEnrollableTopics}</p>
+      )}
+      <ActionFeedback action={action} t={t} />
+      <form onSubmit={start} className="stack" aria-busy={action.pending}>
         <label>
           {t.language}
           <select value={language} onChange={(e) => setLang(e.target.value)}>
@@ -391,9 +511,9 @@ function Onboarding({ pathways, t, language, setLang, refresh }) {
             maxLength="80"
           />
         </label>
-        <button disabled={!selected}>{t.start}</button>
+        <button disabled={!selected || action.pending}>{t.start}</button>
       </form>
-      <button className="quiet" onClick={demo}>
+      <button className="quiet" disabled={action.pending} onClick={demo}>
         {t.demo}
       </button>
     </section>
@@ -401,34 +521,23 @@ function Onboarding({ pathways, t, language, setLang, refresh }) {
 }
 
 function Dashboard({ learner, pathways = [], refresh, t }) {
-  const [data, setData] = useState(null);
+  const state = useJourneyData("/dashboard/", learner);
+  const actionState = useJourneyAction();
+  const data = state.data;
   const navigate = useNavigate();
-  useEffect(() => {
-    api
-      .get("/dashboard/")
-      .then((r) => setData(r.data))
-      .catch(() => setData(null));
-  }, [learner]);
-  async function action(name) {
-    try {
-      await api.post(`/pathway/${name}/`);
+  function action(name, payload) {
+    if (name === "restart" && !window.confirm(en.restartConfirm)) return;
+    actionState.run(async () => {
+      await api.post(`/pathway/${name}/`, payload);
       await refresh();
-      setData((await api.get("/dashboard/")).data);
-    } catch {}
+    });
   }
-  if (!data)
-    return (
-      <section className="panel">
-        <h1>{t.dashboard}</h1>
-        <p>Choose a pathway to get started.</p>
-        <Link className="button" to="/">
-          {t.onboarding}
-        </Link>
-      </section>
-    );
+  if (!data?.pathway)
+    return <JourneyState state={state} title={t.dashboard} t={t} />;
   return (
     <section className="stack">
-      <div className="panel">
+      <ActionFeedback action={actionState} t={t} />
+      <div className="panel" aria-busy={actionState.pending}>
         <p className="eyebrow">{localText(t, data.pathway?.target_outcome)}</p>
         <h1>{localText(t, data.pathway?.title)}</h1>
         <label htmlFor="progress">
@@ -445,6 +554,37 @@ function Dashboard({ learner, pathways = [], refresh, t }) {
           {t.remaining}:{" "}
           {data.remaining.map((value) => localText(t, value)).join(", ") || "—"}
         </p>
+        <section className="journey-outline" lang={t === sw ? "en" : undefined}>
+          <h2>{en.yourLearningSteps}</h2>
+          <ol className="journey-steps">
+            {(data.steps || []).map((step, index) => (
+              <li
+                key={`${index}-${step.skill}`}
+                aria-current={
+                  step.skill === data.next_checkpoint?.skill
+                    ? "step"
+                    : undefined
+                }
+              >
+                <strong>{localText(t, step.skill)}</strong>
+                <span>
+                  {step.status === "done"
+                    ? en.stepDone
+                    : step.status === "skipped"
+                      ? en.stepSkipped
+                      : step.skill === data.next_checkpoint?.skill
+                        ? en.stepCurrent
+                        : en.stepRemaining}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+        {!data.next_checkpoint && (
+          <p role="status" lang={t === sw ? "en" : undefined}>
+            {en.pathwayFinished}
+          </p>
+        )}
         {data.next_checkpoint && (
           <div className="callout">
             <h2>
@@ -467,14 +607,14 @@ function Dashboard({ learner, pathways = [], refresh, t }) {
             {t.switch}
             <select
               value={data.pathway?.id || ""}
-              onChange={async (e) => {
-                await api.post("/pathway/switch/", {
-                  pathway_id: e.target.value,
-                });
-                await refresh();
-                setData((await api.get("/dashboard/")).data);
-              }}
+              disabled={actionState.pending}
+              onChange={(e) => action("switch", { pathway_id: e.target.value })}
             >
+              {!pathways.some((p) => p.id === data.pathway.id) && (
+                <option value={data.pathway.id}>
+                  {localText(t, data.pathway.title)}
+                </option>
+              )}
               {pathways.map((p) => (
                 <option key={p.id} value={p.id}>
                   {localText(t, p.title)}
@@ -482,16 +622,39 @@ function Dashboard({ learner, pathways = [], refresh, t }) {
               ))}
             </select>
           </label>
-          <button className="quiet" onClick={() => action("skip")}>
+          <button
+            className="quiet"
+            disabled={actionState.pending || !data.next_checkpoint}
+            onClick={() => action("skip")}
+          >
             {t.skip}
           </button>
-          <button className="quiet" onClick={() => action("restart")}>
+          <button
+            className="quiet"
+            disabled={actionState.pending}
+            onClick={() => action("restart")}
+          >
             {t.restart}
           </button>
         </div>
       </div>
       <h2>{t.lessons}</h2>
-      <Cards items={data.items} t={t} />
+      {!data.items.length && (
+        <p className="panel" lang={t === sw ? "en" : undefined}>
+          {en.noLessons}
+        </p>
+      )}
+      <Cards
+        items={data.items}
+        t={t}
+        disabled={actionState.pending}
+        doneCallback={(id) =>
+          state.update((old) => ({
+            ...old,
+            items: completedLesson(old.items, id),
+          }))
+        }
+      />
     </section>
   );
 }
@@ -547,56 +710,70 @@ function ItemProvenance({ item, t }) {
   );
 }
 
-function Cards({ items = [], t, doneCallback }) {
+function Cards({ items = [], t, doneCallback, disabled = false }) {
+  const action = useJourneyAction();
   return (
-    <div className="cards">
-      {items.map((item) => (
-        <article className="panel item-card" key={item.id}>
-          <h3>
-            {item.url ? (
-              <a href={item.url} target="_blank" rel="noreferrer">
-                {item.title}
-              </a>
-            ) : (
-              item.title
+    <>
+      <ActionFeedback action={action} t={t} />
+      <div className="cards" aria-busy={action.pending}>
+        {items.map((item) => (
+          <article className="panel item-card" key={item.id}>
+            <h3>
+              {item.url ? (
+                <a href={item.url} target="_blank" rel="noreferrer">
+                  {item.title}
+                </a>
+              ) : (
+                item.title
+              )}
+            </h3>
+            <p className="item-summary">{item.summary}</p>
+            <p className="meta">
+              {[item.source, item.is_low_data && t.lowData]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+            <ItemProvenance item={item} t={t} />
+            <p>{item.skills.join(" · ")}</p>
+            {!item.done && doneCallback && (
+              <button
+                disabled={disabled || action.pending}
+                onClick={() =>
+                  action.run(async () => {
+                    await api.post(`/items/${item.id}/done/`);
+                    doneCallback(item.id);
+                  })
+                }
+              >
+                {t.markDone}
+              </button>
             )}
-          </h3>
-          <p className="item-summary">{item.summary}</p>
-          <p className="meta">
-            {[item.source, item.is_low_data && t.lowData]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          <ItemProvenance item={item} t={t} />
-          <p>{item.skills.join(" · ")}</p>
-          {!item.done && (
-            <button onClick={() => doneCallback?.(item.id)}>
-              {t.markDone}
-            </button>
-          )}
-          {item.done && <span>✓ {t.done}</span>}
-        </article>
-      ))}
-    </div>
+            {item.done && <span>✓ {t.done}</span>}
+          </article>
+        ))}
+      </div>
+    </>
   );
 }
 
 function ItemList({ t }) {
-  const [items, setItems] = useState([]);
-  useEffect(() => {
-    api
-      .get("/items/")
-      .then((r) => setItems(r.data))
-      .catch(() => {});
-  }, []);
-  async function done(id) {
-    await api.post(`/items/${id}/done/`);
-    setItems((all) => all.map((i) => (i.id === id ? { ...i, done: true } : i)));
-  }
+  const state = useJourneyData("/items/");
+  if (!state.data) return <JourneyState state={state} title={t.items} t={t} />;
   return (
-    <section>
+    <section className="stack">
       <h1>{t.items}</h1>
-      <Cards items={items} t={t} doneCallback={done} />
+      {!state.data.length && (
+        <p className="panel" lang={t === sw ? "en" : undefined}>
+          {en.noLessons}
+        </p>
+      )}
+      <Cards
+        items={state.data}
+        t={t}
+        doneCallback={(id) =>
+          state.update((items) => completedLesson(items, id))
+        }
+      />
     </section>
   );
 }
@@ -604,37 +781,43 @@ function ItemList({ t }) {
 function CheckpointPage({ t }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [checkpoint, setCheckpoint] = useState(null);
+  const state = useJourneyData("/dashboard/", id);
+  const action = useJourneyAction();
+  const match = state.data?.next_checkpoint;
+  const checkpoint = match && String(match.id) === id ? match : null;
   const [attested, setAttested] = useState(false);
   const [answers, setAnswers] = useState([null, null, null]);
   useEffect(() => {
-    api
-      .get("/dashboard/")
-      .then((r) => {
-        const match = r.data.next_checkpoint;
-        if (match && String(match.id) === id) setCheckpoint(match);
-      })
-      .catch(() => {});
+    setAttested(false);
+    setAnswers([null, null, null]);
   }, [id]);
-  async function complete() {
-    try {
-      await api.post(`/checkpoints/${id}/complete/`, {
-        self_attested: attested,
-        quiz_answers: answers,
-      });
-      navigate("/next");
-    } catch {}
+  function submit(kind) {
+    action.run(async () => {
+      await api.post(
+        `/checkpoints/${id}/${kind}/`,
+        kind === "complete"
+          ? {
+              self_attested: attested,
+              quiz_answers: answers,
+            }
+          : undefined,
+      );
+      navigate(kind === "complete" ? "/next" : "/pathway");
+    });
   }
+  if (state.loading || state.error || state.unauthenticated)
+    return <JourneyState state={state} title={t.checkpoint} t={t} />;
   if (!checkpoint)
     return (
       <section className="panel">
         <h1>{t.checkpoint}</h1>
-        <p>This checkpoint is not available on the current pathway.</p>
+        <p lang={t === sw ? "en" : undefined}>{en.checkpointUnavailable}</p>
         <Link to="/pathway">{t.back}</Link>
       </section>
     );
   return (
-    <section className="panel stack">
+    <section className="panel stack" aria-busy={action.pending}>
+      <ActionFeedback action={action} t={t} />
       <p className="eyebrow">{localText(t, checkpoint.skill)}</p>
       <h1>{checkpointTitle(t, checkpoint.title)}</h1>
       <p>
@@ -644,7 +827,7 @@ function CheckpointPage({ t }) {
       </p>
       <h2>{t.quiz}</h2>
       {checkpoint.quiz.map((q, index) => (
-        <fieldset key={index}>
+        <fieldset key={index} disabled={action.pending}>
           <legend>
             {t === sw
               ? [
@@ -686,23 +869,26 @@ function CheckpointPage({ t }) {
       <label className="radio">
         <input
           type="checkbox"
+          disabled={action.pending}
           checked={attested}
           onChange={(e) => setAttested(e.target.checked)}
         />
         {t.selfAttest}
       </label>
       <button
-        disabled={!attested || answers.some((answer) => answer === null)}
-        onClick={complete}
+        disabled={
+          action.pending ||
+          !attested ||
+          answers.some((answer) => answer === null)
+        }
+        onClick={() => submit("complete")}
       >
         {t.complete}
       </button>
       <button
         className="quiet"
-        onClick={async () => {
-          await api.post(`/checkpoints/${id}/skip/`);
-          navigate("/pathway");
-        }}
+        disabled={action.pending}
+        onClick={() => submit("skip")}
       >
         {t.skip}
       </button>
@@ -712,20 +898,9 @@ function CheckpointPage({ t }) {
 }
 
 function NextPage({ t }) {
-  const [data, setData] = useState(null);
-  useEffect(() => {
-    api
-      .get("/next/")
-      .then((response) => setData(response.data))
-      .catch(() => setData({ available: false, reason: "no_learner" }));
-  }, []);
-  if (data === null)
-    return (
-      <section className="panel">
-        <h1>{t.whatsNext}</h1>
-        <p>{t.loading}</p>
-      </section>
-    );
+  const state = useJourneyData("/next/");
+  const data = state.data;
+  if (!data) return <JourneyState state={state} title={t.whatsNext} t={t} />;
   if (!data.unlocked_skill)
     return (
       <section className="panel stack">
@@ -763,8 +938,27 @@ function NextPage({ t }) {
         </Link>
       </div>
       <h2>{t.lessons}</h2>
-      <Cards items={data?.items || []} t={t} />
+      {!data.items?.length && (
+        <p className="panel" lang={t === sw ? "en" : undefined}>
+          {en.noLessons}
+        </p>
+      )}
+      <Cards
+        items={data?.items || []}
+        t={t}
+        doneCallback={(id) =>
+          state.update((old) => ({
+            ...old,
+            items: completedLesson(old.items || [], id),
+          }))
+        }
+      />
       <h2>{t.opportunities}</h2>
+      {!data.opportunities?.length && (
+        <p className="panel" lang={t === sw ? "en" : undefined}>
+          {en.noOpportunities}
+        </p>
+      )}
       <div className="cards">
         {(data?.opportunities || []).map((op) => (
           <OpportunityCard key={op.id} op={op} t={t} />
