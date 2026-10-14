@@ -16,8 +16,9 @@ from content.matching import load_config, plain_text
 from content.models import Item, Skill, Source
 from learners.models import LearnerProfile
 from opportunities.models import Opportunity
+from pathways.catalogue import ensure_demo_pathway
 from pathways.constants import CANONICAL_PATHWAYS, FIXTURE_FEEDS
-from pathways.models import Checkpoint, CheckpointRecord, Pathway, PathwaySkill
+from pathways.models import CheckpointRecord, Pathway
 
 FIXED_SAMPLE_DATE = datetime(2026, 1, 1, tzinfo=UTC)
 LEGACY_FRONTEND_TITLE = "Web Developer"
@@ -93,34 +94,8 @@ class Command(BaseCommand):
         seeded = {}
         for pathway_config in CANONICAL_PATHWAYS:
             title = pathway_config["title"]
-            pathway, _ = _update_first_or_create(
-                Pathway,
-                lookup={"title": title},
-                defaults={
-                    "description": pathway_config["description"],
-                    "target_outcome": pathway_config["target_outcome"],
-                    "locale": "KE",
-                },
-            )
+            pathway = ensure_demo_pathway(pathway_config, QUIZ)
             seeded[title] = pathway
-            for order, name in enumerate(pathway_config["skills"], start=1):
-                step, _ = PathwaySkill.objects.update_or_create(
-                    pathway=pathway,
-                    order=order,
-                    defaults={"skill": skill_by_name[name]},
-                )
-                Checkpoint.objects.update_or_create(
-                    pathway_skill=step,
-                    defaults={
-                        "title": f"{name} checkpoint",
-                        "criteria": f"Complete a short practice task using {name} and reflect on what you learned.",
-                        "unlocks_text": (
-                            f"You can now use {name} as part of your "
-                            f"{pathway_config['target_outcome']} journey."
-                        ),
-                        "quiz_json": QUIZ,
-                    },
-                )
 
         sample_source, _ = Source.objects.update_or_create(
             url=SAMPLE_SOURCE_URL,

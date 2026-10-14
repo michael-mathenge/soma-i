@@ -9,13 +9,9 @@ from content.models import Item
 from learners.models import LearnerProfile
 from opportunities.matching import match_score
 from opportunities.models import Opportunity
-from pathways.constants import CANONICAL_PATHWAYS
+from pathways.catalogue import catalogue_skill_ids, enrollable_pathways
 from pathways.logic import completed_items, progress_for, recommendations
-from pathways.models import Checkpoint, CheckpointRecord, ItemRecord, Pathway
-
-CANONICAL_SKILL_NAMES = frozenset(
-    skill_name for pathway in CANONICAL_PATHWAYS for skill_name in pathway["skills"]
-)
+from pathways.models import Checkpoint, CheckpointRecord, ItemRecord
 
 
 def item_json(item, done_ids=None, reference_date=None):
@@ -37,7 +33,7 @@ def item_json(item, done_ids=None, reference_date=None):
         "published_at": item.published_at.isoformat(),
         "source": item.source.name,
         "skills": list(
-            item.skills.filter(name__in=CANONICAL_SKILL_NAMES)
+            item.skills.filter(pk__in=catalogue_skill_ids())
             .order_by("pk")
             .values_list("name", flat=True)
         ),
@@ -99,11 +95,6 @@ def health(request):
 
 @api_view(["GET"])
 def pathways_list(request):
-    canonical = {pathway["title"]: None for pathway in CANONICAL_PATHWAYS}
-    for pathway in Pathway.objects.filter(title__in=canonical).order_by("pk"):
-        if canonical[pathway.title] is None:
-            canonical[pathway.title] = pathway
-
     return Response(
         [
             {
@@ -113,9 +104,7 @@ def pathways_list(request):
                 "target_outcome": p.target_outcome,
                 "locale": p.locale,
             }
-            for title in canonical
-            for p in [canonical[title]]
-            if p is not None
+            for p in enrollable_pathways()
         ]
     )
 
@@ -142,7 +131,9 @@ def demo_session(request):
 @api_view(["POST", "GET", "PATCH", "DELETE"])
 def me(request):
     if request.method == "POST":
-        pathway = get_object_or_404(Pathway, pk=request.data.get("pathway_id"))
+        pathway = get_object_or_404(
+            enrollable_pathways(), pk=request.data.get("pathway_id")
+        )
         language = request.data.get("preferred_language", "en")
         if language not in ("en", "sw"):
             return Response({"detail": "Language must be en or sw."}, status=400)
@@ -391,7 +382,7 @@ def pathway_action(request, action):
         return error
     if action == "switch":
         learner.chosen_pathway = get_object_or_404(
-            Pathway, pk=request.data.get("pathway_id")
+            enrollable_pathways(), pk=request.data.get("pathway_id")
         )
         learner.save(update_fields=["chosen_pathway"])
         return Response({"pathway_id": learner.chosen_pathway_id})
