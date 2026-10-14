@@ -1,4 +1,4 @@
-"""Catalogue operations. Live coverage approval belongs to C5, not this module.
+"""Catalogue operations. Live coverage approval is implemented by pathways.discovery.
 
 Pathway IDs remain revision IDs, so chosen_pathway and checkpoint records need
 no reassignment. Supported writes use ordinary saves; bulk mutations are blocked.
@@ -6,10 +6,12 @@ Raw SQL can bypass model safeguards and is not a publication interface.
 """
 
 from copy import deepcopy
+from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
+from django.utils import timezone
 from django.utils.text import slugify
 
 from content.models import Skill
@@ -17,11 +19,22 @@ from pathways.models import Catalogue, Checkpoint, Pathway, PathwaySkill
 
 
 def enrollable_pathways():
-    return Pathway.objects.filter(
-        catalogue__isnull=False,
-        status="published",
-        enrollment_open=True,
-    ).order_by("catalogue_id", "pk")
+    return (
+        Pathway.objects.filter(
+            catalogue__isnull=False,
+            status="published",
+            enrollment_open=True,
+        )
+        .filter(
+            Q(is_demo=True)
+            | Q(
+                discovery_managed=True,
+                coverage_checked_at__gte=timezone.now() - timedelta(days=1),
+                coverage_checked_at__lte=timezone.now(),
+            )
+        )
+        .order_by("catalogue_id", "pk")
+    )
 
 
 def catalogue_skill_ids():

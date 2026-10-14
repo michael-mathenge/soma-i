@@ -26,6 +26,7 @@ class CurriculumQuerySet(models.QuerySet):
             "pathway": "pk",
             "pathwayskill": "pathway_id",
             "checkpoint": "pathway_skill__pathway_id",
+            "pathwayresource": "pathway_skill__pathway_id",
         }[self.model._meta.model_name]
         pathways = Pathway.objects.filter(pk__in=self.values_list(field, flat=True))
         if (
@@ -69,6 +70,11 @@ class Pathway(models.Model):
     )
     enrollment_open = models.BooleanField(default=False)
     is_demo = models.BooleanField(default=False)
+    discovery_managed = models.BooleanField(default=False)
+    publication_key = models.CharField(max_length=64, blank=True, default="")
+    coverage_checked_at = models.DateTimeField(null=True, blank=True)
+    coverage_failed_since = models.DateTimeField(null=True, blank=True)
+    coverage_report = models.JSONField(default=dict, blank=True)
 
     title = models.CharField(max_length=120)
     description = models.TextField()
@@ -114,6 +120,8 @@ class Pathway(models.Model):
                 "target_outcome",
                 "locale",
                 "is_demo",
+                "discovery_managed",
+                "publication_key",
             )
             if any(
                 getattr(previous, field) != getattr(self, field) for field in frozen
@@ -232,3 +240,44 @@ class ItemRecord(models.Model):
 
     class Meta:
         unique_together = [("learner", "item")]
+
+
+class PathwayResource(models.Model):
+    objects = CurriculumQuerySet.as_manager()
+
+    pathway_skill = models.ForeignKey(
+        PathwaySkill, on_delete=models.CASCADE, related_name="resources"
+    )
+    item = models.ForeignKey(
+        "content.Item", on_delete=models.PROTECT, related_name="curriculum_links"
+    )
+    content_fingerprint = models.CharField(max_length=64)
+    evidence_snapshot = models.JSONField(default=dict)
+
+    def save(self, *args, **kwargs):
+        saved_ids = (
+            type(self)
+            .objects.filter(pk=self.pk)
+            .values_list("pathway_skill__pathway_id", flat=True)
+        )
+        require_draft([self.pathway_skill.pathway_id, *saved_ids])
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return type(self).objects.filter(pk=self.pk).delete()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["pathway_skill", "item"], name="unique_step_resource"
+            )
+        ]
+
+
+class CoverageObservation(models.Model):
+    pathway = models.ForeignKey(
+        Pathway, on_delete=models.PROTECT, related_name="coverage_observations"
+    )
+    observed_at = models.DateTimeField()
+    healthy = models.BooleanField()
+    report = models.JSONField(default=dict)

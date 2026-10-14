@@ -49,6 +49,7 @@ class Item(models.Model):
     )
     word_count = models.PositiveIntegerField(null=True, blank=True)
     pathway_keys = models.JSONField(default=list, blank=True)
+    topic_tags = models.JSONField(default=list, blank=True)
     source = models.ForeignKey(Source, on_delete=models.PROTECT, related_name="items")
     language = models.CharField(max_length=8, default="en")
     skills = models.ManyToManyField(Skill, related_name="items", blank=True)
@@ -57,3 +58,22 @@ class Item(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class ResourceReview(models.Model):
+    """Owner-reviewed evidence; feed text cannot grant itself release eligibility."""
+
+    item = models.OneToOneField(
+        Item, on_delete=models.CASCADE, related_name="release_review"
+    )
+    content_fingerprint = models.CharField(max_length=64)
+    reviewed_by = models.CharField(max_length=120)
+    reviewed_on = models.DateField()
+    expires_on = models.DateField()
+    evidence_url = models.URLField(max_length=2048)
+    author = models.CharField(max_length=255)
+    publisher_key = models.SlugField(max_length=120)
+    free_access = models.BooleanField(default=False)
+    english_confirmed = models.BooleanField(default=False)
+    evergreen = models.BooleanField(default=False)
+    evergreen_reason = models.TextField(blank=True)

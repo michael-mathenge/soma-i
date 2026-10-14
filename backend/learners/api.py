@@ -10,7 +10,12 @@ from learners.models import LearnerProfile
 from opportunities.matching import match_score
 from opportunities.models import Opportunity
 from pathways.catalogue import catalogue_skill_ids, enrollable_pathways
-from pathways.logic import completed_items, progress_for, recommendations
+from pathways.logic import (
+    completed_items,
+    progress_for,
+    recommendations,
+    reviewed_pathway_recommendations,
+)
 from pathways.models import Checkpoint, CheckpointRecord, ItemRecord
 
 
@@ -74,6 +79,12 @@ def checkpoint_json(checkpoint):
             for question in checkpoint.quiz_json
         ],
     }
+
+
+def pathway_picks(learner, skill, limit):
+    if learner.chosen_pathway and learner.chosen_pathway.is_demo:
+        return recommendations(skill, limit)
+    return reviewed_pathway_recommendations(learner.chosen_pathway, skill, limit)
 
 
 def current_learner(request):
@@ -192,7 +203,7 @@ def dashboard(request):
         return error
     state = progress_for(learner)
     done_ids = completed_items(learner)
-    picks_by_skill = [recommendations(skill, 3) for skill in state["remaining"]]
+    picks_by_skill = [pathway_picks(learner, skill, 3) for skill in state["remaining"]]
     recommended = []
     for index in range(max((len(items) for items in picks_by_skill), default=0)):
         recommended.extend(
@@ -249,7 +260,7 @@ def items_list(request):
     done_ids = completed_items(learner)
     items, seen = [], set()
     for skill in state["remaining"]:
-        for item in recommendations(skill, 10):
+        for item in pathway_picks(learner, skill, 10):
             if item.pk not in seen:
                 items.append(item)
                 seen.add(item.pk)
@@ -328,7 +339,7 @@ def what_next(learner, checkpoint):
     recommended = []
     seen_items = set()
     for skill in state["remaining"]:
-        for item in recommendations(skill, 3):
+        for item in pathway_picks(learner, skill, 3):
             if item.pk not in seen_items:
                 recommended.append(item)
                 seen_items.add(item.pk)
@@ -337,7 +348,7 @@ def what_next(learner, checkpoint):
         if len(recommended) == 3:
             break
     if len(recommended) < 2:
-        for item in recommendations(unlocked, 3):
+        for item in pathway_picks(learner, unlocked, 3):
             if item.pk not in seen_items:
                 recommended.append(item)
                 seen_items.add(item.pk)

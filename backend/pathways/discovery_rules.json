@@ -1,0 +1,362 @@
+{
+  "version": 1,
+  "publishers": {},
+  "topics": [
+    {
+      "slug": "data-analyst",
+      "title": "Data analysis foundations",
+      "description": "Build practical foundations through linked English resources and original practice.",
+      "target_outcome": "Complete and explain the listed practice tasks.",
+      "aliases": [
+        "data analysis",
+        "data analytics",
+        "sql",
+        "spreadsheets",
+        "statistics"
+      ],
+      "steps": [
+        {
+          "skill": "Spreadsheets",
+          "aliases": ["spreadsheet", "spreadsheets", "excel", "google sheets"],
+          "requires": [],
+          "title": "Spreadsheets practice",
+          "criteria": "Create a five-row household budget with a SUM total. Change one expense and verify the total updates.",
+          "unlocks_text": "Explain how a formula differs from a typed total.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this Spreadsheets practice?",
+              "options": [
+                "A formula recalculates when its inputs change.",
+                "A typed total always updates itself."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your Spreadsheets result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your Spreadsheets reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "SQL",
+          "aliases": ["sql", "sql query", "relational database"],
+          "requires": ["Spreadsheets"],
+          "title": "SQL practice",
+          "criteria": "Write SELECT, WHERE and GROUP BY queries for a small fictional sales table. Compare each result with a hand calculation.",
+          "unlocks_text": "Explain which rows pass your WHERE condition.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this SQL practice?",
+              "options": [
+                "WHERE filters rows before grouping.",
+                "WHERE invents missing records."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your SQL result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your SQL reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Statistics",
+          "aliases": ["statistics", "statistical", "descriptive statistics"],
+          "requires": ["SQL"],
+          "title": "Statistics practice",
+          "criteria": "Calculate the mean and median of five values, then add an outlier and explain how both measures change.",
+          "unlocks_text": "Choose a summary measure and explain its limits.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this Statistics practice?",
+              "options": [
+                "An outlier can change the mean more than the median.",
+                "The mean and median must always be equal."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your Statistics result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your Statistics reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "frontend-developer",
+      "title": "Accessible web foundations",
+      "description": "Build practical foundations through linked English resources and original practice.",
+      "target_outcome": "Complete and explain the listed practice tasks.",
+      "aliases": [
+        "frontend",
+        "front-end",
+        "web development",
+        "html",
+        "css",
+        "accessibility"
+      ],
+      "steps": [
+        {
+          "skill": "HTML",
+          "aliases": ["html", "semantic markup"],
+          "requires": [],
+          "title": "HTML practice",
+          "criteria": "Build a page with a heading hierarchy, a navigation link and a labelled input. Explain the purpose of each semantic element.",
+          "unlocks_text": "Identify the accessible name of your input.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this HTML practice?",
+              "options": [
+                "A label tells people what an input requests.",
+                "A placeholder replaces every label."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your HTML result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your HTML reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "CSS",
+          "aliases": ["css", "web layout", "flexbox", "css grid"],
+          "requires": ["HTML"],
+          "title": "CSS practice",
+          "criteria": "Style that page with a flexible layout. Check it at 320px and 960px and remove horizontal overflow.",
+          "unlocks_text": "Explain one layout change at the narrow width.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this CSS practice?",
+              "options": [
+                "Flexible widths help a layout fit a narrow viewport.",
+                "A fixed desktop width fits every screen."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your CSS result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your CSS reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Accessibility",
+          "aliases": ["accessibility", "accessible", "wcag"],
+          "requires": ["CSS"],
+          "title": "Accessibility practice",
+          "criteria": "Navigate the page using only a keyboard. Record focus order and fix one unclear label or invisible focus indicator.",
+          "unlocks_text": "Describe the issue and how you checked the fix.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this Accessibility practice?",
+              "options": [
+                "Visible focus helps keyboard users locate their position.",
+                "Keyboard users do not need a focus indicator."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your Accessibility result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your Accessibility reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "backendpython-developer",
+      "title": "Python service foundations",
+      "description": "Build practical foundations through linked English resources and original practice.",
+      "target_outcome": "Complete and explain the listed practice tasks.",
+      "aliases": ["backend", "python", "rest api", "api development", "pytest"],
+      "steps": [
+        {
+          "skill": "Python",
+          "aliases": ["python"],
+          "requires": [],
+          "title": "Python practice",
+          "criteria": "Write a function that validates a list of numbers and returns their total. Show a valid input, an empty list and an invalid input.",
+          "unlocks_text": "Explain how your function handles invalid input.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this Python practice?",
+              "options": [
+                "Validate an input before calculating with it.",
+                "Assume every input is valid."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your Python result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your Python reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "API Development",
+          "aliases": [
+            "api development",
+            "rest api",
+            "api endpoint",
+            "api design"
+          ],
+          "requires": ["Python"],
+          "title": "API Development practice",
+          "criteria": "Describe GET and POST endpoints for a fictional reading list. Write example requests, responses and a validation error without using personal data.",
+          "unlocks_text": "Explain how the error response helps a client correct its request.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this API Development practice?",
+              "options": [
+                "An HTTP method communicates the request intent.",
+                "Every operation must use the same HTTP method."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your API Development result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your API Development reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Testing",
+          "aliases": [
+            "testing",
+            "unit testing",
+            "pytest",
+            "test-driven development"
+          ],
+          "requires": ["API Development"],
+          "title": "Testing practice",
+          "criteria": "Write tests for the number-total function covering normal, empty and invalid inputs. Introduce a deliberate bug and show which test detects it.",
+          "unlocks_text": "Explain what the failing test demonstrates.",
+          "quiz_json": [
+            {
+              "question": "Which statement helps with this Testing practice?",
+              "options": [
+                "A boundary case can reveal a bug missed by a normal example.",
+                "Passing one normal example proves every input works."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "How should you check your Testing result?",
+              "options": [
+                "Compare the result with the stated practice criteria.",
+                "Assume it is correct without checking."
+              ],
+              "answer": 0
+            },
+            {
+              "question": "What should your Testing reflection record?",
+              "options": [
+                "An example, its result and a remaining limitation.",
+                "An unsupported claim of job readiness."
+              ],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
