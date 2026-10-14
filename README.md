@@ -10,7 +10,7 @@ The intended journey connects a short reading task to a checkpoint, an unlocked 
 
 ## Quick start
 
-Use Windows PowerShell, Python 3.12 and Node 20 or newer. The contributor guide specifies these versions; [the validation log](docs/PLANS.md) also records checks with Python 3.13.7.
+Use Windows PowerShell, Python 3.12.15, Node 24.21.0 LTS and pnpm 12.11.2, pinned in [.python-version](.python-version), [.node-version](.node-version) and [frontend/package.json](frontend/package.json). Python 3.12 remains the contributor-guide baseline; the exact Node pin replaces the older minimum for this task. Earlier Python 3.13.7/Node 22 validation remains historical in [the log](docs/PLANS.md).
 
 Configuration names are `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DATABASE_URL` and `SOMA_SENDER`. Optional sandbox configuration uses `AFRICASTALKING_USERNAME` and `AFRICASTALKING_API_KEY`; delivery is stubbed. See [.env.example](.env.example), [settings](backend/soma/settings.py) and [senders](backend/engagement/senders.py). No provider credentials are needed for the console demo.
 
@@ -21,7 +21,7 @@ git clone https://github.com/michael-mathenge/soma-i.git
 Set-Location soma-i
 ```
 
-Install Python 3.12 and Node 20 or newer. Check the installed versions, then run setup from the repository root:
+Install the pinned Node version from [official Node downloads](https://nodejs.org/en/download). An existing Python with pip bootstraps uv 0.13.1 into ignored local tooling below; uv downloads portable Python 3.12.15 without Windows registration or a global interpreter change. See [uv Python distribution provenance](https://docs.astral.sh/uv/concepts/python-versions/#managed-python-distributions). Check versions and run setup from the repository root:
 
 Create an isolated SQLite database under the OS temporary directory. Stop if temporary-directory creation fails; do not use a repository database. Keep this setup window open so the backend window can reuse the printed database URL. Development settings come from `.env`; the explicit `DATABASE_URL` below overrides its database setting. Copy `.env.example` only when `.env` does not already exist.
 
@@ -31,10 +31,17 @@ Create an isolated SQLite database under the OS temporary directory. Stop if tem
 $ErrorActionPreference = 'Stop'
 python --version
 node --version
-py -3.12 -m venv .venv
+python -m pip install --target .local/tooling uv==0.13.1
+$setupUv = Join-Path (Get-Location) '.local/tooling/bin/uv.exe'
+& $setupUv python install 3.12.15 --install-dir .local/python --no-bin --no-registry
+if ($LASTEXITCODE -ne 0) { throw "Portable Python installation failed." }
+& $setupUv venv .venv --python .local/python/cpython-3.12.15-windows-x86_64-none/python.exe --seed
+if ($LASTEXITCODE -ne 0) { throw "Virtual environment creation failed." }
 ./.venv/Scripts/Activate.ps1
 python -c "import sys; assert sys.prefix != sys.base_prefix, 'Project virtual environment is not active'; print(sys.executable)"
-python -m pip install -r requirements.txt
+python -c "import sys; assert sys.version_info[:3] == (3, 12, 15), 'Use the pinned Python runtime'"
+python -m pip install --require-hashes -r requirements.lock
+if ($LASTEXITCODE -ne 0) { throw "Locked dependency installation failed." }
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 $setupDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("somai-setup-" + [guid]::NewGuid())
 try { New-Item -ItemType Directory -Path $setupDirectory -ErrorAction Stop | Out-Null } catch { throw "Temporary database directory could not be created; stop setup." }
@@ -65,8 +72,8 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = Read-Host "Enter the full path to the cloned soma-i repository"
 Set-Location -LiteralPath $repositoryRoot -ErrorAction Stop
 Set-Location frontend
-npm install
-npm run dev
+npx --yes pnpm@12.11.2 install --frozen-lockfile
+npx --yes pnpm@12.11.2 run dev
 ```
 
 In a backend PowerShell window, select the same repository root and paste the exact `DATABASE_URL` printed by setup when prompted. Verify that its temporary database exists before starting Django.
@@ -106,13 +113,13 @@ For frontend checks, use the frontend window in `frontend`. Playwright creates i
 **PowerShell — frontend checks with installed Chrome**
 
 ```powershell
-npm run test:e2e:guard
-npm run test:e2e:robustness
-npm run lint
-npm run build
+npx --yes pnpm@12.11.2 run test:e2e:guard
+npx --yes pnpm@12.11.2 run test:e2e:robustness
+npx --yes pnpm@12.11.2 run lint
+npx --yes pnpm@12.11.2 run build
 netstat -ano -p tcp | Select-String ':8127 |:4177 '
 $env:PLAYWRIGHT_CHANNEL = 'chrome'
-npm run test:e2e
+npx --yes pnpm@12.11.2 exec playwright test --timeout=60000
 ```
 
 `PLAYWRIGHT_CHANNEL=chrome` uses installed Google Chrome. To use Playwright's Chromium instead, remove the channel variable and install that browser if it is missing:
@@ -121,8 +128,8 @@ npm run test:e2e
 
 ```powershell
 Remove-Item Env:PLAYWRIGHT_CHANNEL -ErrorAction SilentlyContinue
-npx playwright install chromium
-npm run test:e2e
+npx --yes pnpm@12.11.2 exec playwright install chromium
+npx --yes pnpm@12.11.2 exec playwright test --timeout=60000
 ```
 
 On Windows, a locked temporary database can produce a cleanup warning after teardown retries; an otherwise successful run still exits successfully.
@@ -248,6 +255,16 @@ failing an otherwise successful run.
 - Service-worker caching exists, but offline reload is **not tested**. No offline progress-submission queue is implemented in [sw.js](frontend/public/sw.js).
 - The scheduled task is documented as paused. Copies can become stale, overlapping runs can duplicate alerts or drafts, and live Gmail drafting is **not tested**.
 - Real SMS, accounts, live opportunity aggregation and deployment are outside this capstone. Production privacy/security hardening is **not done**.
-- The current PostgreSQL path, Python 3.12 environment creation and interactive setup prompts are **not tested**; the fresh setup/startup and automated checks listed above were run on 2026-10-12.
+- At the 2026-10-12 checkpoint, PostgreSQL, Python 3.12 environment creation and interactive setup prompts were **not tested**. P1 below adds isolated Python 3.12 validation; hosted PostgreSQL and interactive fresh-clone prompts remain not tested. The earlier setup/startup evidence stays historical.
 
 Licensed under the MIT License; see [LICENSE](LICENSE).
+
+
+## P1 reproducible dependency baseline - 2026-10-14
+
+- Runtime pins: Python 3.12.15 (security-maintenance line), Node 24.21.0 LTS and pnpm 12.11.2. Windows x64 execution is validated; Linux/macOS, hosted PostgreSQL and deployment are not tested by P1. The guide's Python 3.12 baseline is retained. Portable Python comes from Astral python-build-standalone, not an official python.org Windows installer. The local tooling bootstrap requires an existing Python/pip; it does not install uv or Python globally. Existing environments should be preserved until a separately created environment passes checks.
+- requirements.txt pins direct requirements. requirements.lock pins resolved transitive versions and SHA256 hashes, generated by uv 0.13.1 with Python 3.12 universal resolution. That resolution includes platform markers/artifact hashes; it is not execution evidence for other platforms. Install from the hash-checked lock, not a new unconstrained resolution. Django moves from unsupported 5.1 to 5.2.18 LTS. Black stays pinned as a contributor tool but was not run; formatting remains owner-controlled.
+- The tracked pnpm-lock.yaml is the frontend lock of record. Direct versions and package-manager version are exact; engineStrict and strictPeerDependencies reject mismatches. Use the no-global-install npx command above; its version bootstrap was checked on Node 24.21.0. Do not use npm install in frontend, regenerate package-lock.json or commit the pre-existing untracked npm lock. P1 validation used ignored isolated copies rather than upgrading the existing .venv. The validation log records a separate concurrent npm install in the original frontend; its untracked lockfile is excluded from this PR.
+- pnpm 12 recorded exact release-age exceptions for @playwright/test, playwright and playwright-core 1.64.1 during resolution. These are narrow, visible pins for the current Playwright release, not an exemption for all future versions. The frozen install, advisory check and browser suite are recorded in docs/PLANS.md. An advisory check cannot establish that a package is free of undisclosed vulnerabilities.
+- ESLint 10 keeps the existing rules-of-hooks error and exhaustive-deps warning explicitly. The hooks plugin's newer React Compiler diagnostics are not silently added as part of a dependency-only change. Application source/tests are unchanged. Vite's explicit es2020 target/proxy is retained. CSS minification is disabled to preserve authored custom-property token values after Vite 8's default minifier shortened six-digit white to #fff, which the unchanged contrast test cannot parse. This preserves the existing palette/test contract; browser compatibility beyond the exercised Chrome suite is not claimed.
+- Re-lock deliberately after reviewing support/security guidance, then rerun validation. Sources checked 2026-10-14: [Django support](https://www.djangoproject.com/download/), [Python support/releases](https://www.python.org/downloads/), [Node releases](https://nodejs.org/en/about/previous-releases), [Vite support](https://vite.dev/releases), [Vite migration](https://vite.dev/guide/migration), [ESLint 10 migration](https://eslint.org/docs/latest/use/migrate-to-10.0.0), [pnpm frozen installation](https://pnpm.io/cli/install) and [uv locking](https://docs.astral.sh/uv/pip/compile/). Exact package releases were checked through PyPI/npm metadata. Full results, limits and unchanged historical setup evidence are in docs/PLANS.md; P1 does not clear O1/C1 or authorize release.

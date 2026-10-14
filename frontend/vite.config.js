@@ -4,5 +4,6 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: { proxy: { "/api": "http://127.0.0.1:8000" } },
-  build: { target: "es2020" },
+  // Keep authored custom-property values intact across Vite 8's CSS minifier change.
+  build: { target: "es2020", cssMinify: false },
 });
