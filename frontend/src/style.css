@@ -429,3 +429,10 @@ legend {
     border-color: GrayText;
   }
 }
+
+.catalogue-cards article {
+  min-width: 0;
+}
+.catalogue-cards .button {
+  margin-top: auto;
+}

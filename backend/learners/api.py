@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.decorators import api_view
@@ -106,18 +107,53 @@ def health(request):
 
 @api_view(["GET"])
 def pathways_list(request):
-    return Response(
-        [
+    pathways = enrollable_pathways()
+    paginated = "page" in request.query_params
+    if paginated:
+        try:
+            page = int(request.query_params["page"])
+        except (ValueError, TypeError):
+            return Response({"detail": "Page must be a positive integer."}, status=400)
+        if not 1 <= page <= 1000000:
+            return Response(
+                {"detail": "Page must be between 1 and 1000000."}, status=400
+            )
+        query = request.query_params.get("q", "").strip()
+        if len(query) > 120:
+            return Response(
+                {"detail": "Search is limited to 120 characters."}, status=400
+            )
+        if query:
+            pathways = pathways.filter(
+                Q(title__icontains=query)
+                | Q(description__icontains=query)
+                | Q(target_outcome__icontains=query)
+                | Q(steps__skill__name__icontains=query)
+            ).distinct()
+        count = pathways.count()
+        pathways = pathways[(page - 1) * 12 : page * 12]
+    results = [
+        {
+            "id": p.pk,
+            "title": p.title,
+            "description": p.description,
+            "target_outcome": p.target_outcome,
+            "locale": p.locale,
+            **({"is_demo": p.is_demo, "version": p.version} if paginated else {}),
+        }
+        for p in pathways
+    ]
+    if paginated:
+        return Response(
             {
-                "id": p.pk,
-                "title": p.title,
-                "description": p.description,
-                "target_outcome": p.target_outcome,
-                "locale": p.locale,
+                "results": results,
+                "count": count,
+                "page": page,
+                "page_size": 12,
+                "has_next": page * 12 < count,
             }
-            for p in enrollable_pathways()
-        ]
-    )
+        )
+    return Response(results)
 
 
 @api_view(["POST"])

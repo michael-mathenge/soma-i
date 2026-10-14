@@ -822,3 +822,74 @@ def test_unreviewed_non_demo_pathway_never_falls_back_to_seeded_reading(seeded):
     learner.save()
     assert pathway_picks(learner, original.steps.first().skill, 3) == []
     assert client.get("/api/items/").data == []
+
+
+@pytest.mark.parametrize("query", ["data analyst", "SQL", "junior data"])
+def test_catalogue_search_matches_metadata_and_skills_without_duplicates(seeded, query):
+    response = APIClient().get("/api/pathways/", {"page": 1, "q": query})
+    assert response.status_code == 200
+    ids = [row["id"] for row in response.data["results"]]
+    assert seeded["Data Analyst"].pk in ids
+    assert len(ids) == len(set(ids))
+    assert all(row["is_demo"] for row in response.data["results"])
+
+
+@pytest.mark.parametrize("page", ["0", "-1", "abc", "1.5", "1000001"])
+def test_catalogue_rejects_invalid_pages(page):
+    assert APIClient().get("/api/pathways/", {"page": page}).status_code == 400
+
+
+def test_catalogue_search_bounds_empty_results_and_legacy_contract(seeded):
+    client = APIClient()
+    assert client.get("/api/pathways/", {"page": 1, "q": "x" * 121}).status_code == 400
+    empty = client.get("/api/pathways/", {"page": 1, "q": "unmatched fixture"}).data
+    assert empty["count"] == 0 and empty["results"] == []
+    legacy = client.get("/api/pathways/").data
+    assert isinstance(legacy, list) and len(legacy) == 3
+    assert set(legacy[0]) == {"id", "title", "description", "target_outcome", "locale"}
+
+
+def test_catalogue_pages_are_bounded_stable_and_exclude_unavailable_revisions():
+    from copy import deepcopy
+
+    from pathways.catalogue import create_revision, publish_demo_revision
+    from pathways.management.commands.seed_demo import QUIZ
+    from pathways.models import Catalogue
+
+    ids = []
+    for index in range(14):
+        revision = create_revision(
+            Catalogue.objects.create(slug=f"page-topic-{index}"),
+            title=f"Topic {index}",
+            description="Searchable fixture description",
+            target_outcome="Practice",
+            is_demo=True,
+            steps=[
+                dict(
+                    skill=f"Fixture {step}",
+                    title=f"Check {step}",
+                    criteria="Produce an example",
+                    unlocks_text="Continue",
+                    quiz_json=deepcopy(QUIZ),
+                )
+                for step in range(3)
+            ],
+        )
+        if index < 13:
+            publish_demo_revision(revision)
+            ids.append(revision.pk)
+    client = APIClient()
+    first = client.get("/api/pathways/", {"page": 1}).data
+    second = client.get("/api/pathways/", {"page": 2}).data
+    assert first["count"] == 13 and first["page_size"] == 12 and first["has_next"]
+    assert [row["id"] for row in first["results"] + second["results"]] == ids
+    assert not second["has_next"]
+    for query in ("Searchable fixture description", "Fixture"):
+        searched = client.get("/api/pathways/", {"page": 1, "q": query}).data
+        assert searched["count"] == 13
+        assert len({row["id"] for row in searched["results"]}) == 12
+    assert client.get("/api/pathways/", {"page": 3}).data["results"] == []
+    current = Pathway.objects.get(pk=ids[0])
+    current.enrollment_open = False
+    current.save(update_fields=["enrollment_open"])
+    assert client.get("/api/pathways/", {"page": 1}).data["count"] == 12
