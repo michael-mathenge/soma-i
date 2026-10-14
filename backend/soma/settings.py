@@ -1,20 +1,16 @@
 import os
 from pathlib import Path
 
-import dj_database_url
+from soma.configuration import load_configuration, load_local_environment
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR.parent / ".env"
-if ENV_FILE.exists():
-    for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
-        key, separator, value = line.partition("=")
-        if separator and key.strip() and not key.lstrip().startswith("#"):
-            os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "local-only-soma-development-key")
-DEBUG = os.getenv("DJANGO_DEBUG", "true").lower() == "true"
-ALLOWED_HOSTS = os.getenv(
-    "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver"
-).split(",")
+_environment_values = load_local_environment(os.environ, ENV_FILE)
+_configuration = load_configuration(_environment_values, BASE_DIR)
+# Preserve local .env consumers outside Django settings after target validation.
+for _name, _value in _environment_values.items():
+    os.environ.setdefault(_name, _value)
+globals().update(_configuration)
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
@@ -35,28 +31,11 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 ROOT_URLCONF = "soma.urls"
 TEMPLATES = []
 WSGI_APPLICATION = "soma.wsgi.application"
-database_url = os.getenv("DATABASE_URL")
-if database_url:
-    database_config = dj_database_url.parse(database_url, conn_max_age=600)
-    if (
-        database_config["ENGINE"].endswith("sqlite3")
-        and database_config["NAME"] != ":memory:"
-        and not Path(database_config["NAME"]).is_absolute()
-    ):
-        database_config["NAME"] = str(
-            (BASE_DIR.parent / database_config["NAME"]).resolve()
-        )
-    DATABASES = {"default": database_config}
-else:
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600
-        )
-    }
 LANGUAGE_CODE = "en"
 TIME_ZONE = "Africa/Nairobi"
 USE_I18N = True

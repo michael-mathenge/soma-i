@@ -12,7 +12,7 @@ The intended journey connects a short reading task to a checkpoint, an unlocked 
 
 Use Windows PowerShell, Python 3.12.15, Node 24.21.0 LTS and pnpm 12.11.2, pinned in [.python-version](.python-version), [.node-version](.node-version) and [frontend/package.json](frontend/package.json). Python 3.12 remains the contributor-guide baseline; the exact Node pin replaces the older minimum for this task. Earlier Python 3.13.7/Node 22 validation remains historical in [the log](docs/PLANS.md).
 
-Configuration names are `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DATABASE_URL` and `SOMA_SENDER`. Optional sandbox configuration uses `AFRICASTALKING_USERNAME` and `AFRICASTALKING_API_KEY`; delivery is stubbed. See [.env.example](.env.example), [settings](backend/soma/settings.py) and [senders](backend/engagement/senders.py). No provider credentials are needed for the console demo.
+Configuration requires process-level `SOMA_ENV` and an explicit `DATABASE_URL`. Other names are `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DATABASE_URL` and `SOMA_SENDER`. Optional sandbox configuration uses `AFRICASTALKING_USERNAME` and `AFRICASTALKING_API_KEY`; delivery is stubbed. See [.env.example](.env.example), [settings](backend/soma/settings.py) and [senders](backend/engagement/senders.py). No provider credentials are needed for the console demo.
 
 **PowerShell — clone**
 
@@ -29,6 +29,7 @@ Create an isolated SQLite database under the OS temporary directory. Stop if tem
 
 ```powershell
 $ErrorActionPreference = 'Stop'
+$env:SOMA_ENV = 'development'
 python --version
 node --version
 python -m pip install --target .local/tooling uv==0.13.1
@@ -84,6 +85,7 @@ In a backend PowerShell window, select the same repository root and paste the ex
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = Read-Host "Enter the full path to the cloned soma-i repository"
 Set-Location -LiteralPath $repositoryRoot -ErrorAction Stop
+$env:SOMA_ENV = 'development'
 $env:DATABASE_URL = Read-Host "Paste the DATABASE_URL printed by setup"
 $tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
 if (-not $env:DATABASE_URL.StartsWith('sqlite:///')) { throw "Use the setup SQLite URL." }
@@ -104,6 +106,8 @@ For backend checks, use the setup PowerShell window at the repository root with 
 **PowerShell — backend checks**
 
 ```powershell
+$env:SOMA_ENV = 'test'
+$env:DJANGO_DEBUG = 'false'
 Write-Output $env:DATABASE_URL
 ./.venv/Scripts/python.exe -m pytest backend
 ```
@@ -113,6 +117,8 @@ For frontend checks, use the frontend window in `frontend`. Playwright creates i
 **PowerShell — frontend checks with installed Chrome**
 
 ```powershell
+$env:SOMA_ENV = 'test'
+$env:DJANGO_DEBUG = 'false'
 npx --yes pnpm@12.11.2 run test:e2e:guard
 npx --yes pnpm@12.11.2 run test:e2e:robustness
 npx --yes pnpm@12.11.2 run lint
@@ -268,3 +274,26 @@ Licensed under the MIT License; see [LICENSE](LICENSE).
 - pnpm 12 recorded exact release-age exceptions for @playwright/test, playwright and playwright-core 1.64.1 during resolution. These are narrow, visible pins for the current Playwright release, not an exemption for all future versions. The frozen install, advisory check and browser suite are recorded in docs/PLANS.md. An advisory check cannot establish that a package is free of undisclosed vulnerabilities.
 - ESLint 10 keeps the existing rules-of-hooks error and exhaustive-deps warning explicitly. The hooks plugin's newer React Compiler diagnostics are not silently added as part of a dependency-only change. Application source/tests are unchanged. Vite's explicit es2020 target/proxy is retained. CSS minification is disabled to preserve authored custom-property token values after Vite 8's default minifier shortened six-digit white to #fff, which the unchanged contrast test cannot parse. This preserves the existing palette/test contract; browser compatibility beyond the exercised Chrome suite is not claimed.
 - Re-lock deliberately after reviewing support/security guidance, then rerun validation. Sources checked 2026-10-14: [Django support](https://www.djangoproject.com/download/), [Python support/releases](https://www.python.org/downloads/), [Node releases](https://nodejs.org/en/about/previous-releases), [Vite support](https://vite.dev/releases), [Vite migration](https://vite.dev/guide/migration), [ESLint 10 migration](https://eslint.org/docs/latest/use/migrate-to-10.0.0), [pnpm frozen installation](https://pnpm.io/cli/install) and [uv locking](https://docs.astral.sh/uv/pip/compile/). Exact package releases were checked through PyPI/npm metadata. Full results, limits and unchanged historical setup evidence are in docs/PLANS.md; P1 does not clear O1/C1 or authorize release.
+
+
+## P2 explicit environment configuration - 2026-10-14
+
+Set SOMA_ENV in the process before any Django command. Accepted values are development, test, staging and production; an omitted/unknown value stops startup. A .env file cannot select the environment. Only development/test may read it, and existing process values win. Staging/production ignore .env entirely, so copying local defaults cannot enable debug or choose a repository database there. The current commands above set the environment explicitly; older command-only examples elsewhere require this environment setup too.
+
+| Setting | Local development/test | Staging/production |
+|---|---|---|
+| DATABASE_URL | Required absolute OS-temp SQLite file; relative paths, memory URIs, query options and repository targets are refused | Required PostgreSQL hostname/database/credentials; sslmode=verify-full and sslrootcert=system or an absolute CA path; bounded connect_timeout; duplicate/unknown options are refused |
+| DJANGO_SECRET_KEY | Local-only fallback permitted; empty values refused | Explicit non-development value, at least 50 characters and five distinct characters; operator must generate a separate random secret |
+| DJANGO_DEBUG | Defaults true only in development, false in test; strict true/false parsing | Must be false; malformed values stop startup |
+| DJANGO_ALLOWED_HOSTS | Defaults localhost,127.0.0.1,testserver | Required exact lower-case DNS names; no wildcard, scheme, port or local/IP target |
+| DJANGO_CSRF_TRUSTED_ORIGINS | Empty by default; exact configured-host HTTP/HTTPS origins if supplied | Empty by default for same-origin operation; supplied origins must be exact HTTPS origins on allowed hosts, without paths or wildcard |
+| DJANGO_TRUST_PROXY_SSL_HEADER | False; cannot be enabled locally | False by default. Enable only after verifying that the sole ingress strips/replaces client forwarding headers and the application cannot be reached around it |
+| DJANGO_HSTS_SECONDS | Must be 0 | Defaults 3600; explicit range 0-31536000. includeSubDomains and preload stay false for this existing multipurpose domain |
+
+The checks parse PostgreSQL configuration without connecting. They do not verify credentials, provider eligibility, mounted CA files, DNS, actual TLS/proxy behavior, database identity/least privilege or hosted isolation. Hosted commands still require the separately reviewed target-allowlist workflow in AGENTS.md; P2 supplies no permission to probe hosted learner data. A missing CA file or invalid certificate must fail on a future connection rather than downgrade verification. Live validation remains a later gate.
+
+Deployed settings enable HTTPS redirects, Secure/HttpOnly/SameSite=Lax session cookies, Secure/SameSite=Lax CSRF cookies, nosniff, same-origin referrer policy and frame denial. Forwarded-host trust stays off. The CSRF cookie retains Django's readable default for future same-origin token handling; P2 does not implement account ownership or API-wide CSRF enforcement (P3), request limits (P5), or private service-worker cache isolation (P6). Existing anonymous API behavior is preserved.
+
+STATIC_ROOT is the ignored .local/static directory for later collection. P2 does not provide a production web server, frontend SPA/static serving, ingress or deployment. Security-tag deployment tests intentionally retain security.W005 and security.W021 because subdomain HSTS/preload are not enabled before existing-domain review; this is not a claim that all deployment checks or release gates are cleared.
+
+Validation names/counts and failed sandbox-temp setup attempts are recorded in docs/PLANS.md. Configuration tests use synthetic .invalid PostgreSQL URLs and block socket/psycopg connections. HTTP tests exercise middleware with signed-cookie test sessions, not hosted learner data. Actual database-backed checks use printed OS-temp SQLite only. Official guidance checked 2026-10-14: [Django deployment checklist](https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/), [proxy trust](https://docs.djangoproject.com/en/5.2/ref/settings/#secure-proxy-ssl-header) and [PostgreSQL certificate verification](https://www.postgresql.org/docs/current/libpq-ssl.html). O1/C1 remain blocked; P2 is not release approval.
