@@ -147,6 +147,21 @@ def clean_summary(value):
     return plain_text(value)[:SUMMARY_MAX_CHARS]
 
 
+def topic_tags_for_entry(entry):
+    """Bound RSS/Atom category data; it remains untrusted matching input."""
+    values = entry.get("tags", [])
+    if not isinstance(values, (list, tuple)):
+        return []
+    tags = []
+    for tag in values[:32]:
+        value = tag.get("term") if isinstance(tag, dict) else None
+        if isinstance(value, str):
+            value = plain_text(value).casefold()[:120].strip()
+            if value and value not in tags:
+                tags.append(value)
+    return tags
+
+
 def pathway_matches(feed_config, title, summary, config=None):
     config = config or load_config()
     if exclusion_reason(title, feed_config["source_type"], config):
@@ -243,7 +258,14 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
                 max(latest_item_at, published_at) if latest_item_at else published_at
             )
         pathway_keys = pathway_matches(feed_config, title, summary, config)
-        if not pathway_keys:
+        topic_tags = topic_tags_for_entry(entry)
+        # Known curriculum rules may discover a topic beyond the legacy three.
+        from pathways.discovery import matching_topic_slugs
+
+        discovery_candidate = not exclusion_reason(
+            title, feed_config["source_type"], config
+        ) and bool(matching_topic_slugs(topic_tags))
+        if not pathway_keys and not discovery_candidate:
             continue
 
         dates[date_source] += 1
@@ -276,6 +298,7 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
                 item.published_at = published_at
                 item.fetched_at = fetched_at
                 item.date_source = date_source
+                item.topic_tags = topic_tags
                 item.word_count = word_count_for_entry(entry)
                 update_fields.extend(
                     [
@@ -284,6 +307,7 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
                         "published_at",
                         "fetched_at",
                         "date_source",
+                        "topic_tags",
                         "word_count",
                     ]
                 )
@@ -318,6 +342,7 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
                 date_source=date_source,
                 word_count=word_count_for_entry(entry),
                 pathway_keys=pathway_keys,
+                topic_tags=topic_tags,
                 source=source,
                 language=source.language,
                 estimated_minutes=10,

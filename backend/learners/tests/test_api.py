@@ -801,3 +801,24 @@ def test_pathway_list_reads_database_publication_state_instead_of_title_whitelis
         set(entry) == {"id", "title", "description", "target_outcome", "locale"}
         for entry in response.data
     )
+
+
+def test_unreviewed_non_demo_pathway_never_falls_back_to_seeded_reading(seeded):
+    client = APIClient()
+    assert client.post("/api/demo/").status_code == 200
+    original = seeded["Data Analyst"]
+    from learners.api import pathway_picks
+    from pathways.models import Catalogue
+
+    catalogue = Catalogue.objects.create(slug="unreviewed-live-fixture")
+    pathway = Pathway.objects.create(
+        catalogue=catalogue,
+        title="Unreviewed draft",
+        description="Not release content",
+        target_outcome="No approval",
+    )
+    learner = LearnerProfile.objects.get(display_name="Amina Demo")
+    learner.chosen_pathway = pathway
+    learner.save()
+    assert pathway_picks(learner, original.steps.first().skill, 3) == []
+    assert client.get("/api/items/").data == []

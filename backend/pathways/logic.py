@@ -75,3 +75,12 @@ def completed_items(learner):
     return set(
         ItemRecord.objects.filter(learner=learner).values_list("item_id", flat=True)
     )
+
+
+def reviewed_pathway_recommendations(pathway, skill, limit=5):
+    """Live revisions never fall back to unrelated or unreviewed stored items."""
+    if pathway is None:
+        return []
+    from pathways.discovery import reviewed_picks
+
+    return reviewed_picks(pathway, skill, limit)

@@ -505,7 +505,9 @@ def test_bozo_feed_with_partial_entries_is_usable_and_empty_malformed_feed_fails
     assert entries == partial.entries
     assert warning == "parser warning; partial entries used"
 
-    malformed = SimpleNamespace(version="rss20", bozo=True, entries=[], bozo_exception=ValueError("bad"))
+    malformed = SimpleNamespace(
+        version="rss20", bozo=True, entries=[], bozo_exception=ValueError("bad")
+    )
     monkeypatch.setattr(command_module.feedparser, "parse", lambda _: malformed)
     with pytest.raises(command_module.FeedResponseError, match="Malformed feed"):
         command_module.parse_feed_response(response)
@@ -656,7 +658,9 @@ def test_malformed_feed_failure_does_not_prevent_later_feed_ingestion(monkeypatc
     monkeypatch.setattr(command_module, "load_config", lambda: config)
     valid_fixture = (Path(__file__).parent / "fixtures" / "feed.xml").read_bytes()
     parser_results = [
-        SimpleNamespace(version="rss20", bozo=True, entries=[], bozo_exception=ValueError("bad XML")),
+        SimpleNamespace(
+            version="rss20", bozo=True, entries=[], bozo_exception=ValueError("bad XML")
+        ),
         feedparser.parse(valid_fixture),
     ]
     monkeypatch.setattr(
@@ -692,8 +696,9 @@ def test_recent_feed_is_skipped_and_force_bypasses_interval(monkeypatch):
     def fetcher(_url, headers, **_kwargs):
         calls.append(headers)
         return FetchResponse(
-            200, {"Content-Type": "application/rss+xml"},
-            b"<rss version='2.0'><channel /></rss>"
+            200,
+            {"Content-Type": "application/rss+xml"},
+            b"<rss version='2.0'><channel /></rss>",
         )
 
     skipped = command_module.Command()
@@ -770,6 +775,7 @@ def test_html_title_survives_to_api_as_plain_text(monkeypatch):
     pathway = Pathway.objects.create(
         title="Data Analyst",
         description="Data pathway",
+        is_demo=True,
         target_outcome="Junior Data Analyst",
     )
     step = PathwaySkill.objects.create(pathway=pathway, skill=sql, order=1)
@@ -908,7 +914,9 @@ def test_permission_block_leaves_existing_source_and_items_untouched(monkeypatch
     assert source.items.count() == 1
 
 
-def test_expiry_is_checked_again_before_any_ingestion_or_304_validator_update(monkeypatch):
+def test_expiry_is_checked_again_before_any_ingestion_or_304_validator_update(
+    monkeypatch,
+):
     import content.management.commands.ingest_feeds as command_module
 
     permission = {**DATA_FEED["permissions"], "expires_on": "2026-10-08"}
@@ -946,11 +954,16 @@ def test_expiry_is_checked_again_before_any_ingestion_or_304_validator_update(mo
 @pytest.mark.parametrize(
     "response",
     [
-        FetchResponse(200, {"Content-Type": "application/xml"}, b"<!DOCTYPE rss><rss />"),
-        FetchResponse(200, {"Content-Type": "application/xml"}, b"<!ENTITY x 'secret'>"),
+        FetchResponse(
+            200, {"Content-Type": "application/xml"}, b"<!DOCTYPE rss><rss />"
+        ),
+        FetchResponse(
+            200, {"Content-Type": "application/xml"}, b"<!ENTITY x 'secret'>"
+        ),
         FetchResponse(200, {"Content-Type": "application/xml"}, b"\xff\xfe<\x00r\x00"),
         FetchResponse(
-            200, {"Content-Type": "application/xml"},
+            200,
+            {"Content-Type": "application/xml"},
             b"<?xml version='1.0' encoding='iso-8859-1'?><rss version='2.0'><channel/></rss>",
         ),
         FetchResponse(200, {"Content-Type": "application/json"}, b"{}"),
@@ -970,9 +983,7 @@ def test_feed_parser_rejects_entities_wrong_encoding_and_nonfeed_content(respons
 def test_feed_parser_caps_entries_and_never_echoes_remote_parser_exception(monkeypatch):
     import content.management.commands.ingest_feeds as command_module
 
-    parsed = SimpleNamespace(
-        version="rss20", bozo=False, entries=[make_entry()] * 501
-    )
+    parsed = SimpleNamespace(version="rss20", bozo=False, entries=[make_entry()] * 501)
     monkeypatch.setattr(command_module.feedparser, "parse", lambda _body: parsed)
     response = FetchResponse(200, {"Content-Type": "application/rss+xml"}, b"<rss/>")
     with pytest.raises(command_module.FeedResponseError, match="500-entry"):
@@ -998,11 +1009,17 @@ def test_invalid_cache_validators_are_not_persisted():
         assert source.etag == '"old"'
 
 
-@pytest.mark.parametrize("database", [
-    {"ENGINE": "django.db.backends.postgresql", "NAME": "production"},
-    {"ENGINE": "django.db.backends.sqlite3", "NAME": "C:/dev/soma-i/db.sqlite3"},
-    {"ENGINE": "django.db.backends.sqlite3", "NAME": "C:/dev/soma-i/backend/db.sqlite3"},
-])
+@pytest.mark.parametrize(
+    "database",
+    [
+        {"ENGINE": "django.db.backends.postgresql", "NAME": "production"},
+        {"ENGINE": "django.db.backends.sqlite3", "NAME": "C:/dev/soma-i/db.sqlite3"},
+        {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": "C:/dev/soma-i/backend/db.sqlite3",
+        },
+    ],
+)
 def test_offline_command_rejects_hosted_and_repository_targets_before_writes(
     monkeypatch, database
 ):
@@ -1018,11 +1035,14 @@ def test_offline_command_rejects_hosted_and_repository_targets_before_writes(
     assert Source.objects.count() == 0
 
 
-@pytest.mark.parametrize("name", [
-    "file:memorydb_outside?notmode=memory",
-    "file:memorydb_outside?mode=memory&mode=rwc",
-    "file:memorydb_outside?mode=memoryevil",
-])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "file:memorydb_outside?notmode=memory",
+        "file:memorydb_outside?mode=memory&mode=rwc",
+        "file:memorydb_outside?mode=memoryevil",
+    ],
+)
 def test_offline_memory_uri_check_cannot_be_bypassed_with_substring_or_duplicates(name):
     from content.management.commands.ingest_feeds import _offline_database_allowed
 
@@ -1034,7 +1054,95 @@ def test_offline_memory_uri_check_cannot_be_bypassed_with_substring_or_duplicate
 def test_offline_memory_uri_accepts_only_explicit_memory_mode():
     from content.management.commands.ingest_feeds import _offline_database_allowed
 
-    assert _offline_database_allowed({
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "file:memorydb_default?mode=memory&cache=shared",
-    })
+    assert _offline_database_allowed(
+        {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": "file:memorydb_default?mode=memory&cache=shared",
+        }
+    )
+
+
+def test_rss_categories_are_bounded_sanitized_matching_data():
+    from content.ingestion import topic_tags_for_entry
+
+    assert topic_tags_for_entry(
+        {"tags": [{"term": "<b>SQL</b>"}, {"term": "sql"}, {"term": None}, "ignored"]}
+    ) == ["sql"]
+    assert topic_tags_for_entry({"tags": "sql"}) == []
+    assert len(topic_tags_for_entry({"tags": [{"term": "\u00df" * 120}]})[0]) == 120
+    tags = topic_tags_for_entry(
+        {"tags": [{"term": str(index) + "x" * 150} for index in range(40)]}
+    )
+    assert len(tags) == 32 and all(len(tag) <= 120 for tag in tags)
+
+
+def test_known_rss_category_can_store_candidate_outside_legacy_title_matching():
+    source = Source.objects.create(
+        name="Fixture discovery source", url="https://fixture.example.test/discovery"
+    )
+    feed = dict(DATA_FEED, url=source.url, pathways=[])
+    entry = dict(
+        title="Organize a budget table",
+        link="https://fixture.example.test/budget",
+        summary="An offline example.",
+        tags=[{"term": "<b>Spreadsheets</b>"}],
+        date="2026-10-01",
+    )
+    stats = ingest_entries(source, feed, [entry], FETCHED_AT)
+    assert stats["created"] == 1
+    item = Item.objects.get(source=source)
+    assert item.topic_tags == ["spreadsheets"] and item.pathway_keys == []
+    assert not item.curriculum_links.exists()
+    entry["summary"] = "Updated fixture metadata."
+    entry["tags"] = [{"term": "SQL"}]
+    ingest_entries(source, feed, [entry], FETCHED_AT)
+    item.refresh_from_db()
+    assert item.topic_tags == ["sql"]
+
+
+def test_unknown_rss_category_does_not_invent_a_curriculum_or_store_unmatched_text():
+    source = Source.objects.create(
+        name="Unknown fixture source", url="https://fixture.example.test/unknown"
+    )
+    feed = dict(DATA_FEED, url=source.url, pathways=[])
+    stats = ingest_entries(
+        source,
+        feed,
+        [
+            dict(
+                title="An unmapped subject",
+                link="https://fixture.example.test/unmapped",
+                tags=[{"term": "invent a new occupation"}],
+            )
+        ],
+        FETCHED_AT,
+    )
+    assert stats["created"] == 0
+    assert not Item.objects.filter(source=source).exists()
+
+
+@pytest.mark.parametrize(
+    ("title", "source_type"),
+    [
+        ("Quiz: Spreadsheet practice", "publisher"),
+        ("Hi I am introducing myself", "community"),
+    ],
+)
+def test_discovery_categories_do_not_bypass_feed_exclusions(title, source_type):
+    source = Source.objects.create(
+        name="Excluded fixture", url="https://excluded.example.test/feed"
+    )
+    feed = dict(DATA_FEED, url=source.url, pathways=[], source_type=source_type)
+    result = ingest_entries(
+        source,
+        feed,
+        [
+            dict(
+                title=title,
+                link="https://excluded.example.test/item",
+                tags=[{"term": "SQL"}],
+            )
+        ],
+        FETCHED_AT,
+    )
+    assert result["created"] == 0 and not Item.objects.filter(source=source).exists()
