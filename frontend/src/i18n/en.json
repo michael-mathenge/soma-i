@@ -68,5 +68,21 @@
   "demoTopic": "Demo topic",
   "cataloguePages": "Topic catalogue pages",
   "previousPage": "Previous page",
-  "nextPage": "Next page"
+  "nextPage": "Next page",
+  "savingProgress": "Saving your request...",
+  "actionUnconfirmed": "The request could not be confirmed. Check your current progress before trying again.",
+  "journeyLoadError": "Your learning information could not be loaded. Try loading it again.",
+  "chooseToBegin": "Choose a pathway to get started.",
+  "guestJourney": "Start as a guest. Your name is optional. You can skip a checkpoint, restart or switch pathways.",
+  "restartConfirm": "Restart this pathway? This clears its checkpoint and lesson progress. Other pathway checkpoint records are kept.",
+  "yourLearningSteps": "Your learning steps",
+  "stepDone": "Completed",
+  "stepSkipped": "Skipped",
+  "stepCurrent": "Next checkpoint",
+  "stepRemaining": "Upcoming",
+  "pathwayFinished": "You have reached the end of this pathway. You can revisit lessons, restart or explore another topic.",
+  "noLessons": "No reading picks are available right now. You can continue your practice and check again later.",
+  "checkpointUnavailable": "This checkpoint is not available on the current pathway.",
+  "noOpportunities": "No sample opportunities are available for this step.",
+  "noEnrollableTopics": "No pathways are available for enrollment right now. Please check again later."
 }
