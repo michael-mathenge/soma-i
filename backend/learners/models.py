@@ -6,11 +6,26 @@ from django.db.models.functions import Lower
 class Account(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     email = models.EmailField(max_length=254, unique=True)
+    email_verified_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(Lower("email"), name="account_email_case_unique")
         ]
+
+
+class AccountToken(models.Model):
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="tokens"
+    )
+    digest = models.CharField(max_length=64, unique=True)
+    purpose = models.CharField(
+        max_length=12, choices=[("verify", "Verify email"), ("reset", "Reset password")]
+    )
+    state_digest = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
 
 
 class LearnerProfile(models.Model):

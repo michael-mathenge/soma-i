@@ -178,6 +178,14 @@ function App() {
           />
           <Route path="/catalogue" element={<Catalogue t={t} />} />
           <Route
+            path="/account/verify"
+            element={<RecoveryConfirm purpose="verify" t={t} />}
+          />
+          <Route
+            path="/account/reset"
+            element={<RecoveryConfirm purpose="reset" t={t} />}
+          />
+          <Route
             path="/account"
             element={<AccountPage refresh={refresh} t={t} />}
           />
@@ -1134,7 +1142,11 @@ function AccountPage({ refresh, t }) {
           <p>
             {en.accountSignedIn}: {identity.email}
           </p>
-          <p>{en.accountUnverified}</p>
+          <p>
+            {identity.email_verified
+              ? en.accountVerified
+              : en.accountUnverified}
+          </p>
           <button disabled={pending} onClick={() => act("logout")}>
             {en.accountLogout}
           </button>
@@ -1213,7 +1225,225 @@ function AccountPage({ refresh, t }) {
         </form>
       )}
       {pending && <p role="status">{en.accountPending}</p>}
+      {identity && <RecoveryTools identity={identity} />}
       <Link to="/">{en.accountContinueGuest}</Link>
+    </section>
+  );
+}
+
+function useRecoveryOptions() {
+  const [state, setState] = useState({ loading: true });
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let active = true;
+    api
+      .get("/account/recovery/options/")
+      .then(({ data }) => {
+        if (active) setState({ data });
+      })
+      .catch(() => {
+        if (active) setState({ error: true });
+      });
+    return () => {
+      active = false;
+    };
+  }, [attempt]);
+  return {
+    ...state,
+    retry: () => {
+      setState({ loading: true });
+      setAttempt((value) => value + 1);
+    },
+  };
+}
+
+function RecoveryTools({ identity }) {
+  const options = useRecoveryOptions();
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const locked = useRef(false);
+  async function request(purpose) {
+    if (locked.current) return;
+    locked.current = true;
+    setPending(true);
+    setMessage("");
+    setError("");
+    try {
+      await api.post(
+        `/account/${purpose}/request/`,
+        purpose === "reset" ? { email } : {},
+      );
+      setMessage(en.recoveryRequested);
+    } catch {
+      setError(en.recoveryRequestError);
+    } finally {
+      locked.current = false;
+      setPending(false);
+    }
+  }
+  return (
+    <section
+      className="stack account-recovery"
+      aria-labelledby="recovery-heading"
+    >
+      <h2 id="recovery-heading">{en.recoveryHeading}</h2>
+      {options.loading ? (
+        <p role="status">{en.loading}</p>
+      ) : options.error ? (
+        <>
+          <p>{en.recoveryOptionsError}</p>
+          <button onClick={options.retry}>{en.retry}</button>
+        </>
+      ) : !options.data.available ? (
+        <p>{en.recoveryDisabled}</p>
+      ) : (
+        <>
+          <p>{en.recoveryPreview}</p>
+          {identity.authenticated ? (
+            <button
+              disabled={pending || identity.email_verified}
+              onClick={() => request("verify")}
+            >
+              {en.recoveryVerifyRequest}
+            </button>
+          ) : (
+            <form
+              className="stack"
+              onSubmit={(event) => {
+                event.preventDefault();
+                request("reset");
+              }}
+            >
+              <label>
+                {en.recoveryEmail}
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  maxLength={254}
+                  disabled={pending}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+              </label>
+              <button disabled={pending} type="submit">
+                {en.recoveryResetRequest}
+              </button>
+            </form>
+          )}
+        </>
+      )}
+      {pending && <p role="status">{en.accountPending}</p>}
+      {message && <p role="status">{message}</p>}
+      {error && <p role="alert">{error}</p>}
+    </section>
+  );
+}
+
+function RecoveryConfirm({ purpose, t }) {
+  const location = useLocation();
+  const [token, setToken] = useState(
+    () => new URLSearchParams(location.hash.slice(1)).get("token") || "",
+  );
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+  const [pending, setPending] = useState(false);
+  const locked = useRef(false);
+  // Fragments never reach the server; scrub history before the capability GET.
+  useEffect(() => {
+    setToken(new URLSearchParams(location.hash.slice(1)).get("token") || "");
+    setPassword("");
+    setError("");
+    setDone(false);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      window.location.pathname + window.location.search,
+    );
+  }, [location.key, location.hash, purpose]);
+  const options = useRecoveryOptions();
+  async function confirm(event) {
+    event.preventDefault();
+    if (locked.current) return;
+    locked.current = true;
+    setPending(true);
+    setError("");
+    try {
+      await api.post(`/account/${purpose}/confirm/`, {
+        token,
+        ...(purpose === "reset" ? { password } : {}),
+      });
+      setDone(true);
+      setToken("");
+      setPassword("");
+    } catch (failure) {
+      setError(
+        failure.response?.status === 400
+          ? en.recoveryInvalid
+          : en.recoveryConfirmError,
+      );
+    } finally {
+      locked.current = false;
+      setPending(false);
+    }
+  }
+  return (
+    <section
+      className="panel stack account-form"
+      lang={t === sw ? "en" : undefined}
+    >
+      <h1>
+        {purpose === "reset"
+          ? en.recoveryResetHeading
+          : en.recoveryVerifyHeading}
+      </h1>
+      {done ? (
+        <p role="status">
+          {purpose === "reset" ? en.recoveryResetDone : en.recoveryVerifyDone}
+        </p>
+      ) : options.loading ? (
+        <p role="status">{en.loading}</p>
+      ) : options.error ? (
+        <>
+          <p role="alert">{en.recoveryOptionsError}</p>
+          <button onClick={options.retry}>{en.retry}</button>
+        </>
+      ) : !options.data.available ? (
+        <p>{en.recoveryDisabled}</p>
+      ) : !/^[a-f0-9]{64}$/.test(token) ? (
+        <p role="alert">{en.recoveryInvalid}</p>
+      ) : (
+        <form className="stack" onSubmit={confirm}>
+          <p>{en.recoveryPreview}</p>
+          <p>{en.recoveryExplicit}</p>
+          {purpose === "reset" && (
+            <label>
+              {en.recoveryNewPassword}
+              <input
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+                maxLength={128}
+                required
+                disabled={pending}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </label>
+          )}
+          <button disabled={pending} type="submit">
+            {purpose === "reset"
+              ? en.recoveryResetConfirm
+              : en.recoveryVerifyConfirm}
+          </button>
+        </form>
+      )}
+      {pending && <p role="status">{en.accountPending}</p>}
+      {error && <p role="alert">{error}</p>}
+      <Link to="/account">{en.account}</Link>
     </section>
   );
 }

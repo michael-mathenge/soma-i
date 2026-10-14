@@ -1,8 +1,11 @@
 from django.urls import path
 
-from learners import accounts, api
+from learners import accounts, api, recovery
 
 urlpatterns = [
+    path("account/recovery/options/", recovery.options),
+    path("account/<str:purpose>/request/", recovery.request_link),
+    path("account/<str:purpose>/confirm/", recovery.confirm),
     path("csrf/", accounts.csrf),
     path("account/", accounts.account),
     path("account/login/", accounts.sign_in),

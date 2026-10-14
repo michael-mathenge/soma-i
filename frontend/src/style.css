@@ -469,3 +469,7 @@ legend {
   margin-inline: auto;
   overflow-wrap: anywhere;
 }
+.account-recovery {
+  border-block-start: 1px solid currentColor;
+  padding-block-start: 1rem;
+}
