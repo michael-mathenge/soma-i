@@ -45,6 +45,7 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/**", (route) => {
     const path = new URL(route.request().url()).pathname;
     const responses = {
+      "/api/csrf/": { csrf_token: "offline-csrf-fixture" },
       "/api/me/": {
         id: 1,
         display_name: "Interface fixture",

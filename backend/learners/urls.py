@@ -1,8 +1,12 @@
 from django.urls import path
 
-from learners import api
+from learners import accounts, api
 
 urlpatterns = [
+    path("csrf/", accounts.csrf),
+    path("account/", accounts.account),
+    path("account/login/", accounts.sign_in),
+    path("account/logout/", accounts.sign_out),
     path("health/", api.health),
     path("pathways/", api.pathways_list),
     path("demo/", api.demo_session),

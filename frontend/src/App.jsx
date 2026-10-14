@@ -136,6 +136,13 @@ function App() {
           <NavLink to="/settings" end>
             {t.settings}
           </NavLink>
+          <NavLink
+            to="/account"
+            end
+            lang={language === "sw" ? "en" : undefined}
+          >
+            {en.account}
+          </NavLink>
         </nav>
       </header>
       {error && (
@@ -170,6 +177,10 @@ function App() {
             }
           />
           <Route path="/catalogue" element={<Catalogue t={t} />} />
+          <Route
+            path="/account"
+            element={<AccountPage refresh={refresh} t={t} />}
+          />
           <Route path="/items" element={<ItemList t={t} />} />
           <Route path="/checkpoint/:id" element={<CheckpointPage t={t} />} />
           <Route path="/next" element={<NextPage t={t} />} />
@@ -1009,8 +1020,12 @@ function Settings({ learner, t, language, setLang, refresh }) {
   }
   async function remove() {
     if (!window.confirm(t.delete + "?")) return;
-    await api.delete("/me/");
-    await refresh();
+    try {
+      await api.delete("/me/");
+      await refresh();
+    } catch {
+      setMessage(t.error);
+    }
   }
   return (
     <section className="panel stack">
@@ -1044,8 +1059,161 @@ function Settings({ learner, t, language, setLang, refresh }) {
       <button className="danger" onClick={remove}>
         {t.delete}
       </button>
+      <Link to="/account" lang={t === sw ? "en" : undefined}>
+        {en.account}
+      </Link>
     </section>
   );
 }
 
 export default App;
+
+function AccountPage({ refresh, t }) {
+  const [identity, setIdentity] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [attach, setAttach] = useState(false);
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const lock = useRef(false);
+  const navigate = useNavigate();
+  const load = useCallback(() => {
+    setError("");
+    return api
+      .get("/account/")
+      .then(({ data }) => setIdentity(data))
+      .catch(() => setError(en.accountLoadError));
+  }, []);
+  useEffect(() => {
+    load();
+  }, [load]);
+  async function act(action) {
+    if (lock.current) return;
+    if (action === "delete" && !window.confirm(en.accountDeleteConfirm)) return;
+    lock.current = true;
+    setPending(true);
+    setError("");
+    try {
+      if (action === "register")
+        await api.post("/account/", { email, password, attach_guest: attach });
+      if (action === "login")
+        await api.post("/account/login/", { email, password });
+      if (action === "logout") await api.post("/account/logout/");
+      if (action === "delete")
+        await api.delete("/account/", { data: { password } });
+      setPassword("");
+      await load();
+      await refresh();
+      if (action === "login" || action === "register") navigate("/pathway");
+    } catch (failure) {
+      setError(
+        failure.response?.data?.detail ||
+          failure.message ||
+          en.accountActionError,
+      );
+    } finally {
+      lock.current = false;
+      setPending(false);
+    }
+  }
+  return (
+    <section
+      className="panel stack account-form"
+      lang={t === sw ? "en" : undefined}
+    >
+      <h1>{en.account}</h1>
+      <p>{en.accountOptional}</p>
+      <p>{en.accountRecoveryUnavailable}</p>
+      {error && <p role="alert">{error}</p>}
+      {!identity ? (
+        <button disabled={pending} onClick={load}>
+          {en.retry}
+        </button>
+      ) : identity.authenticated ? (
+        <>
+          <p>
+            {en.accountSignedIn}: {identity.email}
+          </p>
+          <p>{en.accountUnverified}</p>
+          <button disabled={pending} onClick={() => act("logout")}>
+            {en.accountLogout}
+          </button>
+          <label>
+            {en.accountPassword}
+            <input
+              type="password"
+              autoComplete="current-password"
+              maxLength={128}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={pending}
+            />
+          </label>
+          <button
+            className="danger"
+            disabled={pending || !password}
+            onClick={() => act("delete")}
+          >
+            {en.accountDelete}
+          </button>
+        </>
+      ) : (
+        <form
+          className="stack"
+          onSubmit={(event) => {
+            event.preventDefault();
+            act("login");
+          }}
+        >
+          <label>
+            {en.accountEmail}
+            <input
+              type="email"
+              autoComplete="username"
+              required
+              maxLength={254}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              disabled={pending}
+            />
+          </label>
+          <label>
+            {en.accountPassword}
+            <input
+              type="password"
+              autoComplete="current-password"
+              required
+              maxLength={128}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={pending}
+            />
+          </label>
+          <p>{en.accountPasswordHelp}</p>
+          <label className="radio">
+            <input
+              type="checkbox"
+              checked={attach}
+              onChange={(event) => setAttach(event.target.checked)}
+              disabled={pending}
+            />
+            {en.accountAttach}
+          </label>
+          <p>{en.accountLoginGuest}</p>
+          <button disabled={pending} type="submit">
+            {en.accountLogin}
+          </button>
+          <button
+            disabled={pending || !email || !password}
+            type="button"
+            onClick={() => act("register")}
+          >
+            {en.accountRegister}
+          </button>
+        </form>
+      )}
+      {pending && <p role="status">{en.accountPending}</p>}
+      <Link to="/">{en.accountContinueGuest}</Link>
+    </section>
+  );
+}

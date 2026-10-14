@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -89,8 +90,14 @@ def pathway_picks(learner, skill, limit):
 
 
 def current_learner(request):
+    if request.user.is_authenticated:
+        return LearnerProfile.objects.filter(owner=request.user).first()
     learner_id = request.session.get("learner_id")
-    return LearnerProfile.objects.filter(pk=learner_id).first() if learner_id else None
+    return (
+        LearnerProfile.objects.filter(pk=learner_id, owner__isnull=True).first()
+        if learner_id
+        else None
+    )
 
 
 def learner_required(request):
@@ -158,6 +165,11 @@ def pathways_list(request):
 
 @api_view(["POST"])
 def demo_session(request):
+    if (
+        settings.SOMA_ENV not in {"development", "test"}
+        or request.user.is_authenticated
+    ):
+        return Response({"detail": "Demo session unavailable."}, status=404)
     learner = (
         LearnerProfile.objects.filter(display_name="Amina Demo")
         .select_related("chosen_pathway")
@@ -166,6 +178,8 @@ def demo_session(request):
     if learner is None:
         return Response({"detail": "Run seed_demo first."}, status=404)
     request.session["learner_id"] = learner.pk
+    request.session["demo_session"] = True
+    request.session.cycle_key()
     request.session.save()
     return Response(
         {
@@ -186,7 +200,10 @@ def me(request):
             return Response({"detail": "Language must be en or sw."}, status=400)
         learner = current_learner(request)
         if learner is None:
-            learner = LearnerProfile.objects.create()
+            learner = LearnerProfile.objects.create(
+                owner=request.user if request.user.is_authenticated else None
+            )
+            request.session.cycle_key()
         learner.display_name = (
             request.data.get("display_name") or learner.display_name or "Learner"
         )[:80]
@@ -202,6 +219,11 @@ def me(request):
         if error:
             return error
         if request.method == "DELETE":
+            if request.user.is_authenticated:
+                return Response(
+                    {"detail": "Use account deletion with password confirmation."},
+                    status=400,
+                )
             learner.delete()
             request.session.flush()
             return Response({"deleted": True})
