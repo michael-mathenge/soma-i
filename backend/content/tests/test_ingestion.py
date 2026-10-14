@@ -6,6 +6,7 @@ from types import SimpleNamespace
 
 import feedparser
 import pytest
+from django.core.management.base import CommandError
 from rest_framework.test import APIClient
 
 from content.fetching import MAX_FEED_BYTES, FetchResponse, fetch_feed
@@ -57,10 +58,25 @@ def test_new_developer_skill_keywords_match_token_boundaries():
     assert {"Git", "Python", "API Development", "Testing"} <= matched
 
 
+def fixture_permission(url):
+    return {
+        "feed_access": True,
+        "metadata_reuse": True,
+        "excerpt_reuse": True,
+        "reviewed_by": "Offline test reviewer",
+        "scope": "Fictional fixture metadata and excerpts only",
+        "evidence_url": "https://permission.example.test/policy",
+        "reviewed_on": "2026-10-01",
+        "expires_on": "2026-10-31",
+        "allowed_urls": [url],
+    }
+
+
 DATA_FEED = {
     "key": "test_data",
     "name": "Test Data feed",
     "url": "https://data.example.test/feed.xml",
+    "permissions": fixture_permission("https://data.example.test/feed.xml"),
     "source_type": "nonprofit",
     "pathways": ["Data Analyst"],
     "stale_after_days": 60,
@@ -72,6 +88,7 @@ FRONTEND_FEED = {
     "key": "test_frontend",
     "name": "Test Frontend feed",
     "url": "https://frontend.example.test/feed.xml",
+    "permissions": fixture_permission("https://frontend.example.test/feed.xml"),
     "source_type": "publisher",
     "pathways": ["Frontend Developer"],
     "stale_after_days": 60,
@@ -476,6 +493,7 @@ def test_bozo_feed_with_partial_entries_is_usable_and_empty_malformed_feed_fails
     import content.management.commands.ingest_feeds as command_module
 
     partial = SimpleNamespace(
+        version="rss20",
         bozo=True,
         entries=[make_entry()],
         bozo_exception=ValueError("malformed tail"),
@@ -485,9 +503,9 @@ def test_bozo_feed_with_partial_entries_is_usable_and_empty_malformed_feed_fails
 
     entries, warning = command_module.parse_feed_response(response)
     assert entries == partial.entries
-    assert warning == "malformed tail"
+    assert warning == "parser warning; partial entries used"
 
-    malformed = SimpleNamespace(bozo=True, entries=[], bozo_exception=ValueError("bad"))
+    malformed = SimpleNamespace(version="rss20", bozo=True, entries=[], bozo_exception=ValueError("bad"))
     monkeypatch.setattr(command_module.feedparser, "parse", lambda _: malformed)
     with pytest.raises(command_module.FeedResponseError, match="Malformed feed"):
         command_module.parse_feed_response(response)
@@ -575,7 +593,7 @@ def test_live_failure_does_not_prevent_later_feed_ingestion(monkeypatch):
     valid_fixture = (Path(__file__).parent / "fixtures" / "feed.xml").read_bytes()
     calls = []
 
-    def fetcher(url, headers):
+    def fetcher(url, headers, **_kwargs):
         calls.append(url)
         if url == feeds[0]["url"]:
             raise TimeoutError("request timed out")
@@ -588,11 +606,13 @@ def test_live_failure_does_not_prevent_later_feed_ingestion(monkeypatch):
     command.fetcher = fetcher
     command.stdout = StringIO()
     command.stderr = StringIO()
-    command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
+    with pytest.raises(CommandError, match="1 feed"):
+        command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
 
     assert calls == [feed["url"] for feed in feeds]
     assert "feed failed" in command.stderr.getvalue()
-    assert "request timed out" in command.stderr.getvalue()
+    assert "TimeoutError" in command.stderr.getvalue()
+    assert "request timed out" not in command.stderr.getvalue()
     assert Source.objects.get(url=feeds[1]["url"]).items.exists()
 
 
@@ -605,7 +625,7 @@ def test_html_instead_of_xml_fails_one_feed_and_continues(monkeypatch):
     valid_fixture = (Path(__file__).parent / "fixtures" / "feed.xml").read_bytes()
     calls = []
 
-    def fetcher(url, headers):
+    def fetcher(url, headers, **_kwargs):
         calls.append(url)
         if url == feeds[0]["url"]:
             return FetchResponse(
@@ -620,7 +640,8 @@ def test_html_instead_of_xml_fails_one_feed_and_continues(monkeypatch):
     command.fetcher = fetcher
     command.stdout = StringIO()
     command.stderr = StringIO()
-    command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
+    with pytest.raises(CommandError, match="1 feed"):
+        command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
 
     assert calls == [feed["url"] for feed in feeds]
     assert "Response is HTML" in command.stderr.getvalue()
@@ -635,7 +656,7 @@ def test_malformed_feed_failure_does_not_prevent_later_feed_ingestion(monkeypatc
     monkeypatch.setattr(command_module, "load_config", lambda: config)
     valid_fixture = (Path(__file__).parent / "fixtures" / "feed.xml").read_bytes()
     parser_results = [
-        SimpleNamespace(bozo=True, entries=[], bozo_exception=ValueError("bad XML")),
+        SimpleNamespace(version="rss20", bozo=True, entries=[], bozo_exception=ValueError("bad XML")),
         feedparser.parse(valid_fixture),
     ]
     monkeypatch.setattr(
@@ -643,7 +664,7 @@ def test_malformed_feed_failure_does_not_prevent_later_feed_ingestion(monkeypatc
     )
     calls = []
 
-    def fetcher(url, _headers):
+    def fetcher(url, _headers, **_kwargs):
         calls.append(url)
         return FetchResponse(200, {"Content-Type": "application/rss+xml"}, b"<rss />")
 
@@ -652,7 +673,8 @@ def test_malformed_feed_failure_does_not_prevent_later_feed_ingestion(monkeypatc
     command.fetcher = fetcher
     command.stdout = StringIO()
     command.stderr = StringIO()
-    command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
+    with pytest.raises(CommandError, match="1 feed"):
+        command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
 
     assert calls == [feed["url"] for feed in feeds]
     assert "Malformed feed" in command.stderr.getvalue()
@@ -667,9 +689,12 @@ def test_recent_feed_is_skipped_and_force_bypasses_interval(monkeypatch):
     source = make_source(last_fetched_at=FETCHED_AT - timedelta(minutes=10))
     calls = []
 
-    def fetcher(_url, headers):
+    def fetcher(_url, headers, **_kwargs):
         calls.append(headers)
-        return FetchResponse(200, {"Content-Type": "application/rss+xml"}, b"")
+        return FetchResponse(
+            200, {"Content-Type": "application/rss+xml"},
+            b"<rss version='2.0'><channel /></rss>"
+        )
 
     skipped = command_module.Command()
     skipped.clock = lambda: FETCHED_AT
@@ -712,7 +737,7 @@ def test_304_sends_validators_and_does_not_reingest(monkeypatch):
     original_count = Item.objects.count()
     received_headers = {}
 
-    def fetcher(_url, headers):
+    def fetcher(_url, headers, **_kwargs):
         received_headers.update(headers)
         return FetchResponse(304, {}, b"")
 
@@ -780,25 +805,39 @@ def test_fetcher_rejects_http_and_oversize_responses(monkeypatch):
 
     class FakeResponse:
         status = 200
-        headers = {"Content-Length": str(MAX_FEED_BYTES + 1)}
 
-        def __enter__(self):
-            return self
+        def getheaders(self):
+            return [("Content-Length", str(MAX_FEED_BYTES + 1))]
 
-        def __exit__(self, *_args):
-            return None
+        def close(self):
+            pass
 
-        def read(self, _count):
+        def read1(self, _count):
             pytest.fail("oversize response should fail before reading")
 
-    class FakeOpener:
-        def open(self, _request, timeout):
-            assert timeout == 10
+    class FakeConnection:
+        def __init__(self, *_args):
+            pass
+
+        def request(self, *_args, **_kwargs):
+            pass
+
+        def getresponse(self):
             return FakeResponse()
 
-    monkeypatch.setattr(fetching, "build_opener", lambda *_: FakeOpener())
+        def abort(self):
+            pass
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(fetching, "_public_addresses", lambda *_args: [])
+    monkeypatch.setattr(fetching, "_PinnedHTTPSConnection", FakeConnection)
     with pytest.raises(ValueError, match="5 MB"):
-        fetch_feed("https://example.test/feed.xml")
+        fetch_feed(
+            "https://example.test/feed.xml",
+            allowed_urls={"https://example.test/feed.xml"},
+        )
 
 
 def test_redirect_handler_limits_redirects_and_requires_https():
@@ -829,3 +868,173 @@ def test_redirect_handler_limits_redirects_and_requires_https():
             {},
             "http://example.test/feed.xml",
         )
+
+
+def test_live_registry_without_permissions_is_blocked_before_fetch_or_source_write():
+    import content.management.commands.ingest_feeds as command_module
+
+    command = command_module.Command()
+    command.clock = lambda: FETCHED_AT
+    command.fetcher = lambda *_a, **_k: pytest.fail("unapproved registry was fetched")
+    command.stdout = StringIO()
+    command.stderr = StringIO()
+    with pytest.raises(CommandError, match="11 feed"):
+        command.handle(offline=False, force=True, reference_date=date(2000, 1, 1))
+    assert Source.objects.count() == 0
+    assert Item.objects.count() == 0
+    assert command.stderr.getvalue().count("feed blocked") == 11
+    assert "Ingestion incomplete" in command.stdout.getvalue()
+
+
+def test_permission_block_leaves_existing_source_and_items_untouched(monkeypatch):
+    import content.management.commands.ingest_feeds as command_module
+
+    source = make_source(last_fetched_at=FETCHED_AT, etag='"old"')
+    ingest_entries(source, DATA_FEED, [make_entry()], FETCHED_AT)
+    blocked = {**DATA_FEED, "permissions": None}
+    monkeypatch.setattr(
+        command_module, "load_config", lambda: {**load_config(), "feeds": [blocked]}
+    )
+    command = command_module.Command()
+    command.clock = lambda: FETCHED_AT + timedelta(days=1)
+    command.fetcher = lambda *_a, **_k: pytest.fail("blocked feed was fetched")
+    command.stdout = StringIO()
+    command.stderr = StringIO()
+    with pytest.raises(CommandError):
+        command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
+    source.refresh_from_db()
+    assert source.last_fetched_at == FETCHED_AT
+    assert source.etag == '"old"'
+    assert source.items.count() == 1
+
+
+def test_expiry_is_checked_again_before_any_ingestion_or_304_validator_update(monkeypatch):
+    import content.management.commands.ingest_feeds as command_module
+
+    permission = {**DATA_FEED["permissions"], "expires_on": "2026-10-08"}
+    feed = {**DATA_FEED, "permissions": permission}
+    monkeypatch.setattr(
+        command_module, "load_config", lambda: {**load_config(), "feeds": [feed]}
+    )
+    received = []
+    fixture = (Path(__file__).parent / "fixtures" / "feed.xml").read_bytes()
+    for response in (
+        FetchResponse(200, {"Content-Type": "application/rss+xml"}, fixture),
+        FetchResponse(304, {"ETag": '"new"'}, b""),
+    ):
+        source = make_source(etag='"old"')
+        times = iter([FETCHED_AT, FETCHED_AT + timedelta(days=1)])
+        command = command_module.Command()
+        command.clock = lambda: next(times)
+
+        def fetcher(_url, _headers, **kwargs):
+            received.append(kwargs["allowed_urls"])
+            return response
+
+        command.fetcher = fetcher
+        command.stdout = StringIO()
+        command.stderr = StringIO()
+        with pytest.raises(CommandError):
+            command.handle(offline=False, force=True, reference_date=REFERENCE_DATE)
+        source.refresh_from_db()
+        assert source.etag == '"old"'
+        assert not source.items.exists()
+        source.delete()
+    assert received == [{DATA_FEED["url"]}] * 2
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        FetchResponse(200, {"Content-Type": "application/xml"}, b"<!DOCTYPE rss><rss />"),
+        FetchResponse(200, {"Content-Type": "application/xml"}, b"<!ENTITY x 'secret'>"),
+        FetchResponse(200, {"Content-Type": "application/xml"}, b"\xff\xfe<\x00r\x00"),
+        FetchResponse(
+            200, {"Content-Type": "application/xml"},
+            b"<?xml version='1.0' encoding='iso-8859-1'?><rss version='2.0'><channel/></rss>",
+        ),
+        FetchResponse(200, {"Content-Type": "application/json"}, b"{}"),
+        FetchResponse(200, {"Content-Type": "application/xml"}, b"<root/>"),
+    ],
+)
+def test_feed_parser_rejects_entities_wrong_encoding_and_nonfeed_content(response):
+    from content.management.commands.ingest_feeds import (
+        FeedResponseError,
+        parse_feed_response,
+    )
+
+    with pytest.raises(FeedResponseError):
+        parse_feed_response(response)
+
+
+def test_feed_parser_caps_entries_and_never_echoes_remote_parser_exception(monkeypatch):
+    import content.management.commands.ingest_feeds as command_module
+
+    parsed = SimpleNamespace(
+        version="rss20", bozo=False, entries=[make_entry()] * 501
+    )
+    monkeypatch.setattr(command_module.feedparser, "parse", lambda _body: parsed)
+    response = FetchResponse(200, {"Content-Type": "application/rss+xml"}, b"<rss/>")
+    with pytest.raises(command_module.FeedResponseError, match="500-entry"):
+        command_module.parse_feed_response(response)
+    parsed.entries = [make_entry()]
+    parsed.bozo = True
+    parsed.bozo_exception = ValueError("https://user:secret@example.test/private")
+    entries, warning = command_module.parse_feed_response(response)
+    assert len(entries) == 1
+    assert "secret" not in warning
+
+
+def test_invalid_cache_validators_are_not_persisted():
+    from content.management.commands.ingest_feeds import (
+        FeedResponseError,
+        _update_validators,
+    )
+
+    source = make_source(etag='"old"')
+    for value in ('"value\r\nHeader: secret"', "x" * 513):
+        with pytest.raises(FeedResponseError, match="cache validator"):
+            _update_validators(source, {"ETag": value})
+        assert source.etag == '"old"'
+
+
+@pytest.mark.parametrize("database", [
+    {"ENGINE": "django.db.backends.postgresql", "NAME": "production"},
+    {"ENGINE": "django.db.backends.sqlite3", "NAME": "C:/dev/soma-i/db.sqlite3"},
+    {"ENGINE": "django.db.backends.sqlite3", "NAME": "C:/dev/soma-i/backend/db.sqlite3"},
+])
+def test_offline_command_rejects_hosted_and_repository_targets_before_writes(
+    monkeypatch, database
+):
+    import content.management.commands.ingest_feeds as command_module
+
+    monkeypatch.setattr(
+        command_module, "connection", SimpleNamespace(settings_dict=database)
+    )
+    command = command_module.Command()
+    command.fetcher = lambda *_a, **_k: pytest.fail("offline mode attempted a fetch")
+    with pytest.raises(CommandError, match="isolated"):
+        command.handle(offline=True, force=False, reference_date=REFERENCE_DATE)
+    assert Source.objects.count() == 0
+
+
+@pytest.mark.parametrize("name", [
+    "file:memorydb_outside?notmode=memory",
+    "file:memorydb_outside?mode=memory&mode=rwc",
+    "file:memorydb_outside?mode=memoryevil",
+])
+def test_offline_memory_uri_check_cannot_be_bypassed_with_substring_or_duplicates(name):
+    from content.management.commands.ingest_feeds import _offline_database_allowed
+
+    assert not _offline_database_allowed(
+        {"ENGINE": "django.db.backends.sqlite3", "NAME": name}
+    )
+
+
+def test_offline_memory_uri_accepts_only_explicit_memory_mode():
+    from content.management.commands.ingest_feeds import _offline_database_allowed
+
+    assert _offline_database_allowed({
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "file:memorydb_default?mode=memory&cache=shared",
+    })

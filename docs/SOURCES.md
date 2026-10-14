@@ -115,3 +115,43 @@ C1 can pass only when:
 - Unknown/unapproved entries cannot be activated, their text cannot leak through old data or caches, and permission revocation/takedown can be handled without erasing historical provenance.
 
 Publisher clarification/contact, if needed, requires a separately authorized action; no messages were sent. Until those gates pass, C2/C3 may build the approved controls but must not label candidate sources verified. O1 remains blocked independently; C1 research is not deployment or public-release approval.
+
+## C3 feed-fetch enforcement - 2026-10-14
+
+C3 implements safeguards; it does not clear any publisher rights. All 11 registered feeds still lack permission evidence and live ingest_feeds therefore blocks them before a source is created/updated or a fetch occurs. --force bypasses only the minimum fetch interval; --reference-date changes staleness reporting, never permission validity. C1 and O1 remain BLOCKED.
+
+### Permission evidence contract
+
+A future, separately reviewed registry change must supply a permissions object. The code treats it as trusted operator-reviewed evidence, not an automatically verified licence or an account approval. No such objects were added to backend/content/feeds.json in C3.
+
+| Field | Enforced requirement |
+|---|---|
+| feed_access | Boolean true for automated access to the feed. |
+| metadata_reuse | Boolean true for the intended public metadata use. |
+| excerpt_reuse | Boolean true for the intended capped public excerpt use. |
+| reviewed_by | Nonempty reviewer identity; this is operational evidence, not learner profile data. |
+| scope | Nonempty description of the covered metadata/excerpts, author and third-party limitations; semantic rights review remains C1 work. |
+| evidence_url | Valid HTTPS evidence link, without userinfo, fragment or unsafe destination syntax. It is not fetched by the permission checker. |
+| reviewed_on, expires_on | Valid dates with reviewed_on <= actual current date <= expires_on and a window at most 90 days. This is the project's re-review policy, not a publisher's licence term. Earlier real expiry/revocation must be reflected. |
+| allowed_urls | One to six exact approved HTTPS endpoints, including the registry URL and each permitted redirect target. A host-wide wildcard, rights string or arbitrary caller URL is not permission. |
+
+Permission is checked again after fetching, before 304 validator writes and before entry ingestion. A missing/false/malformed/future/expired grant fails closed. Evidence still needs the C1 article/author/free-access/provenance checks; flag values cannot prove legal permission. Review changes through a dedicated approved file scope rather than treating this schema as an invitation to fill in unverified grants.
+
+### Transport and parser limits
+
+- Initial and redirect URLs must be exact allowlisted HTTPS endpoints on port 443. Userinfo, fragments, controls/whitespace, backslashes and local/ambiguous hostnames are rejected. DNS answers must all be public unicast addresses; private, loopback, link-local, shared, multicast, reserved and unsafe IPv6 transition destinations are rejected, including mixed public/private answers.
+- Connections use at most two vetted numeric DNS addresses per request, retaining the original TLS hostname and certificate verification. This prevents a second hostname lookup between validation and connection. Redirect targets are resolved/checked independently. The direct transport does not consume environment proxy settings and forbids tunnelling.
+- Socket operations are capped at ten seconds and the whole network fetch at twenty seconds, including DNS waiting, redirects and retry delays. A watchdog closes/shuts down the active connection at the deadline, including TLS/header/body reads. The underlying OS DNS call can finish later in a daemon worker; no connection is opened from a late/unvalidated result.
+- There are at most two attempts and five redirects per attempt. Only transient connection/DNS failures and HTTP 429/500/502/503/504 are retried. Retry delay defaults to one second and cannot exceed two seconds or the remaining total budget; a larger/invalid Retry-After fails instead of retrying early. TLS validation failures, invalid URLs, permission blocks, unsafe destinations and malformed payloads are not retried. Cross-host redirects drop conditional validators.
+- Bodies are bounded to 5 MiB by declared length and chunked reads. Invalid/negative lengths, truncated declared bodies and compressed responses fail; the request asks for identity encoding. Parsing/storage are separate from the network deadline: UTF-8 RSS/Atom XML is required, HTML/unsupported media types and DTD/entity declarations are rejected, and parsing is capped at 500 entries before writes. Feeds with usable partial entries retain a generic warning; raw parser exceptions are not logged.
+- ETag/Last-Modified values must fit their model fields and contain no CR/LF. Unexpected exceptions are logged by class; fixed controlled diagnostics never echo remote body text, credential-bearing URLs or raw network exceptions. Other registry feeds can continue, but any blocked/failed feed makes the aggregate command raise CommandError after its summary, so schedulers receive failure rather than a partial-success exit.
+
+Design references reviewed on 2026-10-14: [OWASP SSRF prevention](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html), [Python 3.13 HTTPS client](https://docs.python.org/3.13/library/http.client.html#http.client.HTTPSConnection), and [Python default TLS context](https://docs.python.org/3.13/library/ssl.html#ssl.create_default_context). These support the design review; mocked tests are the implementation evidence, not a live provider/TLS compatibility check.
+
+### Offline and release boundaries
+
+--offline remains a local fixture path and never calls the fetcher. It requires an in-memory SQLite target (including an explicitly parsed mode=memory URI) or a SQLite file resolved under OS temp; repository/hosted targets are rejected before source writes. These fixtures are test/demo evidence, not publisher approval. The caller must still print its explicit temporary DATABASE_URL before any database-backed command.
+
+C3 guards this live management-command entry point. The internal ingest_entries function and existing seeded/stored records/caches are not globally permission-filtered or purged by this change. Direct trusted local fixture helpers remain in use; production initialization, API visibility and cache cleanup must honor C1 before release. Do not activate legacy candidate rows merely because the fetch command is now protected.
+
+Tests use fabricated grants on example.test endpoints, patched DNS/socket/HTTP/TLS operations and existing offline RSS bytes only. No live feed was fetched, no publisher was contacted, no real registry grant was created, and no service/database was provisioned or deployed. Live provider compatibility, rights clearance and real ingestion across three independent publishers are **not tested** and remain blocked. The exact test outputs and retained roadmap history are recorded in docs/PLANS.md.

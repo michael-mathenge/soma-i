@@ -1,15 +1,39 @@
 import json
+import re
 from datetime import date, timedelta
 from pathlib import Path
+from tempfile import gettempdir
+from urllib.parse import parse_qs, urlsplit
 
 import feedparser
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
+from django.db import connection
 from django.utils import timezone
 
-from content.fetching import FetchResponse, fetch_feed
+from content.fetching import MAX_FEED_BYTES, FeedFetchError, FetchResponse, fetch_feed
 from content.ingestion import feed_staleness, ingest_entries, items_for_pathway
 from content.matching import load_config
 from content.models import Source
+from content.permissions import FeedPermissionError, approved_feed_urls
+
+MAX_FEED_ENTRIES = 500
+
+
+def _offline_database_allowed(database):
+    if database.get("ENGINE") != "django.db.backends.sqlite3":
+        return False
+    name = str(database.get("NAME", ""))
+    if name == ":memory:" or (
+        name.startswith("file:memorydb_")
+        and parse_qs(urlsplit(name).query).get("mode") == ["memory"]
+    ):
+        return True
+    if not name or name.startswith("file:"):
+        return False
+    try:
+        return Path(name).resolve().is_relative_to(Path(gettempdir()).resolve())
+    except (OSError, ValueError):
+        return False
 
 
 class FeedResponseError(ValueError):
@@ -21,6 +45,21 @@ def parse_feed_response(response):
         return None
     if response.status < 200 or response.status >= 300:
         raise FeedResponseError(f"Unexpected HTTP status {response.status}")
+    if len(response.body) > MAX_FEED_BYTES:
+        raise FeedResponseError("Feed response exceeds the 5 MB limit")
+    try:
+        xml = response.body.decode("utf-8-sig")
+    except UnicodeError as exc:
+        raise FeedResponseError("Feed must be UTF-8 XML") from exc
+    encoding = re.match(
+        r"""\s*<\?xml\b[^?]*\bencoding\s*=\s*["']([^"']+)""",
+        xml,
+        re.IGNORECASE,
+    )
+    if encoding and encoding.group(1).lower() not in ("utf-8", "utf8", "ascii", "us-ascii"):
+        raise FeedResponseError("Feed XML declares an unsupported character encoding")
+    if re.search(r"<!\s*(DOCTYPE|ENTITY)\b", xml, re.IGNORECASE):
+        raise FeedResponseError("Feed DTDs and entity declarations are forbidden")
     content_type = next(
         (
             value.lower()
@@ -32,13 +71,21 @@ def parse_feed_response(response):
     sample = response.body.lstrip()[:512].lower()
     if "html" in content_type or sample.startswith((b"<!doctype html", b"<html")):
         raise FeedResponseError("Response is HTML, not an XML feed")
+    if content_type.split(";", 1)[0] not in (
+        "", "application/rss+xml", "application/atom+xml", "application/xml", "text/xml"
+    ):
+        raise FeedResponseError("Unsupported feed Content-Type")
     parsed = feedparser.parse(response.body)
+    if not getattr(parsed, "version", ""):
+        raise FeedResponseError("Response is not a recognized RSS or Atom feed")
+    if len(parsed.entries) > MAX_FEED_ENTRIES:
+        raise FeedResponseError("Feed exceeds the 500-entry limit")
     if parsed.bozo:
         if not parsed.entries:
             raise FeedResponseError(
-                f"Malformed feed: {parsed.bozo_exception or 'parser error'}"
+                "Malformed feed"
             )
-        return parsed.entries, str(parsed.bozo_exception)
+        return parsed.entries, "parser warning; partial entries used"
     return parsed.entries, ""
 
 
@@ -57,6 +104,10 @@ def _update_validators(source, headers):
             (value for key, value in headers.items() if key.lower() == name), None
         )
         if value:
+            if len(value) > source._meta.get_field(field).max_length or any(
+                char in value for char in "\r\n"
+            ):
+                raise FeedResponseError("Invalid feed cache validator")
             setattr(source, field, value)
 
 
@@ -108,6 +159,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        if options["offline"] and not _offline_database_allowed(connection.settings_dict):
+            raise CommandError(
+                "Offline fixtures require an isolated OS-temp or in-memory SQLite database."
+            )
         config = load_config()
         now = self.clock()
         reference_date = options.get("reference_date") or timezone.localdate(now)
@@ -120,6 +175,14 @@ class Command(BaseCommand):
         total_duplicates = 0
 
         for feed in config["feeds"]:
+            allowed_urls = None
+            if not options["offline"]:
+                try:
+                    allowed_urls = approved_feed_urls(feed, timezone.localdate(now))
+                except FeedPermissionError as exc:
+                    feed_failures.append(feed["name"])
+                    self.stderr.write(f"{feed['name']}: feed blocked ({exc})")
+                    continue
             defaults = _source_defaults(feed)
             source, _ = Source.objects.get_or_create(url=feed["url"], defaults=defaults)
             for name, value in defaults.items():
@@ -152,13 +215,16 @@ class Command(BaseCommand):
                             "last_fetched_at",
                         ]
                     )
-                    response = self.fetcher(feed["url"], _validator_headers(source))
+                    response = self.fetcher(
+                        feed["url"], _validator_headers(source), allowed_urls=allowed_urls
+                    )
                     if not isinstance(response, FetchResponse):
                         response = FetchResponse(
                             response.status,
                             dict(response.headers),
                             response.body,
                         )
+                    approved_feed_urls(feed, timezone.localdate(self.clock()))
                     if response.status == 304:
                         _update_validators(source, response.headers)
                         source.save(update_fields=["etag", "last_modified"])
@@ -177,6 +243,8 @@ class Command(BaseCommand):
                     _update_validators(source, response.headers)
                     fetched_at = now
 
+                if not options["offline"]:
+                    approved_feed_urls(feed, timezone.localdate(self.clock()))
                 stats = ingest_entries(source, feed, entries, fetched_at, config)
                 source.latest_item_at = stats["latest_item_at"]
                 source.save(update_fields=["etag", "last_modified", "latest_item_at"])
@@ -192,8 +260,13 @@ class Command(BaseCommand):
                 )
             except Exception as exc:  # Keep the remaining registry feeds running.
                 feed_failures.append(feed["name"])
+                diagnostic = (
+                    str(exc)
+                    if isinstance(exc, (FeedFetchError, FeedPermissionError, FeedResponseError))
+                    else type(exc).__name__
+                )
                 self.stderr.write(
-                    self.style.WARNING(f"{feed['name']}: feed failed ({exc})")
+                    self.style.WARNING(f"{feed['name']}: feed failed ({diagnostic})")
                 )
 
         stale_feeds = []
@@ -232,7 +305,12 @@ class Command(BaseCommand):
         self.stdout.write(
             "Stale feeds: " + ("; ".join(stale_feeds) if stale_feeds else "none")
         )
+        outcome = "incomplete" if feed_failures else "complete"
         self.stdout.write(
-            f"Ingestion complete: {total_created} new item(s), "
+            f"Ingestion {outcome}: {total_created} new item(s), "
             f"{total_duplicates} duplicate merge(s), {len(feed_failures)} failed feed(s)."
         )
+        if feed_failures:
+            raise CommandError(
+                f"Ingestion failed for {len(feed_failures)} feed(s); see redacted diagnostics."
+            )
