@@ -23,7 +23,10 @@ export default [
     },
     plugins: { "react-hooks": reactHooks, "react-refresh": reactRefresh },
     rules: {
-      ...reactHooks.configs["recommended-latest"].rules,
+      // Preserve the two hook rules enforced before the dependency upgrade.
+      // React Compiler adoption and its additional diagnostics are separate work.
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
       "no-empty": ["error", { allowEmptyCatch: true }],
       "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z]" }],
       "react-refresh/only-export-components": [

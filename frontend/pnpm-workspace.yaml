@@ -1,2 +1,10 @@
 allowBuilds:
   esbuild: true
+
+# P1's pinned runtime and peer graph must match before installation.
+engineStrict: true
+minimumReleaseAgeExclude:
+  - "@playwright/test@1.64.1"
+  - playwright-core@1.64.1
+  - playwright@1.64.1
+strictPeerDependencies: true
