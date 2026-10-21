@@ -405,7 +405,11 @@ test("onboarding blocks duplicate writes and demo while a start request is pendi
   await expect(
     page.getByRole("button", { name: "Open the demo learner" }),
   ).toBeDisabled();
+  // Wait for the request to reach the network before the repeat activation
+  // and the count assertion, so the check cannot race the dispatch.
+  await expect.poll(() => writes.length).toBe(1);
   await page.keyboard.press("Enter");
+  await page.waitForTimeout(500);
   expect(writes).toHaveLength(1);
   release();
   await expect(page.getByRole("alert")).toBeVisible();
