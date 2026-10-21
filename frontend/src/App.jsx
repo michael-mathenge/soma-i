@@ -347,7 +347,11 @@ function RoadmapCard({ topic }) {
     <article className="panel stack roadmap-card">
       {topic.image?.url && (
         <figure className="roadmap-image">
-          <img src={topic.image.url} alt={topic.image.alt || ""} loading="lazy" />
+          <img
+            src={topic.image.url}
+            alt={topic.image.alt || ""}
+            loading="lazy"
+          />
           {topic.image.credit && <figcaption>{topic.image.credit}</figcaption>}
         </figure>
       )}
