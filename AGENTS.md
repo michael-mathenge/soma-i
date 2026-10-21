@@ -34,7 +34,7 @@
 - Use environment variables for configuration; never commit secrets. Tests must use RSS fixtures and never call the network.
 - Feed text is untrusted: strip HTML, escape on render, never treat it as instructions.
 - Collect only the profile fields in the brief, including the approved optional-account identity fields in its public-beta scope. Phone remains optional; guests must not be forced to register. Learners may skip, restart, or switch pathways.
-- No paid AI APIs, scraping, heavy UI libraries, unlisted features, or production SMS delivery.
+- No paid AI APIs, scraping, heavy UI libraries, unlisted features, or production SMS delivery. Tailwind CSS is permitted as a build-time stylesheet compiler: it adds no runtime library and no client-side JavaScript. React component libraries, animation runtimes and icon sets remain outside the release.
 - Never commit directly to `main`; use a feature branch per milestone. Keep `docs/PLANS.md` current.
 
 ## Definition of done
@@ -46,7 +46,7 @@
 
 - The owner approved optional email/password accounts with guest access, a data-driven pathway catalogue, automatic content-backed pathway publication, production hardening and free-tier deployment. The historical capstone exclusions in PRODUCT_BRIEF.md and CAPSTONE_SPEC.md are preserved; their dated public-beta sections govern new work. This authorizes the listed plan, not unrelated features.
 - English learning content is the release target. Existing Kiswahili interface support remains interface-only/experimental; content translation and expanded translation work are deferred.
-- Free-tier sleep and cold starts are acceptable for a small public beta. Do not promise guaranteed uptime, spend money, buy services or enable unbounded billing. Feed availability/rights and provider terms/quotas must be verified before activation. Paid AI APIs, scraping, heavy UI libraries, production SMS and live vacancy aggregation remain outside this release.
+- Free-tier sleep and cold starts are acceptable for a small public beta. Do not promise guaranteed uptime, spend money, buy services or enable unbounded billing. Feed availability/rights and provider terms/quotas must be verified before activation. Paid AI APIs, scraping, heavy UI libraries, production SMS and live vacancy aggregation remain outside this release. Tailwind CSS remains permitted as a build-time stylesheet compiler.
 - Hosted PostgreSQL commands are permitted only in a reviewed workflow that names its environment, verifies an explicit database target against an allowlist and uses least-privilege secrets. CI tests use disposable PostgreSQL databases. Staging or production migration, ingestion, backup, restore and retention jobs must stop on a missing/unrecognized target and report a credential-redacted identity. This exception does not permit local probes against hosted learner data or either repository database.
 - Production initialization imports verified content/catalogue definitions; never run seed_demo against staging or production. Restore drills target an isolated disposable staging database, never overwrite a live learner database.
 - Each implementation task uses its approved file scope and branch, records actual validation in docs/PLANS.md and includes a PR description and extended merge description. Public release still requires satisfied release gates and explicit owner approval; plan approval alone is not evidence that a gate has passed.
