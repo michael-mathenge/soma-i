@@ -223,15 +223,21 @@ function Catalogue({ t }) {
   const [search, setSearch] = useState(query);
   const [state, setState] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
+  // Adopt a query that arrived from the URL, but never clobber a value the
+  // learner is still typing; the form owns the input until it is submitted.
+  const lastQuery = useRef(query);
   useEffect(() => {
-    setSearch(query);
+    if (query !== lastQuery.current) {
+      lastQuery.current = query;
+      setSearch(query);
+    }
   }, [query]);
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
     setState({ loading: true });
     api
-      .get("/pathways/", {
+      .get("/roadmaps/", {
         params: { page, q: query },
         signal: controller.signal,
       })
@@ -308,19 +314,7 @@ function Catalogue({ t }) {
           {data.results.length === 0 && <p className="panel">{en.noTopics}</p>}
           <div className="cards catalogue-cards">
             {data.results.map((topic) => (
-              <article className="panel stack" key={topic.id}>
-                <h2>{topic.title}</h2>
-                {topic.is_demo && <p className="eyebrow">{en.demoTopic}</p>}
-                <p>{topic.description}</p>
-                <p>{topic.target_outcome}</p>
-                <Link
-                  className="button"
-                  to={`/?pathway=${topic.id}`}
-                  aria-label={`${en.choosePathway}: ${topic.title}`}
-                >
-                  {en.choosePathway}
-                </Link>
-              </article>
+              <RoadmapCard topic={topic} key={topic.slug || topic.id} />
             ))}
           </div>
           <nav className="toolbar" aria-label={en.cataloguePages}>
@@ -342,6 +336,53 @@ function Catalogue({ t }) {
         </>
       )}
     </section>
+  );
+}
+
+function RoadmapCard({ topic }) {
+  const availableId = topic.available_pathway_id || topic.id;
+  const canStart = Boolean(topic.available || topic.is_demo);
+  const steps = topic.steps || [];
+  return (
+    <article className="panel stack roadmap-card">
+      {topic.image?.url && (
+        <figure className="roadmap-image">
+          <img src={topic.image.url} alt={topic.image.alt || ""} loading="lazy" />
+          {topic.image.credit && <figcaption>{topic.image.credit}</figcaption>}
+        </figure>
+      )}
+      <div className="roadmap-card__body">
+        <p className="eyebrow">
+          {canStart ? en.availableNow : en.previewRoadmap}
+          {topic.version ? ` · v${topic.version}` : ""}
+        </p>
+        {topic.is_demo && <p className="eyebrow">{en.demoTopic}</p>}
+        <h2>{topic.title}</h2>
+        <p>{topic.description}</p>
+        <p className="roadmap-outcome">{topic.target_outcome}</p>
+        {steps.length > 0 && (
+          <ol className="roadmap-steps" aria-label={en.roadmapSteps}>
+            {steps.map((step, index) => (
+              <li key={`${index}-${step.skill}`}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{step.skill}</strong>
+              </li>
+            ))}
+          </ol>
+        )}
+        {canStart ? (
+          <Link
+            className="button"
+            to={`/?pathway=${availableId}`}
+            aria-label={`${en.choosePathway}: ${topic.title}`}
+          >
+            {en.choosePathway}
+          </Link>
+        ) : (
+          <p className="source-gate">{en.sourceGate}</p>
+        )}
+      </div>
+    </article>
   );
 }
 

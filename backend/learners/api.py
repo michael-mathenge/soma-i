@@ -12,6 +12,7 @@ from learners.models import LearnerProfile
 from opportunities.matching import match_score
 from opportunities.models import Opportunity
 from pathways.catalogue import catalogue_skill_ids, enrollable_pathways
+from pathways.discovery import load_rules
 from pathways.logic import (
     completed_items,
     progress_for,
@@ -161,6 +162,71 @@ def pathways_list(request):
             }
         )
     return Response(results)
+
+
+@api_view(["GET"])
+def roadmaps_list(request):
+    try:
+        page = int(request.query_params.get("page", "1"))
+    except (ValueError, TypeError):
+        return Response({"detail": "Page must be a positive integer."}, status=400)
+    if not 1 <= page <= 1000000:
+        return Response({"detail": "Page must be between 1 and 1000000."}, status=400)
+    query = request.query_params.get("q", "").strip()
+    if len(query) > 120:
+        return Response({"detail": "Search is limited to 120 characters."}, status=400)
+    enrollable_by_slug = {
+        pathway.catalogue.slug: pathway
+        for pathway in enrollable_pathways().select_related("catalogue")
+        if pathway.catalogue_id
+    }
+    roadmaps = []
+    for topic in load_rules()["topics"]:
+        if query:
+            fields = [
+                topic["title"],
+                topic["description"],
+                topic["target_outcome"],
+                *topic["aliases"],
+                *(step["skill"] for step in topic["steps"]),
+            ]
+            folded = query.casefold()
+            if not any(folded in field.casefold() for field in fields):
+                continue
+        pathway = enrollable_by_slug.get(topic["slug"])
+        roadmaps.append(
+            {
+                "slug": topic["slug"],
+                "title": topic["title"],
+                "description": topic["description"],
+                "target_outcome": topic["target_outcome"],
+                "available_pathway_id": pathway.pk if pathway else None,
+                "available": pathway is not None,
+                "is_demo": bool(pathway and pathway.is_demo),
+                "version": pathway.version if pathway else None,
+                "image": topic.get("image", {}),
+                "steps": [
+                    {
+                        "skill": step["skill"],
+                        "title": step["title"],
+                        "criteria": step["criteria"],
+                        "requires": step["requires"],
+                    }
+                    for step in topic["steps"]
+                ],
+            }
+        )
+    count = len(roadmaps)
+    paged = roadmaps[(page - 1) * 12 : page * 12]
+    return Response(
+        {
+            "results": paged,
+            "count": count,
+            "page": page,
+            "page_size": 12,
+            "has_next": page * 12 < count,
+        }
+    )
 
 
 @api_view(["POST"])

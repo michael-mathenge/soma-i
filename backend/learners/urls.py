@@ -12,6 +12,7 @@ urlpatterns = [
     path("account/logout/", accounts.sign_out),
     path("health/", api.health),
     path("pathways/", api.pathways_list),
+    path("roadmaps/", api.roadmaps_list),
     path("demo/", api.demo_session),
     path("me/", api.me),
     path("dashboard/", api.dashboard),
