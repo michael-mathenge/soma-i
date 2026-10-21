@@ -69,7 +69,10 @@ def test_discovery_migrations_preserve_legacy_content_versions_and_progress_with
         NewPath = new_apps.get_model("pathways", "Pathway")
         saved = NewItem.objects.get(pk=item.pk)
         assert saved.topic_tags == []
-        assert saved.summary == "Original excerpt" and saved.date_source is None
+        assert saved.match_text == "Original excerpt" and saved.date_source is None
+        # The forward migration moves the stored text into internal matching
+        # text and clears any republicable excerpt.
+        assert saved.excerpt == ""
         assert not new_apps.get_model("content", "ResourceReview").objects.exists()
         assert not new_apps.get_model("pathways", "PathwayResource").objects.exists()
         current = NewPath.objects.get(pk=path.pk)

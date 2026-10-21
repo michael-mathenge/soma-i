@@ -19,3 +19,12 @@
 - PostgreSQL is the production target; SQLite stays local/test only. The contributor guide narrowly allows reviewed hosted jobs and disposable PostgreSQL tests while forbidding repository database access and production seeding.
 - Proposed same-origin Render web hosting, Neon PostgreSQL, GitHub Actions scheduling, Brevo mail and Cloudflare R2 encrypted backup storage all remain to verify. Existing michaelmathenge.dev is owner-reported; DNS, TLS, sender verification, quotas and effective no-charge controls are unverified. Stop at failed eligibility/cost/privacy gates instead of selecting a paid substitute.
 - The target is a small public beta that tolerates disclosed cold starts/sleep; it is not an uptime-guaranteed production service. Public publication still requires satisfied gates and explicit approval. No production SMS, live vacancies, paid APIs or new demographic data.
+
+## Metadata-only content model - 2026-10-21
+
+- Content is published to learners as title, publisher, publication date and a link to the original. Stored feed text is never returned by the API. The previous behaviour, which stored a feed excerpt and displayed it in the lesson card, is replaced.
+- Feed text is still read at ingest time to decide which pathway and skill an item belongs to. That text is kept in a separate internal field used only for matching and discovery, and it is never served. Matching on text that was fetched is not republication of it.
+- A separate excerpt field holds publisher text that a review has explicitly cleared for republication. It is empty by default, so a feed that has not been reviewed shows no excerpt rather than an uncleared one. Only reviewed text reaches the excerpt field.
+- The reason is that excerpt reuse permission is the narrowest and hardest to obtain right of the ones a feed involves. Removing the dependency lets a feed be cleared for metadata reuse without also clearing excerpt reuse, which unblocks publishers that permit linking and attribution but not republication. MDN is the clearest example: its documentation is CC BY-SA 2.5, but its blog feed carries a reserved-rights notice, and the two are separate.
+- The forward migration moves any existing stored text into the internal matching field and clears the excerpt, so no previously stored text is carried forward as publishable content.
+- The API keeps reporting the publisher's reported rights string and still reports reuse as unverified. A licence string is a claim by the publisher, not permission confirmed by the owner.

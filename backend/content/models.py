@@ -34,7 +34,13 @@ class Item(models.Model):
         max_length=2048, unique=True, null=True, blank=True
     )
     guid = models.CharField(max_length=1000, blank=True, default="", db_index=True)
-    summary = models.TextField(blank=True)
+    # Feed text used only to decide which pathway an item belongs to. It is
+    # never published, and the API never returns it.
+    match_text = models.TextField(blank=True)
+    # Publisher text cleared for republication. Empty unless a review
+    # confirmed explicit reuse permission, so the default is to publish
+    # title, publisher and date only and link out to the original.
+    excerpt = models.TextField(blank=True)
     published_at = models.DateTimeField()
     fetched_at = models.DateTimeField(null=True, blank=True)
     date_source = models.CharField(

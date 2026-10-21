@@ -337,5 +337,5 @@ def test_seeded_functional_css_summary_keeps_200_character_fixture_excerpt():
         url="https://www.freecodecamp.org/news/atomic-and-functional-css/"
     )
 
-    print(f"Functional CSS stored summary length: {len(item.summary)}")
-    assert len(item.summary) == 200
+    print(f"Functional CSS stored match text length: {len(item.match_text)}")
+    assert len(item.match_text) == 200

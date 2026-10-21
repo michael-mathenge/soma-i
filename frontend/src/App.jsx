@@ -791,12 +791,19 @@ function Cards({ items = [], t, doneCallback, disabled = false }) {
                 item.title
               )}
             </h3>
-            <p className="item-summary">{item.summary}</p>
+            {item.excerpt && <p className="item-summary">{item.excerpt}</p>}
             <p className="meta">
               {[item.source, item.is_low_data && t.lowData]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
+            {item.url && (
+              <p className="item-read">
+                <a href={item.url} target="_blank" rel="noreferrer">
+                  {t.readAtPublisher}
+                </a>
+              </p>
+            )}
             <ItemProvenance item={item} t={t} />
             <p>{item.skills.join(" · ")}</p>
             {!item.done && doneCallback && (

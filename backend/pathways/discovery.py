@@ -57,7 +57,7 @@ def content_fingerprint(item):
     return digest(
         dict(
             title=item.title,
-            summary=item.summary,
+            match_text=item.match_text,
             url=item.url,
             source_url=item.source.url,
             language=item.language,
@@ -280,7 +280,9 @@ def topic_coverage(topic, resources):
                 r
                 for r in candidates
                 if matches_terms(
-                    " ".join([r.item.title, r.item.summary[:300], *r.item.topic_tags]),
+                    " ".join(
+                        [r.item.title, r.item.match_text[:300], *r.item.topic_tags]
+                    ),
                     step["aliases"],
                 )
             ]
