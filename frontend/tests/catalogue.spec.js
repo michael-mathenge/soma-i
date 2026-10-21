@@ -15,8 +15,18 @@ const topics = Array.from({ length: 13 }, (_, index) => ({
     credit: "Unsplash",
   },
   steps: [
-    { skill: `Skill ${index + 1} A`, title: "Check A", criteria: "Example", requires: [] },
-    { skill: `Skill ${index + 1} B`, title: "Check B", criteria: "Example", requires: [] },
+    {
+      skill: `Skill ${index + 1} A`,
+      title: "Check A",
+      criteria: "Example",
+      requires: [],
+    },
+    {
+      skill: `Skill ${index + 1} B`,
+      title: "Check B",
+      criteria: "Example",
+      requires: [],
+    },
   ],
 }));
 async function fixtures(page, handler) {
@@ -114,7 +124,10 @@ test("catalogue search submits explicitly resets pages and handles empty results
   // empty result. Asserting the render alone can observe the previous
   // result set on a slower machine.
   await expect
-    .poll(() => served.filter((entry) => entry.query === "missing").length)
+    .poll(() => served.filter((entry) => entry.query === "missing").length, {
+      message: () =>
+        `served=${JSON.stringify(served)} url=${page.url()} input=${search.inputValue()}`,
+    })
     .toBe(1);
   await expect(page.getByText(/No topics on this page/)).toBeVisible();
   await page.getByRole("button", { name: "Clear search" }).click();
@@ -202,10 +215,10 @@ test("catalogue marks a roadmap without an open pathway as a preview", async ({
   });
   await page.goto("/catalogue");
   await expect(page.getByRole("article")).toHaveCount(1);
-  await expect(page.getByText("Roadmap preview", { exact: true })).toBeVisible();
   await expect(
-    page.getByText(/not open for enrollment yet/),
+    page.getByText("Roadmap preview", { exact: true }),
   ).toBeVisible();
+  await expect(page.getByText(/not open for enrollment yet/)).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Choose a pathway: Locked topic" }),
   ).toHaveCount(0);
