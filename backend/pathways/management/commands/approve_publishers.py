@@ -87,9 +87,7 @@ class Command(BaseCommand):
         for publisher in prepared:
             # The key is the map key, so it is not repeated in the value.
             publishers[publisher["key"]] = {
-                field: value
-                for field, value in publisher.items()
-                if field != "key"
+                field: value for field, value in publisher.items() if field != "key"
             }
         rules["publishers"] = publishers
         validate_rules(rules)
