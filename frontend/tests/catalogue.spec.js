@@ -20,6 +20,9 @@ const topics = Array.from({ length: 13 }, (_, index) => ({
   ],
 }));
 async function fixtures(page, handler) {
+  // The served queries are recorded so a test can wait for the request it
+  // triggered instead of asserting on a render that follows it.
+  const served = [];
   await page.route("**/api/**", async (route) => {
     const url = new URL(route.request().url());
     if (route.request().method() !== "GET") return route.abort();
@@ -44,6 +47,7 @@ async function fixtures(page, handler) {
     const matches = topics.filter((topic) =>
       topic.title.toLowerCase().includes(query.toLowerCase()),
     );
+    served.push({ query, page: number, count: matches.length });
     return route.fulfill({
       json: {
         results: matches.slice((number - 1) * 12, number * 12),
@@ -54,6 +58,7 @@ async function fixtures(page, handler) {
       },
     });
   });
+  return served;
 }
 test("catalogue pages preserve URL history and selected onboarding pathway", async ({
   page,
@@ -95,7 +100,7 @@ test("catalogue pages preserve URL history and selected onboarding pathway", asy
 test("catalogue search submits explicitly resets pages and handles empty results", async ({
   page,
 }) => {
-  await fixtures(page);
+  const served = await fixtures(page);
   await page.goto("/catalogue?page=2");
   const search = page.getByRole("searchbox", { name: "Search topics" });
   await search.fill("Topic 2");
@@ -105,6 +110,12 @@ test("catalogue search submits explicitly resets pages and handles empty results
   await expect(page).toHaveURL(/page=1/);
   await search.fill("missing");
   await search.press("Enter");
+  // Wait for the second search to reach the server before asserting the
+  // empty result. Asserting the render alone can observe the previous
+  // result set on a slower machine.
+  await expect
+    .poll(() => served.filter((entry) => entry.query === "missing").length)
+    .toBe(1);
   await expect(page.getByText(/No topics on this page/)).toBeVisible();
   await page.getByRole("button", { name: "Clear search" }).click();
   await expect(page.getByRole("article")).toHaveCount(12);
