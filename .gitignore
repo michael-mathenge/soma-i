@@ -17,3 +17,17 @@ test-results/
 
 .local/
 .idea/
+
+# Large local media and archives must never be committed.
+*.mp4
+*.mov
+*.mkv
+*.zip
+*.tar
+*.tar.gz
+
+# Local scratch output from validation runs.
+.local/
+*.log
+playwright-report/
+test-results/

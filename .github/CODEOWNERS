@@ -1,0 +1,13 @@
+# Default owners for every file in the repository.
+* @michael-mathenge
+
+# Domain-sensitive areas keep an explicit owner so a change is never
+# reviewed by whoever happens to be available.
+backend/pathways/   @michael-mathenge
+backend/content/    @michael-mathenge
+backend/learners/   @michael-mathenge
+backend/engagement/ @michael-mathenge
+frontend/src/       @michael-mathenge
+frontend/tests/     @michael-mathenge
+docs/               @michael-mathenge
+.github/            @michael-mathenge
