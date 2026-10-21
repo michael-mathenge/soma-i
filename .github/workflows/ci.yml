@@ -70,8 +70,15 @@ jobs:
         # resolves in a separate Black/format pass, so checking the whole
         # tree here would block every unrelated pull request.
         run: |
-          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          # Fetch enough history to find the merge base with the base branch.
+          # A shallow fetch alone leaves no merge base, so unshallow when needed.
+          git fetch --no-tags origin "${{ github.base_ref }}"
+          git fetch --no-tags --unshallow origin 2>/dev/null || git fetch --no-tags origin
           BASE=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          if [ -z "$BASE" ]; then
+            echo "No merge base found; skipping the scoped format check."
+            exit 0
+          fi
           git diff --name-only --diff-filter=ACMR "$BASE" HEAD -- backend/ > /tmp/changed.txt
           FILES=$(grep '\.py$' /tmp/changed.txt || true)
           if [ -z "$FILES" ]; then
@@ -148,6 +155,12 @@ jobs:
       - name: Resolve isolated database target
         run: |
           python -c "import tempfile,pathlib;d=pathlib.Path(tempfile.gettempdir()).resolve()/'somai-ci';d.mkdir(parents=True,exist_ok=True);p=d/'test.sqlite3';print('DATABASE_URL=sqlite:///'+str(p).replace(chr(92),'/'))" >> "$GITHUB_ENV"
+
+      - name: Point the browser suite at the runner interpreter
+        # The suite resolves Python from PYTHON, then a repository virtual
+        # environment, then "py". CI has no virtual environment and no "py"
+        # launcher on Linux, so the runner interpreter is supplied directly.
+        run: echo "PYTHON=$(command -v python)" >> "$GITHUB_ENV"
 
       - name: Playwright journey
         working-directory: frontend
