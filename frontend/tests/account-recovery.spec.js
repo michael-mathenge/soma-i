@@ -113,6 +113,9 @@ test("reset pending prevents duplicate writes and success requires explicit sign
   await confirm.click();
   await expect(confirm).toBeDisabled();
   await expect(page.getByLabel("New password")).toBeDisabled();
+  // Wait for the request to reach the network before asserting, so the check
+  // cannot race the dispatch on a slower machine.
+  await expect.poll(() => writes.length).toBe(1);
   expect(writes).toHaveLength(1);
   finish();
   await expect(page.getByRole("status")).toContainText(
