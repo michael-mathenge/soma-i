@@ -152,6 +152,12 @@ jobs:
         working-directory: frontend
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec playwright install --with-deps chromium
 
+      - name: Build the frontend
+        # The browser job serves the production bundle, so it must exist
+        # before the Playwright web server starts.
+        working-directory: frontend
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} run build
+
       - name: Resolve isolated database target
         run: |
           python -c "import tempfile,pathlib;d=pathlib.Path(tempfile.gettempdir()).resolve()/'somai-ci';d.mkdir(parents=True,exist_ok=True);p=d/'test.sqlite3';print('DATABASE_URL=sqlite:///'+str(p).replace(chr(92),'/'))" >> "$GITHUB_ENV"
