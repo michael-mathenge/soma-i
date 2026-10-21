@@ -195,7 +195,11 @@ test("checkpoint pending locks controls and submits the selected answers once", 
     page.getByRole("button", { name: "Skip this checkpoint" }),
   ).toBeDisabled();
   await expect(page.getByRole("radio").first()).toBeDisabled();
+  // Wait for the request to reach the network before the repeat activation
+  // is attempted, so the assertion cannot race the dispatch.
+  await expect.poll(() => writes.length).toBe(1);
   await page.keyboard.press("Enter");
+  await page.waitForTimeout(500);
   expect(writes).toEqual([
     {
       path: "/api/checkpoints/11/complete/",
@@ -424,7 +428,12 @@ test("lesson pending state waits for confirmation and locks repeated activation"
   const button = page.getByRole("button", { name: "Mark lesson done" });
   await button.press("Enter");
   await expect(button).toBeDisabled();
+  // The request must reach the network before the repeat activation is
+  // attempted. Asserting the write count without waiting for it races the
+  // dispatch and fails on a slower machine.
+  await expect.poll(() => writes.length).toBe(1);
   await page.keyboard.press("Enter");
+  await page.waitForTimeout(500);
   expect(writes).toHaveLength(1);
   release();
   await expect(button).toHaveCount(0);
@@ -479,6 +488,9 @@ test("checkpoint route changes reset answers and skip navigates only after confi
     page.getByRole("button", { name: "Skip this checkpoint" }),
   ).toBeDisabled();
   await expect(page).toHaveURL(/checkpoint\/12/);
+  // Wait for the skip request to reach the network before asserting, so the
+  // check cannot race the dispatch on a slower machine.
+  await expect.poll(() => writes.length).toBe(1);
   expect(writes).toHaveLength(1);
   release();
   await expect(page).toHaveURL(/\/pathway$/);
