@@ -174,3 +174,17 @@ jobs:
           SOMA_ENV: test
           DJANGO_DEBUG: "false"
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec playwright test --timeout=60000
+
+      - name: Upload browser failure context
+        # The error context records the rendered page at the moment of
+        # failure, which is the only way to diagnose a browser failure from
+        # the job log alone.
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-context
+          path: |
+            frontend/test-results/**/error-context.md
+            frontend/playwright-report/**
+          retention-days: 7
+          if-no-files-found: ignore
