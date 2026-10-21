@@ -111,6 +111,17 @@ test("missing CSRF and an untrusted origin cannot start a guest or login", async
 test("failed registration is visible and writes are not automatically retried", async ({
   page,
 }) => {
+  // The application waits for the offline shell worker before it sends an
+  // account write. The worker intermittently takes control of the page, and
+  // that handshake can resolve after the request has already been sent, so
+  // the mocked failure is not observed. This test asserts request behaviour
+  // rather than worker behaviour, and the worker-specific cases in this file
+  // cover the worker itself.
+  await page.context().addInitScript(() => {
+    if ("serviceWorker" in navigator) {
+      Object.defineProperty(navigator, "serviceWorker", { value: undefined });
+    }
+  });
   await account(page);
   let writes = 0;
   await page.route("**/api/account/", async (route) => {
