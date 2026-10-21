@@ -238,6 +238,95 @@ Read the [AI-use disclosure](docs/AI-usage.md) for the owner’s account of AI c
 | Multilingual | English/Kiswahili interface and reminder strings; bilingual test definitions | Pathway-specific translation is limited to Data Analyst; native-speaker review **not done** |
 | Local relevance | Kenya-labelled sample opportunities and the assumed Nakuru learner | Locally African RSS sources and verified local vacancies: **not done** |
 
+## Recording review evidence
+
+A pathway can only be published when the owner has confirmed, in writing and
+with a date, that the material is freely accessible, in English, attributed,
+and covered by a publisher whose reuse permission has been verified. The
+pipeline has always required that evidence; these commands are how it is
+recorded, so the review does not have to be written by hand into a database.
+
+**PowerShell — approve a feed endpoint**
+
+```powershell
+$env:SOMA_ENV = 'development'
+$reviews = "$env:TEMP\somai-feeds.json"
+@'
+{
+  "feeds": [
+    {
+      "key": "fcc_sql",
+      "reviewed_by": "Your name",
+      "scope": "Title and link with attribution; excerpts are not republished.",
+      "reviewed_on": "2026-10-21",
+      "expires_on": "2026-12-20",
+      "evidence_url": "https://www.freecodecamp.org/copyright/",
+      "allowed_urls": ["https://www.freecodecamp.org/news/tag/sql/rss/"],
+      "publisher_key": "freecodecamp",
+      "excerpt_reuse": false
+    }
+  ]
+}
+'@ | Set-Content -Path $reviews -Encoding UTF8
+.\.venv\Scripts\python.exe backend\manage.py approve_feeds $reviews --dry-run
+```
+
+**PowerShell — approve a publisher**
+
+```powershell
+$publishers = "$env:TEMP\somai-publishers.json"
+@'
+{
+  "publishers": [
+    {
+      "key": "freecodecamp",
+      "domains": ["freecodecamp.org"],
+      "reviewed_by": "Your name",
+      "reviewed_on": "2026-10-21",
+      "expires_on": "2026-12-20",
+      "evidence_url": "https://www.freecodecamp.org/copyright/",
+      "independence_confirmed": true
+    }
+  ]
+}
+'@ | Set-Content -Path $publishers -Encoding UTF8
+.\.venv\Scripts\python.exe backend\manage.py approve_publishers $publishers --dry-run
+```
+
+**PowerShell — review the ingested items**
+
+```powershell
+$items = "$env:TEMP\somai-items.json"
+@'
+{
+  "items": [
+    {
+      "url": "https://www.freecodecamp.org/news/learn-sql-in-30-minutes/",
+      "publisher_key": "freecodecamp",
+      "author": "Author name",
+      "reviewed_by": "Your name",
+      "reviewed_on": "2026-10-21",
+      "expires_on": "2026-12-20",
+      "evidence_url": "https://www.freecodecamp.org/copyright/",
+      "free_access": true,
+      "english_confirmed": true
+    }
+  ]
+}
+'@ | Set-Content -Path $items -Encoding UTF8
+.\.venv\Scripts\python.exe backend\manage.py review_resources $items --dry-run
+```
+
+Every command validates the whole file before it writes anything, refuses a
+review that is not dated, current or shorter than ninety days, refuses a
+publisher that shares a domain with another publisher, and never infers
+permission from a licence string, a feed tag or a previous approval. Excerpt
+reuse is a separate decision and is not granted unless you grant it; content
+is published as title, publisher and date by default.
+
+The reviewed files hold the owner's decisions, so keep them outside the
+repository. `--dry-run` reports what would change without writing anything.
+
 ## Known limits
 
 SOMA.i is a local proof of concept using anonymous sessions rather than
