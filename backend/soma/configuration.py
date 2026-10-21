@@ -232,5 +232,13 @@ def load_configuration(values, base_dir):
         "SECURE_CONTENT_TYPE_NOSNIFF": True,
         "SECURE_REFERRER_POLICY": "same-origin",
         "X_FRAME_OPTIONS": "DENY",
-        "STATIC_ROOT": base_dir.parent / ".local" / "static",
+        # The built single page application is served from the same origin as
+        # the API, so that session cookies and CSRF stay same-origin. The
+        # static root is the built bundle itself, so there is one source of
+        # truth for the assets and no separate collection step to forget.
+        # WhiteNoise serves the bundle at the site root, which is where the
+        # built index document references its assets from.
+        "STATIC_ROOT": base_dir.parent / "frontend" / "dist",
+        "WHITENOISE_ROOT": base_dir.parent / "frontend" / "dist",
+        "WHITENOISE_MAX_AGE": 3600,
     }

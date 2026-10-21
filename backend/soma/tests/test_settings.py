@@ -387,7 +387,11 @@ def test_real_settings_accept_synthetic_production_values_without_opening_databa
     assert (
         "django.middleware.clickjacking.XFrameOptionsMiddleware" in result["MIDDLEWARE"]
     )
-    assert result["STATIC_ROOT"] == BASE.parent / ".local" / "static"
+    # The built bundle is the static root and is served at the site root,
+    # which is where the built index document references its assets from.
+    assert result["STATIC_ROOT"] == BASE.parent / "frontend" / "dist"
+    assert result["WHITENOISE_ROOT"] == BASE.parent / "frontend" / "dist"
+    assert "whitenoise.middleware.WhiteNoiseMiddleware" in result["MIDDLEWARE"]
 
 
 def test_real_local_settings_preserve_non_django_env_consumers_after_validation(
