@@ -5,30 +5,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pathways', '0003_discovery_coverage'),
+        ("pathways", "0003_discovery_coverage"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CuratedResource',
+            name="CuratedResource",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=300)),
-                ('url', models.URLField()),
-                ('publisher', models.CharField(max_length=120)),
-                ('evidence_url', models.URLField(max_length=2048)),
-                ('reviewed_by', models.CharField(max_length=120)),
-                ('reviewed_on', models.DateField()),
-                ('expires_on', models.DateField()),
-                ('order', models.PositiveSmallIntegerField(default=0)),
-                ('rationale', models.TextField(blank=True)),
-                ('pathway_skill', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='curated_resources', to='pathways.pathwayskill')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=300)),
+                ("url", models.URLField()),
+                ("publisher", models.CharField(max_length=120)),
+                ("evidence_url", models.URLField(max_length=2048)),
+                ("reviewed_by", models.CharField(max_length=120)),
+                ("reviewed_on", models.DateField()),
+                ("expires_on", models.DateField()),
+                ("order", models.PositiveSmallIntegerField(default=0)),
+                ("rationale", models.TextField(blank=True)),
+                (
+                    "pathway_skill",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="curated_resources",
+                        to="pathways.pathwayskill",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order', 'pk'],
-                'constraints': [models.UniqueConstraint(fields=('pathway_skill', 'url'), name='unique_curated_step_link')],
+                "ordering": ["order", "pk"],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("pathway_skill", "url"), name="unique_curated_step_link"
+                    )
+                ],
             },
         ),
     ]

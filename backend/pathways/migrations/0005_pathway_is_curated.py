@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pathways', '0004_curatedresource'),
+        ("pathways", "0004_curatedresource"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='pathway',
-            name='is_curated',
+            model_name="pathway",
+            name="is_curated",
             field=models.BooleanField(default=False),
         ),
     ]
