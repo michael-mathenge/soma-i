@@ -37,6 +37,14 @@ export default defineConfig({
   workers: 1,
   globalSetup: "./tests/e2e-global-setup.js",
   globalTeardown: "./tests/e2e-global-teardown.js",
+  // A few cases reseed the database and reload the journey for every
+  // pathway, so a case can take well over the default thirty seconds on a
+  // loaded or slower runner. The limits are set here so that the behaviour
+  // does not depend on a timeout passed on the command line.
+  timeout: 180000,
+  expect: {
+    timeout: 15000,
+  },
   use: {
     baseURL: `http://127.0.0.1:${uiPort}`,
     browserName: "chromium",

@@ -190,7 +190,7 @@ jobs:
         env:
           SOMA_ENV: test
           DJANGO_DEBUG: "false"
-        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec playwright test --timeout=60000
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec playwright test
 
       - name: Upload browser failure context
         # The error context records the rendered page at the moment of
