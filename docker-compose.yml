@@ -1,0 +1,39 @@
+# Local container workflow for the production-shaped image.
+#
+# The application target is PostgreSQL, so this file exercises the real
+# database rather than a SQLite file. It is for local verification only:
+# the hosted deployment remains blocked on the recorded release gates.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: soma
+      POSTGRES_PASSWORD: soma-local-only
+      POSTGRES_DB: soma
+    volumes:
+      - soma-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soma -d soma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SOMA_ENV: development
+      DATABASE_URL: postgres://soma:soma-local-only@db:5432/soma
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      DJANGO_DEBUG: "false"
+      DJANGO_HSTS_SECONDS: "0"
+    ports:
+      - "8000:8000"
+
+volumes:
+  soma-db:
