@@ -394,6 +394,12 @@ progress {
   margin: var(--space-2) 0;
   font-size: var(--text-small);
 }
+.curated-card {
+  border-inline-start: 3px solid var(--color-primary);
+}
+.curated-card h3 {
+  margin-block: var(--space-1) 0;
+}
 .item-provenance {
   margin: var(--spacing-3) 0;
   font-size: var(--text-small);

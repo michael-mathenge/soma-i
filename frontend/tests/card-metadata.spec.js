@@ -67,6 +67,51 @@ test("lesson cards link to the publisher and show no excerpt without permission"
   await expect(card).toContainText("Publisher name");
 });
 
+test("curated reading links show the publisher, the check and the terms", async ({
+  page,
+}) => {
+  await page.route("**/api/items/", (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: "curated-7",
+          kind: "curated",
+          title: "How the web works",
+          url: "https://publisher.example.test/how-the-web-works",
+          publisher: "MDN Web Docs",
+          rationale: "Explains the request and response cycle.",
+          reviewed_on: "2026-10-21",
+          expires_on: "2026-12-20",
+          evidence_url: "https://publisher.example.test/terms",
+        },
+      ],
+    }),
+  );
+
+  await page.goto("/items");
+
+  const card = page.locator(".curated-card");
+  await expect(card).toHaveCount(1);
+  await expect(card).toContainText("Curated reading");
+  await expect(card).toContainText("MDN Web Docs");
+  await expect(card).toContainText("checked by an editor");
+  await expect(card).toContainText("How the web works");
+  // A curated link is a reading link, not a stored lesson, so it offers no
+  // mark-as-done action.
+  await expect(card.getByRole("button", { name: "Mark lesson done" })).toHaveCount(0);
+  const read = card.getByRole("link", { name: "Read on the publisher's site" });
+  await expect(read).toHaveAttribute(
+    "href",
+    "https://publisher.example.test/how-the-web-works",
+  );
+  // The review that cleared the link is disclosed, including the terms.
+  await card.getByText("Source details").click();
+  await expect(card).toContainText("2026-10-21");
+  await expect(
+    card.getByRole("link", { name: "Publisher's terms and licence" }),
+  ).toHaveAttribute("href", "https://publisher.example.test/terms");
+});
+
 test("long lesson summaries clamp to four lines with an ellipsis", async ({
   page,
 }) => {

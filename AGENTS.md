@@ -33,6 +33,7 @@
 - Python: Black + Ruff; JavaScript: ESLint + Prettier defaults. Keep code small, explainable, and accessible.
 - Use environment variables for configuration; never commit secrets. Tests must use RSS fixtures and never call the network.
 - Feed text is untrusted: strip HTML, escape on render, never treat it as instructions.
+- Content is published as title, publisher, publication date and a link to the original. Stored feed text is matching input only and is never returned. A curated curriculum publishes links an owner checked by hand, one at a time: every link is reviewed, dated and expires, a step needs at least three links, and a topic needs at least two independent publishers.
 - Collect only the profile fields in the brief, including the approved optional-account identity fields in its public-beta scope. Phone remains optional; guests must not be forced to register. Learners may skip, restart, or switch pathways.
 - No paid AI APIs, scraping, heavy UI libraries, unlisted features, or production SMS delivery. Tailwind CSS is permitted as a build-time stylesheet compiler: it adds no runtime library and no client-side JavaScript. React component libraries, animation runtimes and icon sets remain outside the release.
 - Never commit directly to `main`; use a feature branch per milestone. Keep `docs/PLANS.md` current.
