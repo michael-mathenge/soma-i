@@ -64,9 +64,7 @@ class Command(BaseCommand):
             try:
                 result = publish_curated_topic(slug, steps)
             except ValidationError as exc:
-                raise CommandError(
-                    f"Curated curricula were not published: {exc}"
-                )
+                raise CommandError(f"Curated curricula were not published: {exc}")
             self.stdout.write(
                 f"{slug}: {result['action']} (version {result['version']})"
             )

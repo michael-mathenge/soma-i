@@ -118,12 +118,16 @@ jobs:
       - name: Verify the lockfile is current
         # A frozen install proves the lockfile is usable. This proves it still
         # matches package.json, so a dependency change cannot be merged with a
-        # stale lockfile.
+        # stale lockfile. The comparison ignores line endings, because the
+        # checked out file and the regenerated one differ in line endings
+        # alone on a runner that normalises them.
         run: |
           npx --yes pnpm@${{ env.PNPM_VERSION }} install --lockfile-only
-          if ! git diff --quiet -- pnpm-lock.yaml; then
+          git show HEAD:frontend/pnpm-lock.yaml | sed 's/\r$//' > /tmp/committed-lock.yaml
+          sed 's/\r$//' pnpm-lock.yaml > /tmp/regenerated-lock.yaml
+          if ! diff -q /tmp/committed-lock.yaml /tmp/regenerated-lock.yaml; then
             echo "::error file=frontend/pnpm-lock.yaml::The lockfile does not match package.json. Run pnpm install and commit the result."
-            git diff -- pnpm-lock.yaml
+            diff /tmp/committed-lock.yaml /tmp/regenerated-lock.yaml | head -40
             exit 1
           fi
 

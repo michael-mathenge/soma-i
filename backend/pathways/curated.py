@@ -31,7 +31,7 @@ from django.utils import timezone
 from content.fetching import validate_feed_url
 from pathways.catalogue import create_revision, validate_steps
 from pathways.discovery import digest
-from pathways.models import Catalogue, CuratedResource, Pathway
+from pathways.models import Catalogue, CuratedResource
 
 # A step needs enough reading to be a course rather than a pointer.
 MINIMUM_LINKS_PER_STEP = 3

@@ -98,7 +98,9 @@ test("curated reading links show the publisher, the check and the terms", async 
   await expect(card).toContainText("How the web works");
   // A curated link is a reading link, not a stored lesson, so it offers no
   // mark-as-done action.
-  await expect(card.getByRole("button", { name: "Mark lesson done" })).toHaveCount(0);
+  await expect(
+    card.getByRole("button", { name: "Mark lesson done" }),
+  ).toHaveCount(0);
   const read = card.getByRole("link", { name: "Read on the publisher's site" });
   await expect(read).toHaveAttribute(
     "href",

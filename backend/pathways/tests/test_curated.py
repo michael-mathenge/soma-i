@@ -5,11 +5,10 @@ from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
-from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from pathways.models import Catalogue, CuratedResource, Pathway
+from pathways.models import CuratedResource, Pathway
 
 pytestmark = pytest.mark.django_db
 
@@ -93,10 +92,15 @@ def test_changing_the_links_creates_a_new_revision_and_retires_the_old(tmp_path)
 
     changed = steps()
     changed["Computer Basics"][0]["title"] = "A different title"
-    call_command("publish_curriculum", write(tmp_path, {"topics": {"digital-foundations": changed}}))
+    call_command(
+        "publish_curriculum",
+        write(tmp_path, {"topics": {"digital-foundations": changed}}),
+    )
 
     first.refresh_from_db()
-    newest = Pathway.objects.get(catalogue__slug="digital-foundations", status="published")
+    newest = Pathway.objects.get(
+        catalogue__slug="digital-foundations", status="published"
+    )
     assert first.status == "retired"
     assert first.enrollment_open is False
     assert newest.version == first.version + 1
@@ -189,9 +193,7 @@ def test_an_expired_link_is_not_served_to_a_learner(tmp_path):
 
     path = write(tmp_path, {"topics": {"digital-foundations": steps()}})
     call_command("publish_curriculum", path)
-    step = Pathway.objects.get(
-        catalogue__slug="digital-foundations"
-    ).steps.first()
+    step = Pathway.objects.get(catalogue__slug="digital-foundations").steps.first()
 
     CuratedResource.objects.filter(pathway_skill=step).update(
         expires_on=TODAY - timedelta(days=1)
@@ -205,9 +207,7 @@ def test_a_current_link_is_served_to_a_learner(tmp_path):
 
     path = write(tmp_path, {"topics": {"digital-foundations": steps()}})
     call_command("publish_curriculum", path)
-    step = Pathway.objects.get(
-        catalogue__slug="digital-foundations"
-    ).steps.first()
+    step = Pathway.objects.get(catalogue__slug="digital-foundations").steps.first()
 
     links = curated_links(step, today=TODAY)
 

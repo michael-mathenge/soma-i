@@ -553,9 +553,7 @@ def what_next(learner, checkpoint):
             if state["next_checkpoint"]
             else None
         ),
-        "items": [
-            reading_json(item, completed_items(learner)) for item in recommended
-        ],
+        "items": [reading_json(item, completed_items(learner)) for item in recommended],
         "opportunities": [
             {
                 "id": op.pk,
