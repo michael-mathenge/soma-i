@@ -110,6 +110,18 @@ jobs:
       - name: Install locked dependencies
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} install --frozen-lockfile
 
+      - name: Verify the lockfile is current
+        # A frozen install proves the lockfile is usable. This proves it still
+        # matches package.json, so a dependency change cannot be merged with a
+        # stale lockfile.
+        run: |
+          npx --yes pnpm@${{ env.PNPM_VERSION }} install --lockfile-only
+          if ! git diff --quiet -- pnpm-lock.yaml; then
+            echo "::error file=frontend/pnpm-lock.yaml::The lockfile does not match package.json. Run pnpm install and commit the result."
+            git diff -- pnpm-lock.yaml
+            exit 1
+          fi
+
       - name: ESLint
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} run lint
 
@@ -188,3 +200,59 @@ jobs:
             frontend/playwright-report/**
           retention-days: 7
           if-no-files-found: ignore
+
+  container:
+    name: Container image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: soma-i:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run the image
+        run: |
+          docker run -d --name soma-i -p 8000:8000 \
+            -e SOMA_ENV=development \
+            -e DATABASE_URL=sqlite:////tmp/soma-ci.sqlite3 \
+            -e DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1 \
+            -e DJANGO_DEBUG=false \
+            -e DJANGO_HSTS_SECONDS=0 \
+            soma-i:ci
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/api/health/ > /dev/null; then
+              echo "The container reported a healthy API."
+              break
+            fi
+            if [ "$attempt" = "30" ]; then
+              echo "::error::The container did not become healthy."
+              docker logs soma-i
+              exit 1
+            fi
+            sleep 2
+          done
+
+      - name: Verify the container serves the application and its assets
+        run: |
+          # The API answers for its own routes.
+          curl -fsS http://127.0.0.1:8000/api/health/ | grep -q '"status":"ok"'
+          # A client-side route returns the application shell.
+          curl -fsS http://127.0.0.1:8000/catalogue | grep -q '<div id="root">'
+          # The assets the shell references are served with their own types,
+          # not as the shell document.
+          asset=$(curl -fsS http://127.0.0.1:8000/catalogue | grep -o '/assets/[^"]*\.js' | head -1)
+          curl -fsS -o /dev/null -w '%{content_type}\n' "http://127.0.0.1:8000$asset" | grep -q 'javascript'
+          echo "The container serves the application, the API and the assets."
+
+      - name: Container logs
+        if: failure()
+        run: docker logs soma-i

@@ -197,6 +197,34 @@ The checkpoint journey has test coverage in `test_onboard_complete_checkpoint_an
 
 Offline reload is **not tested** and is not part of this demo promise. [PLANS.md](docs/PLANS.md), [ARCHITECTURE.md](docs/ARCHITECTURE.md), [DECISIONS.md](docs/DECISIONS.md) and [SOURCES.md](docs/SOURCES.md) provide supporting project records.
 
+## Container image
+
+The repository builds a single image that serves the application, the API and
+the static assets from one origin, so session cookies and CSRF stay
+same-origin.
+
+**PowerShell — build and run against PostgreSQL**
+
+```powershell
+docker compose up --build
+```
+
+**PowerShell — build and run against a temporary SQLite file**
+
+```powershell
+docker build -t soma-i:local .
+docker run --rm -p 8000:8000 -e SOMA_ENV=development -e DATABASE_URL=sqlite:////tmp/soma.sqlite3 -e DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1 -e DJANGO_DEBUG=false -e DJANGO_HSTS_SECONDS=0 soma-i:local
+```
+
+The image runs migrations on start, serves on port 8000 and has a health
+check on `/api/health/`. The application runs as an unprivileged user and the
+image contains only the locked requirements.
+
+This is the production-shaped image, not a deployed service. Hosting, DNS,
+TLS, backups and the release gates recorded in
+[FREE_TIER_VERIFICATION.md](docs/FREE_TIER_VERIFICATION.md) are still
+outstanding, and no public deployment has been made.
+
 ## Built with Codex
 
 Codex assisted with planning, implementation, tests, documentation, and

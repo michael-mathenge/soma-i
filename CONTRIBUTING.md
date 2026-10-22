@@ -103,6 +103,35 @@ The tracked `frontend/pnpm-lock.yaml` is the lock of record. Do not run
 `npm install` in `frontend`, do not regenerate `package-lock.json`, and do not
 commit it.
 
+### Node version
+
+The frontend pins Node 24.21.0 in `.node-version` and in `package.json`, and
+`pnpm-workspace.yaml` sets `engineStrict: true`. Running the commands above
+on an older Node fails with `ERR_PNPM_UNSUPPORTED_ENGINE` rather than
+installing, which is deliberate: the dependency graph is only verified on the
+pinned runtime.
+
+Check your version with `node --version`. If it is not 24.21.0, install that
+build first. One option, which needs no change to your system PATH:
+
+```powershell
+$nodeRoot = "$env:LOCALAPPDATA\soma-node-24.21.0"
+Invoke-WebRequest -Uri "https://nodejs.org/dist/v24.21.0/node-v24.21.0-win-x64.zip" -OutFile "$env:TEMP\node24.zip"
+Expand-Archive -Path "$env:TEMP\node24.zip" -DestinationPath $nodeRoot -Force
+$env:Path = "$nodeRoot\node-v24.21.0-win-x64;$env:Path"
+node --version
+```
+
+Verify the download against the published checksum list before using it:
+
+```powershell
+Invoke-WebRequest -Uri "https://nodejs.org/dist/v24.21.0/SHASUMS256.txt" -OutFile "$env:TEMP\SHASUMS256.txt"
+Get-FileHash -Algorithm SHA256 "$env:TEMP\node24.zip" | Select-Object Hash
+```
+
+The expected SHA256 for `node-v24.21.0-win-x64.zip` is
+`158f7685b44de51f6c0df1d153526cbcd3e1bc739a8dfc607721cef75de9e541`.
+
 ## Database safety
 
 Local and CI commands must run against an explicit SQLite file under the OS

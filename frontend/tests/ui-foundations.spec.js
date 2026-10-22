@@ -74,8 +74,17 @@ test.beforeEach(async ({ page }) => {
 
 function rgb(value) {
   if (value.startsWith("#")) {
-    return value
-      .slice(1)
+    const hex = value.slice(1);
+    // A three digit hex is expanded to its full form first, because the
+    // production CSS minifier may shorten a colour value.
+    const full =
+      hex.length === 3
+        ? hex
+            .split("")
+            .map((part) => part + part)
+            .join("")
+        : hex;
+    return full
       .match(/.{2}/g)
       .map((part) => parseInt(part, 16) / 255);
   }
