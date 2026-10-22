@@ -15,6 +15,10 @@ playwright-report/
 test-results/
 .pytest_cache/
 
+# The tracked frontend/pnpm-lock.yaml is the lock of record. The npm lockfile
+# is a local artifact of an npm install and must never be committed.
+frontend/package-lock.json
+
 .local/
 .idea/
 

@@ -893,3 +893,78 @@ def test_catalogue_pages_are_bounded_stable_and_exclude_unavailable_revisions():
     current.enrollment_open = False
     current.save(update_fields=["enrollment_open"])
     assert client.get("/api/pathways/", {"page": 1}).data["count"] == 12
+
+
+def test_roadmaps_list_returns_rule_topics_with_steps_and_availability(seeded):
+    from pathways.discovery import load_rules
+
+    client = APIClient()
+    response = client.get("/api/roadmaps/", {"page": 1})
+    assert response.status_code == 200
+    assert response.data["page"] == 1 and response.data["page_size"] == 12
+    assert response.data["count"] == len(response.data["results"])
+    slugs = [row["slug"] for row in response.data["results"]]
+    # The catalogue follows owner-reviewed rule order, not alphabetical order.
+    assert slugs == [topic["slug"] for topic in load_rules()["topics"]]
+    assert len(slugs) == len(set(slugs))
+    first = response.data["results"][0]
+    assert set(first) == {
+        "slug",
+        "title",
+        "description",
+        "target_outcome",
+        "available_pathway_id",
+        "available",
+        "is_demo",
+        "version",
+        "image",
+        "steps",
+    }
+    assert first["steps"]
+    assert set(first["steps"][0]) == {"skill", "title", "criteria", "requires"}
+
+
+def test_roadmaps_marks_seeded_topics_available_and_others_as_preview(seeded):
+    client = APIClient()
+    rows = client.get("/api/roadmaps/", {"page": 1}).data["results"]
+    by_slug = {row["slug"]: row for row in rows}
+    published = by_slug["data-analyst"]
+    assert published["available"] is True
+    assert published["available_pathway_id"] == seeded["Data Analyst"].pk
+    assert published["is_demo"] is True
+    assert published["version"]
+    assert published["steps"]
+    preview = by_slug["digital-foundations"]
+    assert preview["available"] is False
+    assert preview["available_pathway_id"] is None
+    assert preview["is_demo"] is False
+    assert preview["version"] is None
+    assert preview["steps"]
+
+
+@pytest.mark.parametrize("page", ["0", "-1", "abc", "1.5", "1000001"])
+def test_roadmaps_rejects_invalid_pages(page):
+    assert APIClient().get("/api/roadmaps/", {"page": page}).status_code == 400
+
+
+def test_roadmaps_search_matches_title_alias_and_skill_fields(seeded):
+    client = APIClient()
+    for query in ("Data analysis foundations", "data analytics", "Spreadsheets"):
+        found = client.get("/api/roadmaps/", {"page": 1, "q": query}).data
+        assert found["count"] >= 1
+        assert all(
+            query.casefold()
+            in " ".join(
+                [
+                    row["title"],
+                    row["description"],
+                    row["target_outcome"],
+                    *(step["skill"] for step in row["steps"]),
+                ]
+            ).casefold()
+            or row["slug"] == "data-analyst"
+            for row in found["results"]
+        )
+    empty = client.get("/api/roadmaps/", {"page": 1, "q": "unmatched fixture"}).data
+    assert empty["count"] == 0 and empty["results"] == []
+    assert client.get("/api/roadmaps/", {"page": 1, "q": "x" * 121}).status_code == 400

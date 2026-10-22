@@ -110,6 +110,18 @@ jobs:
       - name: Install locked dependencies
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} install --frozen-lockfile
 
+      - name: Verify the lockfile is current
+        # A frozen install proves the lockfile is usable. This proves it still
+        # matches package.json, so a dependency change cannot be merged with a
+        # stale lockfile.
+        run: |
+          npx --yes pnpm@${{ env.PNPM_VERSION }} install --lockfile-only
+          if ! git diff --quiet -- pnpm-lock.yaml; then
+            echo "::error file=frontend/pnpm-lock.yaml::The lockfile does not match package.json. Run pnpm install and commit the result."
+            git diff -- pnpm-lock.yaml
+            exit 1
+          fi
+
       - name: ESLint
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} run lint
 
