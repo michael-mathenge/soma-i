@@ -514,6 +514,67 @@ legend {
   margin-top: auto;
 }
 
+.roadmap-card {
+  padding: 0;
+  overflow: hidden;
+  padding-block-end: var(--space-5);
+}
+.roadmap-image {
+  margin: 0;
+  background: var(--color-callout);
+}
+.roadmap-image img {
+  display: block;
+  inline-size: 100%;
+  block-size: 11rem;
+  object-fit: cover;
+}
+.roadmap-image figcaption {
+  padding: var(--space-2) var(--space-5) 0;
+  color: var(--color-muted);
+  font-size: var(--text-small);
+}
+.roadmap-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) 0;
+}
+.roadmap-card h2 {
+  margin: 0;
+}
+.roadmap-outcome {
+  color: var(--color-muted);
+}
+.roadmap-steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-inline-start: var(--space-5);
+}
+.roadmap-steps li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.roadmap-steps span {
+  color: var(--color-muted);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+}
+.source-gate {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: 4px solid var(--color-border);
+  background: var(--color-callout);
+  color: var(--color-muted);
+  font-size: var(--text-small);
+}
+.catalogue-cards .source-gate {
+  margin-top: auto;
+}
+
 .journey-steps {
   display: grid;
   gap: var(--spacing-3);

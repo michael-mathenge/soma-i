@@ -1,13 +1,33 @@
 import { expect, test } from "@playwright/test";
 test.use({ serviceWorkers: "block" });
 const topics = Array.from({ length: 13 }, (_, index) => ({
-  id: index + 1,
+  slug: `topic-${index + 1}`,
   title: `Topic ${index + 1}`,
   description: "Offline topic fixture",
   target_outcome: "Practice independently",
-  locale: "KE",
+  available: true,
+  available_pathway_id: index + 1,
   is_demo: true,
   version: 1,
+  image: {
+    url: "https://images.example.test/topic.jpg",
+    alt: "Topic illustration",
+    credit: "Unsplash",
+  },
+  steps: [
+    {
+      skill: `Skill ${index + 1} A`,
+      title: "Check A",
+      criteria: "Example",
+      requires: [],
+    },
+    {
+      skill: `Skill ${index + 1} B`,
+      title: "Check B",
+      criteria: "Example",
+      requires: [],
+    },
+  ],
 }));
 async function fixtures(page, handler) {
   // The served queries are recorded so a test can wait for the request it
@@ -18,7 +38,18 @@ async function fixtures(page, handler) {
     if (route.request().method() !== "GET") return route.abort();
     if (url.pathname === "/api/me/")
       return route.fulfill({ status: 401, json: {} });
-    if (url.pathname !== "/api/pathways/") return route.abort();
+    // The onboarding select is fed by the legacy pathway list.
+    if (url.pathname === "/api/pathways/")
+      return route.fulfill({
+        json: topics.map((topic) => ({
+          id: topic.available_pathway_id,
+          title: topic.title,
+          description: topic.description,
+          target_outcome: topic.target_outcome,
+          locale: "KE",
+        })),
+      });
+    if (url.pathname !== "/api/roadmaps/") return route.abort();
     if (!url.searchParams.has("page")) return route.fulfill({ json: topics });
     if (handler && (await handler(route, url))) return;
     const query = url.searchParams.get("q") || "";
@@ -50,7 +81,7 @@ test("catalogue pages preserve URL history and selected onboarding pathway", asy
   expect(
     initialRequests.filter(
       (url) =>
-        url.pathname === "/api/pathways/" && !url.searchParams.has("page"),
+        url.pathname === "/api/roadmaps/" && !url.searchParams.has("page"),
     ),
   ).toHaveLength(0);
   expect(
@@ -93,7 +124,10 @@ test("catalogue search submits explicitly resets pages and handles empty results
   // empty result. Asserting the render alone can observe the previous
   // result set on a slower machine.
   await expect
-    .poll(() => served.filter((entry) => entry.query === "missing").length)
+    .poll(() => served.filter((entry) => entry.query === "missing").length, {
+      message: () =>
+        `served=${JSON.stringify(served)} url=${page.url()} input=${search.inputValue()}`,
+    })
     .toBe(1);
   await expect(page.getByText(/No topics on this page/)).toBeVisible();
   await page.getByRole("button", { name: "Clear search" }).click();
@@ -139,6 +173,56 @@ test("catalogue narrow keyboard navigation and English language marking", async 
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(320);
+});
+test("catalogue marks a roadmap without an open pathway as a preview", async ({
+  page,
+}) => {
+  await page.route("**/api/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (route.request().method() !== "GET") return route.abort();
+    if (url.pathname === "/api/me/")
+      return route.fulfill({ status: 401, json: {} });
+    if (url.pathname !== "/api/roadmaps/") return route.abort();
+    return route.fulfill({
+      json: {
+        results: [
+          {
+            slug: "locked-topic",
+            title: "Locked topic",
+            description: "Not open for enrollment",
+            target_outcome: "Practice independently",
+            available: false,
+            available_pathway_id: null,
+            is_demo: false,
+            version: null,
+            image: {},
+            steps: [
+              {
+                skill: "Locked skill",
+                title: "Check",
+                criteria: "Example",
+                requires: [],
+              },
+            ],
+          },
+        ],
+        count: 1,
+        page: 1,
+        page_size: 12,
+        has_next: false,
+      },
+    });
+  });
+  await page.goto("/catalogue");
+  await expect(page.getByRole("article")).toHaveCount(1);
+  await expect(
+    page.getByText("Roadmap preview", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(/not open for enrollment yet/)).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Choose a pathway: Locked topic" }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("list")).toBeVisible();
 });
 test("catalogue ignores a superseded delayed response", async ({ page }) => {
   let release;

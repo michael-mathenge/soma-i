@@ -1,0 +1,38 @@
+# Version control and local state never belong in the build context.
+.git
+.github
+.gitignore
+.gitattributes
+.editorconfig
+.local
+.venv
+.idea
+
+# Local environment and secrets.
+.env
+.env.*
+!.env.example
+
+# Build outputs and dependencies. The image builds these itself.
+frontend/node_modules
+frontend/dist
+frontend/pnpm-store
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.ruff_cache
+backend/**/__pycache__
+
+# Test and documentation artefacts.
+frontend/test-results
+frontend/playwright-report
+docs
+*.md
+!README.md
+
+# Local media and databases.
+*.sqlite3
+*.db
+*.mp4
+*.mov
+*.zip
