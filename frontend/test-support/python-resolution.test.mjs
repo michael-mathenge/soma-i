@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { resolvePython } from "../../backend/python-resolution.mjs";
+
+const isWindows = process.platform === "win32";
 
 test("Python resolution uses only existing files in priority order", (t) => {
   const directory = mkdtempSync(join(tmpdir(), "somai-python-resolution-"));
@@ -24,10 +26,20 @@ test("Python resolution uses only existing files in priority order", (t) => {
   assert.equal(resolvePython(missing, directory), "py");
 });
 
-test("child ignores a folder PYTHON and starts the selected interpreter", () => {
+test("child ignores a folder PYTHON and starts the selected interpreter", (t) => {
   const resolver = new URL("../../backend/python-resolution.mjs", import.meta.url);
-  const venv = new URL("../../.venv/Scripts/python.exe", import.meta.url);
+  // The virtual environment layout differs by platform, so the test resolves
+  // the interpreter the same way the application does.
+  const venv = isWindows
+    ? new URL("../../.venv/Scripts/python.exe", import.meta.url)
+    : new URL("../../.venv/bin/python", import.meta.url);
   const folder = new URL("../../backend/", import.meta.url);
+  if (!existsSync(fileURLToPath(venv))) {
+    t.skip(
+      `no virtual environment at ${fileURLToPath(venv)}; run the suite from a prepared checkout`,
+    );
+    return;
+  }
   const source = `
     import { spawnSync } from "node:child_process";
     import { fileURLToPath } from "node:url";

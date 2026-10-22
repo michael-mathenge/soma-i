@@ -223,8 +223,14 @@ function Catalogue({ t }) {
   const [search, setSearch] = useState(query);
   const [state, setState] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
+  // Adopt a query that arrived from the URL, but never clobber a value the
+  // learner is still typing; the form owns the input until it is submitted.
+  const lastQuery = useRef(query);
   useEffect(() => {
-    setSearch(query);
+    if (query !== lastQuery.current) {
+      lastQuery.current = query;
+      setSearch(query);
+    }
   }, [query]);
   useEffect(() => {
     let active = true;

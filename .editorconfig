@@ -1,0 +1,33 @@
+# EditorConfig is not supported above this level.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,js,jsx,mjs,cjs,css,html}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
+
+# Shell scripts and CI definitions must stay LF to execute on Linux runners.
+[*.{sh,bash}]
+end_of_line = lf
+
+[Dockerfile*]
+end_of_line = lf
+
+[.github/**]
+end_of_line = lf
+
+[*.{png,jpg,jpeg,gif,webp,ico,pdf,mp4,woff,woff2,ttf,eot}]
+insert_final_newline = false
+trim_trailing_whitespace = false

@@ -1,0 +1,41 @@
+# Run `pre-commit install` once after cloning to enable the local hooks.
+# CI is the authoritative gate; these hooks only catch problems earlier.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: ^frontend/pnpm-lock\.yaml$
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+        exclude: ^(frontend/pnpm-lock\.yaml|requirements\.lock)$
+      - id: trailing-whitespace
+        exclude: ^frontend/pnpm-lock\.yaml$
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.0
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+        files: ^backend/
+      - id: ruff-format
+        files: ^backend/
+
+  # Prettier runs from the project's own pinned devDependency so the hook and
+  # CI use the identical version. The upstream mirror's newest v3 tag pins
+  # Prettier 3.1.0 while this project uses 3.9.10, which would make the hook
+  # reformat files differently from CI.
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: frontend/node_modules/.bin/prettier
+        language: system
+        files: ^frontend/(src|tests)/
+        types_or: [javascript, jsx, json, css]
+        args: ["--write", "--ignore-unknown"]

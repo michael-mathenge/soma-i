@@ -1,0 +1,190 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12.15"
+  NODE_VERSION: "24.21.0"
+  PNPM_VERSION: "12.11.2"
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements.lock') }}
+          restore-keys: pip-
+
+      - name: Install locked dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --require-hashes -r requirements.lock
+
+      - name: Resolve isolated database target
+        # The application requires an absolute path under the OS temp directory.
+        # It is resolved at run time because the runner temp root is not fixed.
+        run: |
+          python -c "import os,tempfile,pathlib;d=pathlib.Path(tempfile.gettempdir()).resolve()/'somai-ci';d.mkdir(parents=True,exist_ok=True);p=d/'test.sqlite3';print('DATABASE_URL=sqlite:///'+str(p).replace(chr(92),'/'))" >> "$GITHUB_ENV"
+          mkdir -p "$(python -c "import tempfile,pathlib;print(pathlib.Path(tempfile.gettempdir()).resolve()/'somai-ci')")"
+
+      - name: Django system check
+        env:
+          SOMA_ENV: test
+          DJANGO_DEBUG: "false"
+        run: python backend/manage.py check
+
+      - name: Django migration check
+        env:
+          SOMA_ENV: test
+          DJANGO_DEBUG: "false"
+        run: python backend/manage.py makemigrations --check --dry-run
+
+      - name: Ruff lint
+        run: python -m ruff check backend
+
+      - name: Ruff format check on changed files
+        # Ruff format is checked against the files a pull request touches.
+        # The repository carries pre-existing format drift that the owner
+        # resolves in a separate Black/format pass, so checking the whole
+        # tree here would block every unrelated pull request.
+        run: |
+          # Fetch enough history to find the merge base with the base branch.
+          # A shallow fetch alone leaves no merge base, so unshallow when needed.
+          git fetch --no-tags origin "${{ github.base_ref }}"
+          git fetch --no-tags --unshallow origin 2>/dev/null || git fetch --no-tags origin
+          BASE=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          if [ -z "$BASE" ]; then
+            echo "No merge base found; skipping the scoped format check."
+            exit 0
+          fi
+          git diff --name-only --diff-filter=ACMR "$BASE" HEAD -- backend/ > /tmp/changed.txt
+          FILES=$(grep '\.py$' /tmp/changed.txt || true)
+          if [ -z "$FILES" ]; then
+            echo "No changed Python files to format-check."
+            exit 0
+          fi
+          echo "Format-checking:"; echo "$FILES"
+          python -m ruff format --check $FILES
+
+      - name: Pytest
+        env:
+          SOMA_ENV: test
+          DJANGO_DEBUG: "false"
+        run: python -m pytest backend -q
+
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install locked dependencies
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} install --frozen-lockfile
+
+      - name: ESLint
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} run lint
+
+      - name: Prettier check
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec prettier --check "src/**/*.{js,jsx,json,css}"
+
+      - name: Production build
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} run build
+
+      - name: Database guard tests
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} run test:e2e:guard
+
+      - name: Teardown robustness tests
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} run test:e2e:robustness
+
+  browser:
+    name: Browser journey
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --require-hashes -r requirements.lock
+
+      - name: Install locked frontend dependencies
+        working-directory: frontend
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec playwright install --with-deps chromium
+
+      - name: Build the frontend
+        # The browser job serves the production bundle, so it must exist
+        # before the Playwright web server starts.
+        working-directory: frontend
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} run build
+
+      - name: Resolve isolated database target
+        run: |
+          python -c "import tempfile,pathlib;d=pathlib.Path(tempfile.gettempdir()).resolve()/'somai-ci';d.mkdir(parents=True,exist_ok=True);p=d/'test.sqlite3';print('DATABASE_URL=sqlite:///'+str(p).replace(chr(92),'/'))" >> "$GITHUB_ENV"
+
+      - name: Point the browser suite at the runner interpreter
+        # The suite resolves Python from PYTHON, then a repository virtual
+        # environment, then "py". CI has no virtual environment and no "py"
+        # launcher on Linux, so the runner interpreter is supplied directly.
+        run: echo "PYTHON=$(command -v python)" >> "$GITHUB_ENV"
+
+      - name: Playwright journey
+        working-directory: frontend
+        env:
+          SOMA_ENV: test
+          DJANGO_DEBUG: "false"
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec playwright test --timeout=60000
+
+      - name: Upload browser failure context
+        # The error context records the rendered page at the moment of
+        # failure, which is the only way to diagnose a browser failure from
+        # the job log alone.
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-context
+          path: |
+            frontend/test-results/**/error-context.md
+            frontend/playwright-report/**
+          retention-days: 7
+          if-no-files-found: ignore

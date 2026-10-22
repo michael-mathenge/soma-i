@@ -173,12 +173,13 @@ test("allows nesting below the first somai-playwright-* temp folder", () => {
 });
 
 test("rejects a symlink to a project database stand-in", (context) => {
-  const scratchDirectory = mkdtempSync(join(tmpdir(), "somai-guard-symlink-"));
-  const projectDatabase = join(scratchDirectory, "project", "backend", "db.sqlite3");
-  const linkDirectory = join(scratchDirectory, "somai-playwright-link");
+  // The link must live under a "somai-playwright-*" folder, otherwise the
+  // guard rejects it for being outside the expected temporary folder and the
+  // project-database check this test targets is never reached.
+  const linkDirectory = mkdtempSync(join(tmpdir(), "somai-playwright-symlink-"));
+  const projectDatabase = join(linkDirectory, "project", "backend", "db.sqlite3");
   const linkedDatabase = join(linkDirectory, "test.sqlite3");
   mkdirSync(dirname(projectDatabase), { recursive: true });
-  mkdirSync(linkDirectory);
   writeFileSync(projectDatabase, "temporary database stand-in");
   try {
     try {
@@ -199,6 +200,6 @@ test("rejects a symlink to a project database stand-in", (context) => {
       /must never use backend\/db\.sqlite3/,
     );
   } finally {
-    rmSync(scratchDirectory, { recursive: true, force: true });
+    rmSync(linkDirectory, { recursive: true, force: true });
   }
 });

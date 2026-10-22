@@ -1,0 +1,34 @@
+# Normalize every text file to LF in the repository index and CRLF in the
+# Windows working tree. This matches the existing convention: the index stores
+# LF, the checkout uses CRLF, and the project scope checks compare content
+# after normalizing line endings only.
+* text=auto eol=crlf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Generated or vendored files are stored exactly as produced.
+frontend/dist/** -text
+frontend/node_modules/** -text
+frontend/pnpm-lock.yaml text eol=lf
+frontend/package-lock.json text eol=lf
+requirements.lock text eol=lf
+
+# Keep shell scripts and CI definitions LF so they execute on Linux runners.
+*.sh text eol=lf
+*.bash text eol=lf
+Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+.dockerignore text eol=lf
+.github/** text eol=lf
