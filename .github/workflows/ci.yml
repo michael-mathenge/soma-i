@@ -69,12 +69,17 @@ jobs:
         # The repository carries pre-existing format drift that the owner
         # resolves in a separate Black/format pass, so checking the whole
         # tree here would block every unrelated pull request.
+        env:
+          # The base branch differs between a pull request and a push, and
+          # the push event has no base ref at all.
+          BASE_REF: ${{ github.base_ref || github.event.repository.default_branch }}
         run: |
+          set -euo pipefail
           # Fetch enough history to find the merge base with the base branch.
           # A shallow fetch alone leaves no merge base, so unshallow when needed.
-          git fetch --no-tags origin "${{ github.base_ref }}"
+          git fetch --no-tags origin "$BASE_REF"
           git fetch --no-tags --unshallow origin 2>/dev/null || git fetch --no-tags origin
-          BASE=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          BASE=$(git merge-base "origin/$BASE_REF" HEAD)
           if [ -z "$BASE" ]; then
             echo "No merge base found; skipping the scoped format check."
             exit 0
@@ -185,7 +190,7 @@ jobs:
         env:
           SOMA_ENV: test
           DJANGO_DEBUG: "false"
-        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec playwright test --timeout=60000
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec playwright test
 
       - name: Upload browser failure context
         # The error context records the rendered page at the moment of

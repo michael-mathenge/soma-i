@@ -1,25 +1,23 @@
 @import "tailwindcss";
 
 /* The design tokens are unchanged from the hand-written stylesheet. They
-   are declared in Tailwind's theme block so the custom properties and the
-   utility classes share one source of truth, and so the forced colours and
-   reduced motion rules can still override them by name. */
-@theme static {
+   are declared on the root element so the custom properties are always
+   present, and so the forced colours and reduced motion rules can still
+   override them by name. Tailwind's theme block only emits the variables
+   a utility class references, and the authored stylesheet reads several
+   of these by name. */
+:root {
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
-
   --text-small: 0.9rem;
   --text-base: 1rem;
   --text-brand: 1.3rem;
   --text-title: clamp(1.8rem, 5vw, 2.6rem);
-
   --leading-body: 1.5;
   --leading-heading: 1.2;
-
   --font-weight-body: 400;
   --font-weight-label: 600;
   --font-weight-action: 650;
   --font-weight-brand: 850;
-
   --color-text: #18312d;
   --color-muted: #51645e;
   --color-page: #f7f8f5;
@@ -40,11 +38,7 @@
   --color-disabled: #e4e9e5;
   --color-disabled-text: #51645e;
   --color-progress: #087566;
-
   --spacing: 0.25rem;
-  /* The numbered spacing scale is declared explicitly because the
-     authored stylesheet reads these by name, and Tailwind only
-     generates a scale entry for a utility that is actually used. */
   --spacing-1: 0.25rem;
   --spacing-2: 0.5rem;
   --spacing-3: 0.75rem;
@@ -52,13 +46,10 @@
   --spacing-5: 1.25rem;
   --spacing-6: 1.5rem;
   --spacing-8: 2rem;
-
   --radius-control: 0.5rem;
   --radius-panel: 0.75rem;
-
   --container-content: 65rem;
   --container-hero: 42.5rem;
-
   --shadow-panel: 0 1px 2px #18312d0a, 0 8px 24px #18312d0d;
   --shadow-raised: 0 2px 4px #18312d0f, 0 12px 32px #18312d14;
   --shadow-inset: inset 0 1px 0 #ffffffb3;

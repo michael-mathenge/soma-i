@@ -7,7 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 const apiOrigin = process.env.SOMAI_API_ORIGIN || "http://127.0.0.1:8000";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     proxy: { "/api": apiOrigin },
     port: Number(process.env.SOMAI_FRONTEND_PORT || 5173),

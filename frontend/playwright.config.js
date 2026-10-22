@@ -13,8 +13,10 @@ const candidateDatabaseUrl = `sqlite:///${candidateDatabasePath.replaceAll("\\",
 const databasePath = assertIsolatedDatabase(candidateDatabaseUrl);
 const databaseDirectory = dirname(databasePath);
 const databaseUrl = `sqlite:///${databasePath.replaceAll("\\", "/")}`;
-const apiPort = "8127";
-const uiPort = "4177";
+// The test ports are configurable so a developer whose machine already uses
+// them can run the suite without stopping an unrelated service.
+const apiPort = process.env.SOMAI_E2E_API_PORT || "8127";
+const uiPort = process.env.SOMAI_E2E_UI_PORT || "4177";
 const e2eEnv = {
   ...process.env,
   DATABASE_URL: databaseUrl,
@@ -37,6 +39,14 @@ export default defineConfig({
   workers: 1,
   globalSetup: "./tests/e2e-global-setup.js",
   globalTeardown: "./tests/e2e-global-teardown.js",
+  // A few cases reseed the database and reload the journey for every
+  // pathway, so a case can take well over the default thirty seconds on a
+  // loaded or slower runner. The limits are set here so that the behaviour
+  // does not depend on a timeout passed on the command line.
+  timeout: 180000,
+  expect: {
+    timeout: 15000,
+  },
   use: {
     baseURL: `http://127.0.0.1:${uiPort}`,
     browserName: "chromium",
