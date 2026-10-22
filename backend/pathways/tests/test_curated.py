@@ -8,6 +8,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
+from pathways.curated import load_curated_file, validate_curated_topics
 from pathways.models import CuratedResource, Pathway
 
 pytestmark = pytest.mark.django_db
@@ -223,3 +224,47 @@ def test_the_published_pathway_is_enrollable(tmp_path):
 
     slugs = {pathway.catalogue.slug for pathway in enrollable_pathways()}
     assert "digital-foundations" in slugs
+
+
+def test_the_reviewed_curricula_file_is_valid():
+    """The curricula in the repository must publish, so a change cannot rot."""
+    from django.utils import timezone
+
+    from pathways.discovery import load_rules
+
+    path = Path(__file__).resolve().parents[1] / "curricula.json"
+    topics = load_curated_file(path)
+
+    validate_curated_topics(topics, load_rules(), timezone.localdate())
+
+
+def test_the_reviewed_curricula_cover_every_new_topic():
+    """Every topic in the review rules that is not a demo has a reading list."""
+    from pathways.discovery import load_rules
+
+    path = Path(__file__).resolve().parents[1] / "curricula.json"
+    topics = load_curated_file(path)
+    rules = load_rules()
+    rule_slugs = {topic["slug"] for topic in rules["topics"]}
+
+    assert set(topics) <= rule_slugs
+    for slug, steps in topics.items():
+        rule_steps = {
+            step["skill"]
+            for topic in rules["topics"]
+            if topic["slug"] == slug
+            for step in topic["steps"]
+        }
+        assert set(steps) == rule_steps
+
+
+def test_every_curated_link_uses_a_https_address():
+    from pathways.curated import load_curated_file
+
+    path = Path(__file__).resolve().parents[1] / "curricula.json"
+    topics = load_curated_file(path)
+    for steps in topics.values():
+        for links in steps.values():
+            for link in links:
+                assert link["url"].startswith("https://")
+                assert link["evidence_url"].startswith("https://")

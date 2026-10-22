@@ -5,10 +5,13 @@ automatic route needs two independent publishers whose reuse permission
 is verified, and a small learning site often has one publisher with
 generous terms rather than two with narrow ones.
 
-The reviewed file holds the owner's decisions, so it lives outside the
-repository. The learning sequence, the checkpoint criteria and the
-check-in questions come from the reviewed discovery rules.
+The reviewed curricula live beside the reviewed discovery rules, so the
+whole curriculum is reviewed in one place. The learning sequence, the
+checkpoint criteria and the check-in questions come from the discovery
+rules; only the reading list comes from the curricula file.
 """
+
+from pathlib import Path
 
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
@@ -19,6 +22,10 @@ from pathways.curated import (
     publish_curated_topic,
     validate_curated_topics,
 )
+
+# The reviewed curricula live beside the discovery rules, so the whole
+# curriculum is reviewed in the same place.
+DEFAULT_CURRICULA_PATH = Path(__file__).resolve().parents[2] / "curricula.json"
 
 
 class Command(BaseCommand):
@@ -31,9 +38,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "path",
+            nargs="?",
+            default=None,
             help=(
-                "Path to the reviewed curricula file. It must be outside the "
-                "repository, because it records the owner's decisions."
+                "Path to the reviewed curricula file. It defaults to the "
+                "reviewed file in the repository."
             ),
         )
         parser.add_argument(
@@ -45,8 +54,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from pathways.discovery import load_rules
 
+        path = options["path"] or DEFAULT_CURRICULA_PATH
         try:
-            topics = load_curated_file(options["path"])
+            topics = load_curated_file(path)
             validate_curated_topics(topics, load_rules(), timezone.localdate())
         except ValidationError as exc:
             raise CommandError(f"Curated curricula were not published: {exc}")

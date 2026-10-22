@@ -368,33 +368,31 @@ No publisher text is reproduced, so there is no excerpt to republish. The
 review records the publisher's own terms page, which is the evidence that
 the material may be read and linked to.
 
-**PowerShell — the reviewed file**
+The reviewed curricula live in
+[backend/pathways/curricula.json](backend/pathways/curricula.json), beside
+the reviewed discovery rules, so the whole curriculum is reviewed in one
+place. Each entry records the link, the publisher, the publisher's own
+terms page as the evidence, who checked it, the dates, and why it was
+chosen:
 
 ```json
 {
-  "topics": {
-    "digital-foundations": {
-      "Computer Basics": [
-        {
-          "title": "How the web works",
-          "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
-          "publisher": "MDN Web Docs",
-          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines",
-          "reviewed_by": "Your name",
-          "reviewed_on": "2026-10-21",
-          "expires_on": "2026-12-20",
-          "rationale": "Explains the request and response cycle."
-        }
-      ]
-    }
-  }
+  "title": "How the web works",
+  "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+  "publisher": "MDN Web Docs",
+  "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines",
+  "reviewed_by": "Your name",
+  "reviewed_on": "2026-10-21",
+  "expires_on": "2026-12-20",
+  "rationale": "Explains the request and response cycle."
 }
 ```
 
 Each step needs at least three links and each topic needs links from at
 least two publishers. The learning sequence, the checkpoint criteria and
 the check-in questions come from the reviewed discovery rules, so a curated
-topic is the same kind of learning sequence as every other pathway.
+topic is the same kind of learning sequence as every other pathway. Only
+the reading list comes from the curricula file.
 
 **PowerShell — publish it**
 
@@ -403,13 +401,12 @@ $env:SOMA_ENV = 'development'
 $env:DATABASE_URL = 'sqlite:///C:/Users/' + $env:USERNAME + '/AppData/Local/Temp/soma-curated/curated.sqlite3'
 New-Item -ItemType Directory -Force -Path "$env:TEMP\soma-curated" | Out-Null
 .\.venv\Scripts\python.exe backend\manage.py migrate --noinput
-.\.venv\Scripts\python.exe backend\manage.py publish_curriculum "$env:TEMP\soma-curated\curated.json" --dry-run
-.\.venv\Scripts\python.exe backend\manage.py publish_curriculum "$env:TEMP\soma-curated\curated.json"
+.\.venv\Scripts\python.exe backend\manage.py publish_curriculum --dry-run
+.\.venv\Scripts\python.exe backend\manage.py publish_curriculum
 ```
 
-The reviewed file holds the owner's decisions, so keep it outside the
-repository. A dry run validates every link and reports what would be
-published without writing anything.
+A dry run validates every link and reports what would be published without
+writing anything. Pass a path to publish a different file.
 
 ## Recording review evidence
 
