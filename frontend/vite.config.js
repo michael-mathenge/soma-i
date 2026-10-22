@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 // The API origin is configurable so the development server can point at a
 // backend on a port other than 8000, which is often already taken.

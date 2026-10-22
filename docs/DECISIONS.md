@@ -19,3 +19,10 @@
 - PostgreSQL is the production target; SQLite stays local/test only. The contributor guide narrowly allows reviewed hosted jobs and disposable PostgreSQL tests while forbidding repository database access and production seeding.
 - Proposed same-origin Render web hosting, Neon PostgreSQL, GitHub Actions scheduling, Brevo mail and Cloudflare R2 encrypted backup storage all remain to verify. Existing michaelmathenge.dev is owner-reported; DNS, TLS, sender verification, quotas and effective no-charge controls are unverified. Stop at failed eligibility/cost/privacy gates instead of selecting a paid substitute.
 - The target is a small public beta that tolerates disclosed cold starts/sleep; it is not an uptime-guaranteed production service. Public publication still requires satisfied gates and explicit approval. No production SMS, live vacancies, paid APIs or new demographic data.
+
+## Tailwind CSS v4 for the design system - 2026-10-21
+
+- The owner chose Tailwind CSS v4 for the interface revamp. The contributor guide previously recorded "no heavy UI libraries" and "native HTML/CSS". That rule is narrowed rather than removed: Tailwind is a build-time stylesheet compiler with no runtime component library, no animation library and no client-side JavaScript, so the bundle cost is compiled away and the dependency count stays at one build tool.
+- The design tokens move into a Tailwind theme block, so the custom properties and the utility classes share one source of truth. The token values are unchanged, which keeps the recorded contrast, focus, reduced-motion and forced-colours behaviour.
+- Tailwind only emits a theme variable when a utility class references it, and the authored stylesheet reads several variables by name. The spacing scale is therefore declared explicitly in the theme. Without this the build silently drops the variables and the layout loses its spacing.
+- The system fonts, the reduced-motion rules, the forced-colours overrides and the minimum target size stay as they are. Those are accessibility guarantees, not styling preferences.

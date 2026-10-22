@@ -1,16 +1,25 @@
-:root {
-  color-scheme: light;
+@import "tailwindcss";
+
+/* The design tokens are unchanged from the hand-written stylesheet. They
+   are declared in Tailwind's theme block so the custom properties and the
+   utility classes share one source of truth, and so the forced colours and
+   reduced motion rules can still override them by name. */
+@theme static {
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+
   --text-small: 0.9rem;
   --text-base: 1rem;
   --text-brand: 1.3rem;
   --text-title: clamp(1.8rem, 5vw, 2.6rem);
-  --line-body: 1.5;
-  --line-heading: 1.2;
-  --weight-body: 400;
-  --weight-label: 600;
-  --weight-action: 650;
-  --weight-brand: 850;
+
+  --leading-body: 1.5;
+  --leading-heading: 1.2;
+
+  --font-weight-body: 400;
+  --font-weight-label: 600;
+  --font-weight-action: 650;
+  --font-weight-brand: 850;
+
   --color-text: #18312d;
   --color-muted: #51645e;
   --color-page: #f7f8f5;
@@ -31,30 +40,56 @@
   --color-disabled: #e4e9e5;
   --color-disabled-text: #51645e;
   --color-progress: #087566;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
+
+  --spacing: 0.25rem;
+  /* The numbered spacing scale is declared explicitly because the
+     authored stylesheet reads these by name, and Tailwind only
+     generates a scale entry for a utility that is actually used. */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+
   --radius-control: 0.5rem;
   --radius-panel: 0.75rem;
-  --content-width: 65rem;
-  --hero-width: 42.5rem;
+
+  --container-content: 65rem;
+  --container-hero: 42.5rem;
+
+  --shadow-panel: 0 1px 2px #18312d0a, 0 8px 24px #18312d0d;
+  --shadow-raised: 0 2px 4px #18312d0f, 0 12px 32px #18312d14;
+  --shadow-inset: inset 0 1px 0 #ffffffb3;
+  --ring-primary: 0 0 0 4px #075e5426;
+  --gradient-page: linear-gradient(180deg, #f2f6f2 0%, #f7f8f5 22rem);
+  --gradient-brand: linear-gradient(
+    135deg,
+    #075e54 0%,
+    #0b7c6b 55%,
+    #12907c 100%
+  );
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-surface: 180ms;
+}
+
+:root {
+  color-scheme: light;
+  /* These custom properties are kept by name so the forced colours and
+     reduced motion rules can override them. */
   --target-size: 2.75rem;
   --focus-width: 3px;
   --focus-offset: 2px;
   --duration-control: 120ms;
   --ease-control: ease-out;
-  --shadow-panel: 0 2px 8px #18312d0a;
   font-family: var(--font-body);
   font-size: 100%;
   color: var(--color-text);
   background: var(--color-page);
   font-synthesis: none;
-  line-height: var(--line-body);
-  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  font-weight: var(--font-weight-body);
 }
 * {
   box-sizing: border-box;
@@ -74,7 +109,7 @@ legend {
 h1,
 h2,
 h3 {
-  line-height: var(--line-heading);
+  line-height: var(--leading-heading);
 }
 a {
   color: var(--color-primary);
@@ -94,17 +129,17 @@ button,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: var(--spacing-2);
   min-block-size: var(--target-size);
   min-inline-size: var(--target-size);
   max-inline-size: 100%;
   border: 1px solid transparent;
   border-radius: var(--radius-control);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--spacing-3) var(--spacing-4);
   background: var(--color-primary);
   color: var(--color-on-primary);
   font: inherit;
-  font-weight: var(--weight-action);
+  font-weight: var(--font-weight-action);
   cursor: pointer;
   text-decoration: none;
   text-align: center;
@@ -115,6 +150,7 @@ button:not(:disabled):hover,
 .button:hover {
   background: var(--color-primary-hover);
   color: var(--color-on-primary);
+  box-shadow: var(--ring-primary);
 }
 button.quiet {
   color: var(--color-primary);
@@ -141,26 +177,26 @@ button:disabled {
 }
 .skip-link {
   position: fixed;
-  inset-block-start: var(--space-2);
-  inset-inline-start: var(--space-2);
+  inset-block-start: var(--spacing-2);
+  inset-inline-start: var(--spacing-2);
   z-index: 10;
-  transform: translateY(calc(-100% - var(--space-4)));
-  max-inline-size: calc(100% - var(--space-4));
+  transform: translateY(calc(-100% - var(--spacing-4)));
+  max-inline-size: calc(100% - var(--spacing-4));
   min-block-size: var(--target-size);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--spacing-3) var(--spacing-4);
   border-radius: var(--radius-control);
   color: var(--color-on-primary);
   background: var(--color-primary);
-  font-weight: var(--weight-action);
+  font-weight: var(--font-weight-action);
 }
 .skip-link:focus {
   transform: none;
   color: var(--color-on-primary);
 }
 .app-shell {
-  max-width: var(--content-width);
+  max-width: var(--container-content);
   margin: auto;
-  padding: 0 var(--space-4);
+  padding: 0 var(--spacing-4);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -169,8 +205,8 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3) var(--space-4);
-  padding: var(--space-4) 0;
+  gap: var(--spacing-3) var(--spacing-4);
+  padding: var(--spacing-4) 0;
   border-bottom: 1px solid var(--color-border);
 }
 .brand {
@@ -178,34 +214,50 @@ button:disabled {
   align-items: center;
   min-block-size: var(--target-size);
   color: var(--color-primary);
-  font-weight: var(--weight-brand);
+  font-weight: var(--font-weight-brand);
   font-size: var(--text-brand);
+  letter-spacing: -0.02em;
   text-decoration: none;
+  background: var(--gradient-brand);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .site-header nav {
   margin-left: auto;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
+  gap: var(--spacing-2) var(--spacing-4);
 }
 .site-header nav a {
   display: inline-flex;
   align-items: center;
   min-block-size: var(--target-size);
-  padding: var(--space-2) var(--space-1);
+  padding: var(--spacing-2) var(--spacing-1);
 }
 .site-header nav a[aria-current="page"] {
-  font-weight: var(--weight-action);
+  font-weight: var(--font-weight-action);
   text-decoration-thickness: 3px;
 }
 main {
   flex: 1;
   min-inline-size: 0;
-  padding: var(--space-8) 0;
-  scroll-margin-block-start: var(--space-2);
+  padding: var(--spacing-8) 0;
+  scroll-margin-block-start: var(--spacing-2);
+}
+
+/* The page surface is a soft gradient so the content reads as a card on a
+   calm field rather than a flat sheet. */
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--gradient-page);
+  pointer-events: none;
 }
 footer {
-  padding: var(--space-4) 0;
+  padding: var(--spacing-4) 0;
   border-top: 1px solid var(--color-border);
   color: var(--color-muted);
   font-size: var(--text-small);
@@ -214,36 +266,51 @@ footer {
   min-inline-size: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
-  padding: var(--space-5);
+  padding: var(--spacing-5);
   background: var(--color-surface);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-panel), var(--shadow-inset);
+  transition:
+    box-shadow var(--duration-surface) var(--ease-out-soft),
+    transform var(--duration-surface) var(--ease-out-soft);
 }
 .hero {
-  max-width: var(--hero-width);
-  margin: var(--space-8) auto;
+  max-width: var(--container-hero);
+  margin: var(--spacing-8) auto;
 }
 .hero h1 {
   font-size: var(--text-title);
+  letter-spacing: -0.03em;
+}
+.hero .eyebrow {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .eyebrow,
 .meta {
   color: var(--color-muted);
   font-size: var(--text-small);
 }
+.catalogue-cards .eyebrow {
+  font-weight: var(--font-weight-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 .stack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--spacing-4);
 }
 form.stack {
-  margin: var(--space-5) 0;
+  margin: var(--spacing-5) 0;
 }
 label:not(.radio) {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--spacing-1);
   min-inline-size: 0;
-  font-weight: var(--weight-label);
+  font-weight: var(--font-weight-label);
 }
 input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 select,
@@ -254,7 +321,7 @@ textarea {
   min-block-size: var(--target-size);
   font: inherit;
   font-size: var(--text-base);
-  padding: var(--space-3);
+  padding: var(--spacing-3);
   color: var(--color-text);
   background: var(--color-surface);
   border: 1px solid var(--color-control-border);
@@ -276,9 +343,9 @@ textarea[aria-invalid="true"] {
 .radio {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
+  gap: var(--spacing-2);
   min-block-size: var(--target-size);
-  padding-block: var(--space-2);
+  padding-block: var(--spacing-2);
 }
 .radio input {
   flex: 0 0 auto;
@@ -290,8 +357,8 @@ textarea[aria-invalid="true"] {
 .callout {
   background: var(--color-callout);
   border-left: 4px solid var(--color-primary);
-  padding: var(--space-4);
-  margin: var(--space-4) 0;
+  padding: var(--spacing-4);
+  margin: var(--spacing-4) 0;
 }
 progress {
   width: 100%;
@@ -302,8 +369,8 @@ progress {
   display: flex;
   align-items: end;
   flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
 }
 .toolbar label {
   min-width: min(100%, 13.125rem);
@@ -311,10 +378,20 @@ progress {
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: var(--space-4);
+  gap: var(--spacing-4);
 }
 .item-card h3 {
   margin-top: 0;
+  line-height: var(--leading-heading);
+}
+.item-card {
+  transition:
+    box-shadow var(--duration-surface) var(--ease-out-soft),
+    transform var(--duration-surface) var(--ease-out-soft);
+}
+.item-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-raised), var(--shadow-inset);
 }
 .item-summary {
   display: -webkit-box;
@@ -323,23 +400,23 @@ progress {
   -webkit-line-clamp: 4;
 }
 .item-provenance {
-  margin: var(--space-3) 0;
+  margin: var(--spacing-3) 0;
   font-size: var(--text-small);
   overflow-wrap: anywhere;
 }
 .item-provenance summary {
   min-block-size: var(--target-size);
-  padding-block: var(--space-2);
+  padding-block: var(--spacing-2);
   cursor: pointer;
 }
 .item-provenance dl {
-  margin: var(--space-2) 0;
+  margin: var(--spacing-2) 0;
 }
 .item-provenance dt {
-  font-weight: var(--weight-label);
+  font-weight: var(--font-weight-label);
 }
 .item-provenance dd {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--spacing-2);
 }
 .item-provenance > a {
   display: inline-flex;
@@ -350,16 +427,16 @@ fieldset {
   min-inline-size: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
-  padding: var(--space-4);
+  padding: var(--spacing-4);
 }
 legend {
   max-inline-size: 100%;
-  padding-inline: var(--space-1);
-  font-weight: var(--weight-action);
+  padding-inline: var(--spacing-1);
+  font-weight: var(--font-weight-action);
 }
 .notice {
   background: var(--color-notice);
-  padding: var(--space-3);
+  padding: var(--spacing-3);
   border-radius: var(--radius-control);
 }
 @media (max-width: 640px) {
@@ -372,7 +449,7 @@ legend {
     justify-content: space-between;
   }
   main {
-    padding-top: var(--space-4);
+    padding-top: var(--spacing-4);
   }
   .toolbar {
     align-items: stretch;
@@ -500,11 +577,11 @@ legend {
 
 .journey-steps {
   display: grid;
-  gap: var(--space-3);
-  padding-inline-start: var(--space-5);
+  gap: var(--spacing-3);
+  padding-inline-start: var(--spacing-5);
 }
 .journey-steps li {
-  padding: var(--space-3);
+  padding: var(--spacing-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
 }
