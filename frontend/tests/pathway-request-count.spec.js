@@ -19,7 +19,9 @@ test("unauthenticated page loads request pathways at least once and at most twic
   const pathwayRequests = watchPathwayRequests(page);
 
   await page.goto("/pathway");
-  await expect(page.getByText("Choose a pathway to get started.")).toBeVisible();
+  await expect(
+    page.getByText("Choose a pathway to get started."),
+  ).toBeVisible();
   await page.waitForLoadState("networkidle");
 
   expect(pathwayRequests.length).toBeGreaterThanOrEqual(1);
@@ -43,7 +45,9 @@ test("signed-in dashboard requests pathways at most once", async ({ page }) => {
 
   pathwayRequests.length = 0;
   await page.goto("/pathway");
-  await expect(page.getByRole("heading", { name: "Data Analyst" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Data Analyst" }),
+  ).toBeVisible();
   await page.waitForLoadState("networkidle");
 
   expect(pathwayRequests.length).toBeLessThanOrEqual(1);
@@ -54,7 +58,10 @@ test("unauthenticated refresh reuses the original pathways request after a 401",
 }) => {
   const pathwayRequests = watchPathwayRequests(page);
   await page.route("**/api/me/", (route) =>
-    route.fulfill({ status: 401, json: { detail: "Authentication required." } }),
+    route.fulfill({
+      status: 401,
+      json: { detail: "Authentication required." },
+    }),
   );
   await page.route("**/api/pathways/", (route) =>
     route.fulfill({
@@ -71,9 +78,12 @@ test("unauthenticated refresh reuses the original pathways request after a 401",
   await page.goto("/");
 
   await expect(
-    page.getByLabel("Learning pathway").locator("option").filter({
-      hasText: /Data Analyst/,
-    }),
+    page
+      .getByLabel("Learning pathway")
+      .locator("option")
+      .filter({
+        hasText: /Data Analyst/,
+      }),
   ).toHaveCount(1);
   expect(pathwayRequests).toHaveLength(1);
 });
@@ -82,7 +92,10 @@ test("refresh retries a failed pathways request once", async ({ page }) => {
   const pathwayRequests = watchPathwayRequests(page);
   let attempts = 0;
   await page.route("**/api/me/", (route) =>
-    route.fulfill({ status: 401, json: { detail: "Authentication required." } }),
+    route.fulfill({
+      status: 401,
+      json: { detail: "Authentication required." },
+    }),
   );
   await page.route("**/api/pathways/", (route) => {
     attempts += 1;
@@ -103,9 +116,12 @@ test("refresh retries a failed pathways request once", async ({ page }) => {
   await page.goto("/");
 
   await expect(
-    page.getByLabel("Learning pathway").locator("option").filter({
-      hasText: /Data Analyst/,
-    }),
+    page
+      .getByLabel("Learning pathway")
+      .locator("option")
+      .filter({
+        hasText: /Data Analyst/,
+      }),
   ).toHaveCount(1);
   expect(pathwayRequests).toHaveLength(2);
 });
@@ -117,7 +133,10 @@ test("refresh retries a failed pathways request once and settles if it fails aga
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await page.route("**/api/me/", (route) =>
-    route.fulfill({ status: 401, json: { detail: "Authentication required." } }),
+    route.fulfill({
+      status: 401,
+      json: { detail: "Authentication required." },
+    }),
   );
   await page.route("**/api/pathways/", (route) =>
     route.fulfill({ status: 503, json: { detail: "Unavailable." } }),

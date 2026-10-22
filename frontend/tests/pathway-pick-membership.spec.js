@@ -21,7 +21,11 @@ function loadDeclaredSeedPicks() {
   const validatedDatabaseUrl = `sqlite:///${databasePath.replaceAll("\\", "/")}`;
   const result = spawnSync(
     python,
-    [...pythonPrefix, resolve(backendDirectory, "manage.py"), "dump_seed_picks"],
+    [
+      ...pythonPrefix,
+      resolve(backendDirectory, "manage.py"),
+      "dump_seed_picks",
+    ],
     {
       cwd: backendDirectory,
       env: { ...process.env, DATABASE_URL: validatedDatabaseUrl },
@@ -29,7 +33,9 @@ function loadDeclaredSeedPicks() {
     },
   );
   if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout || "Failed to dump seed picks.");
+    throw new Error(
+      result.stderr || result.stdout || "Failed to dump seed picks.",
+    );
   }
   return JSON.parse(result.stdout);
 }

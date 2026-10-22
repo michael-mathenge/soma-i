@@ -16,12 +16,11 @@ test("Learning pathway selector lists exactly the three pathways", async ({
   const selector = page.getByLabel("Learning pathway");
   const selectorOptions = selector.locator("option");
   await expect(selectorOptions).toHaveCount(pathways.length + 1);
-  const options = await selectorOptions
-    .evaluateAll((all) =>
-      all
-        .filter((option) => option.value)
-        .map((option) => option.textContent.trim()),
-    );
+  const options = await selectorOptions.evaluateAll((all) =>
+    all
+      .filter((option) => option.value)
+      .map((option) => option.textContent.trim()),
+  );
   expect(options).toEqual(
     pathways.map((pathway) => `${pathway.title} · ${pathway.target_outcome}`),
   );
@@ -39,13 +38,13 @@ for (const pathwayIndex of [0, 1, 2]) {
     expect(pathway).toBeTruthy();
 
     await page.goto("/");
-    await page
-      .getByLabel("Learning pathway")
-      .selectOption(String(pathway.id));
+    await page.getByLabel("Learning pathway").selectOption(String(pathway.id));
     await page.getByLabel("Name (optional)").fill("Pathway smoke test");
     await page.getByRole("button", { name: "Start learning" }).click();
 
-    await expect(page.getByRole("heading", { name: pathway.title })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: pathway.title }),
+    ).toBeVisible();
     await expect(page.locator(".cards .item-card").first()).toBeVisible();
   });
 }
