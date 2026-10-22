@@ -17,10 +17,7 @@ export function resetE2ESeed() {
   const databaseUrl = process.env.SOMAI_E2E_DATABASE_URL;
   assertIsolatedDatabase(databaseUrl);
   console.log(`Resetting fresh Playwright seed in ${databaseUrl}`);
-  for (const args of [
-    ["flush", "--noinput"],
-    ["seed_demo"],
-  ]) {
+  for (const args of [["flush", "--noinput"], ["seed_demo"]]) {
     const result = spawnSync(
       python,
       [...pythonPrefix, resolve(backendDirectory, "manage.py"), ...args],
@@ -34,7 +31,9 @@ export function resetE2ESeed() {
       },
     );
     if (result.status !== 0) {
-      throw new Error(result.stderr || result.stdout || `Failed: ${args.join(" ")}`);
+      throw new Error(
+        result.stderr || result.stdout || `Failed: ${args.join(" ")}`,
+      );
     }
   }
 }

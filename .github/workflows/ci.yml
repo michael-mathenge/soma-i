@@ -131,7 +131,7 @@ jobs:
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} run lint
 
       - name: Prettier check
-        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec prettier --check "src/**/*.{js,jsx,json,css}"
+        run: npx --yes pnpm@${{ env.PNPM_VERSION }} exec prettier --check "src/**/*.{js,jsx,json,css}" "tests/**/*.js" "*.js"
 
       - name: Production build
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} run build

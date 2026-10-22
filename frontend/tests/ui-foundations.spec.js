@@ -84,9 +84,7 @@ function rgb(value) {
             .map((part) => part + part)
             .join("")
         : hex;
-    return full
-      .match(/.{2}/g)
-      .map((part) => parseInt(part, 16) / 255);
+    return full.match(/.{2}/g).map((part) => parseInt(part, 16) / 255);
   }
   return value
     .match(/[\d.]+/g)

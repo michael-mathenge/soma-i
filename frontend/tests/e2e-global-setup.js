@@ -27,7 +27,9 @@ function runManagementCommand(...args) {
     },
   );
   if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout || `Failed: ${args.join(" ")}`);
+    throw new Error(
+      result.stderr || result.stdout || `Failed: ${args.join(" ")}`,
+    );
   }
 }
 
