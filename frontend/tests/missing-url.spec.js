@@ -14,7 +14,7 @@ test("items without a URL render as text while linked items stay linked", async 
         {
           id: 1,
           title: "Item without a link",
-          summary: "Plain title fallback",
+          excerpt: "Plain title fallback",
           source: "Test feed",
           skills: [],
           estimated_minutes: 10,
@@ -25,7 +25,7 @@ test("items without a URL render as text while linked items stay linked", async 
           id: 2,
           title: "Item with a link",
           url: "https://example.test/article",
-          summary: "Linked item",
+          excerpt: "Linked item",
           source: "Test feed",
           skills: [],
           estimated_minutes: 10,

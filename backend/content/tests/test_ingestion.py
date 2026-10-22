@@ -219,7 +219,7 @@ def test_item_api_payload_clears_unsafe_legacy_urls():
     item = Item.objects.create(
         title="Legacy unsafe URL",
         url="javascript:alert(1)",
-        summary="Legacy item",
+        match_text="Legacy item",
         published_at=FETCHED_AT,
         source=make_source(),
     )
@@ -287,7 +287,9 @@ def test_summary_only_entries_store_null_word_count_and_plain_excerpt():
 
     assert result["created"] == 1
     assert item.word_count is None
-    assert item.summary == "SQL basics and a short guide."
+    assert item.match_text == "SQL basics and a short guide."
+    # The stored text is internal matching input and is never published.
+    assert item.excerpt == ""
     assert clean_summary("<b>plain</b> text") == "plain text"
 
 
@@ -301,7 +303,8 @@ def test_full_content_sets_word_count_without_storing_article_text():
     item = source.items.get()
 
     assert item.word_count == 4
-    assert item.summary == "Short SQL summary."
+    assert item.match_text == "Short SQL summary."
+    assert item.excerpt == ""
     assert not hasattr(item, "content")
     assert word_count_for_entry(entry) == 4
 
@@ -1084,7 +1087,7 @@ def test_known_rss_category_can_store_candidate_outside_legacy_title_matching():
     entry = dict(
         title="Organize a budget table",
         link="https://fixture.example.test/budget",
-        summary="An offline example.",
+        match_text="An offline example.",
         tags=[{"term": "<b>Spreadsheets</b>"}],
         date="2026-10-01",
     )

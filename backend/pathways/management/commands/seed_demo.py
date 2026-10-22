@@ -168,7 +168,7 @@ class Command(BaseCommand):
                 item = Item(
                     url=url,
                     title=sample_title,
-                    summary=summary,
+                    match_text=summary,
                     published_at=FIXED_SAMPLE_DATE,
                     source=sample_source,
                     estimated_minutes=8,
@@ -177,7 +177,7 @@ class Command(BaseCommand):
             else:
                 item.url = url
                 item.title = sample_title
-                item.summary = summary
+                item.match_text = summary
                 item.source = sample_source
                 item.estimated_minutes = 8
                 item.is_low_data = True

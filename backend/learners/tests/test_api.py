@@ -519,7 +519,7 @@ def test_non_catalogue_item_skills_are_filtered_without_changing_recommendations
     item = Item.objects.create(
         title="A canonical pick with noncanonical tags",
         url="https://api-skills.example.test/pick",
-        summary="A test pick for canonical skill filtering.",
+        match_text="A test pick for canonical skill filtering.",
         published_at=timezone.now(),
         source=Item.objects.first().source,
     )
@@ -589,7 +589,7 @@ def test_dashboard_round_robin_covers_four_skills_deduplicates_and_is_determinis
             item = Item.objects.create(
                 title=f"Round robin {skill.name} {index}",
                 url=f"https://round-robin.example/{skill.slug}-{index}",
-                summary="A deterministic dashboard pick.",
+                match_text="A deterministic dashboard pick.",
                 published_at=timezone.now(),
                 source=source,
             )

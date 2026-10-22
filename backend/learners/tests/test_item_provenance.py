@@ -23,7 +23,7 @@ def make_item(**overrides):
     values = {
         "title": "Fixture lesson",
         "url": "https://publisher.example.test/lesson",
-        "summary": "Offline fixture excerpt.",
+        "match_text": "Offline fixture excerpt.",
         "source": source,
         "published_at": CONTENT_DATE,
         "date_source": "published",
@@ -91,4 +91,34 @@ def test_reported_rights_never_imply_verified_reuse(reported_rights):
     assert payload["source_rights"] == reported_rights
     assert payload["source_reuse_verified"] is False
     item.refresh_from_db()
-    assert item.summary == "Offline fixture excerpt."
+    assert item.match_text == "Offline fixture excerpt."
+
+
+def test_stored_feed_text_is_never_returned_to_a_learner():
+    """The API publishes title, publisher and date, not stored feed text."""
+    item = make_item()
+    item.match_text = "Uncleared feed text that must never be published."
+    item.excerpt = ""
+    item.save(update_fields=["match_text", "excerpt"])
+
+    payload = item_json(item, reference_date=REFERENCE_DATE)
+
+    assert "summary" not in payload
+    assert "match_text" not in payload
+    assert payload["excerpt"] == ""
+    assert "Uncleared feed text" not in str(payload)
+    # The learner still gets the metadata the catalogue is built on.
+    assert payload["title"] == "Fixture lesson"
+    assert payload["source"] == "Fixture publisher"
+
+
+def test_only_reviewed_excerpt_text_is_returned():
+    item = make_item()
+    item.match_text = "Internal matching text."
+    item.excerpt = "Cleared publisher excerpt."
+    item.save(update_fields=["match_text", "excerpt"])
+
+    payload = item_json(item, reference_date=REFERENCE_DATE)
+
+    assert payload["excerpt"] == "Cleared publisher excerpt."
+    assert "Internal matching text" not in str(payload)

@@ -86,7 +86,7 @@ def world(monkeypatch):
             source = sources[index % 2]
             item = Item.objects.create(
                 title=step["skill"] + " fundamentals",
-                summary="An offline resource fixture.",
+                match_text="An offline resource fixture.",
                 url=f"https://{source.name}.example.test/{step['skill'].lower()}/{index}".replace(
                     " ", "-"
                 ),
@@ -210,7 +210,7 @@ def test_unverified_or_changed_resources_cannot_publish(world, failure):
     elif failure == "long_review":
         review.expires_on = date(2027, 10, 1)
     elif failure == "fingerprint":
-        item.summary = "Changed after review."
+        item.match_text = "Changed after review."
     elif failure == "retrieval_date":
         item.date_source = "fetched"
     elif failure == "future_date":
@@ -598,7 +598,7 @@ def test_selected_three_resources_retain_two_publishers_even_if_sorted_first_thr
             review_again(target)
     extra = Item.objects.create(
         title=item.title,
-        summary=item.summary,
+        match_text=item.match_text,
         url="https://two.example.test/zz-last",
         source=world["sources"][1],
         published_at=item.published_at,
@@ -633,7 +633,7 @@ def test_repeat_retrieval_does_not_invalidate_unchanged_review_but_content_edits
     item.save()
     assert content_fingerprint(item) == fingerprint
     run(world)
-    item.summary += " Changed."
+    item.match_text += " Changed."
     item.save()
     picks = discovery.reviewed_picks(published(), published().steps.first().skill, 3)
     assert len(picks) == 2 and item.pk not in {i.pk for i in picks}

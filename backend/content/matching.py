@@ -113,7 +113,7 @@ def ranking_key(item, source_type="publisher", config=None):
     else:
         timestamp = 0
     return (
-        -ranking_score(item.title, item.summary, source_type, config),
+        -ranking_score(item.title, item.match_text, source_type, config),
         -int(bool(has_published_date)),
         -timestamp,
     )

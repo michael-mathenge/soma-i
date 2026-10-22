@@ -14,7 +14,7 @@ const pathway = {
 const lesson = {
   id: 9,
   title: "Compare a small table",
-  summary: "Explain an observation and a limitation.",
+  excerpt: "Explain an observation and a limitation.",
   url: "https://resource.example.test/table",
   source: "Fixture publisher",
   skills: ["SQL"],

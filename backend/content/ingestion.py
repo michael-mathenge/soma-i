@@ -294,7 +294,7 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
             update_fields = ["pathway_keys"]
             if matched_same_feed:
                 item.title = title
-                item.summary = summary
+                item.match_text = summary
                 item.published_at = published_at
                 item.fetched_at = fetched_at
                 item.date_source = date_source
@@ -303,7 +303,7 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
                 update_fields.extend(
                     [
                         "title",
-                        "summary",
+                        "match_text",
                         "published_at",
                         "fetched_at",
                         "date_source",
@@ -336,7 +336,7 @@ def ingest_entries(source, feed_config, entries, fetched_at, config=None):
                 url=original_link,
                 normalized_link=normalized_link,
                 guid=guid,
-                summary=summary,
+                match_text=summary,
                 published_at=published_at,
                 fetched_at=fetched_at,
                 date_source=date_source,

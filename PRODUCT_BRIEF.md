@@ -44,6 +44,6 @@ The three initial pathways are migration seeds, not a catalogue ceiling. Discove
 
 ### Release boundaries
 
-Link out to original resources; never scrape or store full articles/paywalled text/copied images. Feed-provided excerpts are capped at 300 characters and stored only where publisher permission is verified. Every candidate feed remains to verify until checked. New pathways describe learning topics, not inferred hiring qualifications. Sample opportunities remain visibly labelled. Existing Kiswahili UI is interface-only/experimental; translation expansion is next scope.
+Link out to original resources; never scrape or store full articles/paywalled text/copied images. Feed text is read only to decide which pathway and skill an item belongs to and is never shown to a learner. Content is published as title, publisher, publication date and a link to the original; a cleared excerpt is shown only where publisher permission for republication has been verified. Every candidate feed remains to verify until checked. New pathways describe learning topics, not inferred hiring qualifications. Sample opportunities remain visibly labelled. Existing Kiswahili UI is interface-only/experimental; translation expansion is next scope.
 
 Use the existing owner-reported michaelmathenge.dev domain without a new purchase. Free hosting, database, email, scheduling and backup terms are verification gates; stop rather than silently use paid services. This beta is not an uptime-guaranteed service and its usefulness still needs learner research.

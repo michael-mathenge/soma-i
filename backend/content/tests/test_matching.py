@@ -169,19 +169,19 @@ def test_beginner_score_and_community_adjustment():
 def test_recency_breaks_ties_and_fetched_dates_get_no_recency_advantage():
     older = SimpleNamespace(
         title="An article",
-        summary="",
+        match_text="",
         date_source="published",
         published_at=datetime(2026, 1, 1, tzinfo=UTC),
     )
     newer = SimpleNamespace(
         title="An article",
-        summary="",
+        match_text="",
         date_source="updated",
         published_at=datetime(2026, 2, 1, tzinfo=UTC),
     )
     fetched = SimpleNamespace(
         title="An article",
-        summary="",
+        match_text="",
         date_source="fetched",
         published_at=datetime(2026, 3, 1, tzinfo=UTC),
     )

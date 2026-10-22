@@ -37,7 +37,9 @@ def item_json(item, done_ids=None, reference_date=None):
         "id": item.pk,
         "title": item.title,
         "url": safe_http_link(item.url) or "",
-        "summary": item.summary,
+        # Only publisher-cleared text is returned. Everything else is
+        # published as title, publisher and date with a link to the original.
+        "excerpt": item.excerpt,
         "published_at": item.published_at.isoformat(),
         "source": item.source.name,
         "skills": list(

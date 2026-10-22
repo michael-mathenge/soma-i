@@ -12,7 +12,7 @@ test("lesson cards hide minutes and retain the low data badge", async ({
         {
           id: 1,
           title: "Sample lesson",
-          summary: "Short sample summary.",
+          excerpt: "Short sample summary.",
           source: "SOMA.i sample content",
           skills: ["Spreadsheets"],
           estimated_minutes: 8,
@@ -31,6 +31,42 @@ test("lesson cards hide minutes and retain the low data badge", async ({
   await expect(card).not.toContainText("8 min");
 });
 
+test("lesson cards link to the publisher and show no excerpt without permission", async ({
+  page,
+}) => {
+  await page.route("**/api/items/", (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 3,
+          title: "Publisher lesson",
+          url: "https://publisher.example.test/lesson",
+          excerpt: "",
+          source: "Publisher name",
+          skills: ["SQL"],
+          estimated_minutes: 8,
+          is_low_data: true,
+          done: false,
+        },
+      ],
+    }),
+  );
+
+  await page.goto("/items");
+
+  const card = page.locator(".item-card");
+  // No cleared excerpt, so no excerpt paragraph is rendered at all.
+  await expect(card.locator(".item-summary")).toHaveCount(0);
+  // The learner is told where the lesson actually is.
+  const read = card.getByRole("link", { name: "Read on the publisher's site" });
+  await expect(read).toBeVisible();
+  await expect(read).toHaveAttribute(
+    "href",
+    "https://publisher.example.test/lesson",
+  );
+  await expect(card).toContainText("Publisher name");
+});
+
 test("long lesson summaries clamp to four lines with an ellipsis", async ({
   page,
 }) => {
@@ -40,7 +76,7 @@ test("long lesson summaries clamp to four lines with an ellipsis", async ({
         {
           id: 2,
           title: "Long summary lesson",
-          summary: "A long summary sentence. ".repeat(60),
+          excerpt: "A long summary sentence. ".repeat(60),
           source: "Sample source",
           skills: ["CSS"],
           estimated_minutes: 8,
@@ -85,7 +121,7 @@ test("source details expose attribution, dated provenance and unverified rights"
           id: 3,
           title: "Attributed lesson",
           url: "https://publisher.example.test/lesson",
-          summary: "Offline sample.",
+          excerpt: "Offline sample.",
           source: "Fixture publisher",
           source_url: "https://publisher.example.test/feed.xml",
           source_attribution: "Fixture author and publisher",
@@ -135,7 +171,7 @@ test("retrieval-only and legacy metadata never invent a publication date", async
         {
           id: 4,
           title: "Retrieved fixture",
-          summary: "Offline sample.",
+          excerpt: "Offline sample.",
           source: "Fixture publisher",
           source_url: "",
           source_attribution: "",
@@ -149,7 +185,7 @@ test("retrieval-only and legacy metadata never invent a publication date", async
         {
           id: 5,
           title: "Legacy fixture",
-          summary: "Offline sample.",
+          excerpt: "Offline sample.",
           source: "Legacy publisher",
           published_at: "2026-10-11T09:00:00+00:00",
           skills: [],
@@ -188,7 +224,7 @@ test("updated dates and untrusted attribution stay honest and readable on mobile
         {
           id: 6,
           title: "Updated fixture",
-          summary: "Offline sample.",
+          excerpt: "Offline sample.",
           source: "Fixture publisher",
           source_attribution: attribution,
           source_rights: "Unverified licence text ".repeat(15),
@@ -227,7 +263,7 @@ test("source details keep English labels in the experimental Kiswahili interface
         {
           id: 7,
           title: "English fixture",
-          summary: "Offline sample.",
+          excerpt: "Offline sample.",
           source: "Fixture publisher",
           skills: [],
           done: false,

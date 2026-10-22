@@ -16,7 +16,7 @@ const lesson = {
   id: 1,
   title: "Practice reading a small table",
   url: "https://resource.example.test/table",
-  summary: "Compare two values and explain one limitation of the table.",
+  excerpt: "Compare two values and explain one limitation of the table.",
   source: "Offline fixture publisher",
   source_attribution: "Fixture author",
   source_url: "https://resource.example.test/feed",

@@ -399,6 +399,10 @@ progress {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
 }
+.item-read {
+  margin: var(--space-2) 0;
+  font-size: var(--text-small);
+}
 .item-provenance {
   margin: var(--spacing-3) 0;
   font-size: var(--text-small);
