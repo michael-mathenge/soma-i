@@ -225,6 +225,87 @@ TLS, backups and the release gates recorded in
 [FREE_TIER_VERIFICATION.md](docs/FREE_TIER_VERIFICATION.md) are still
 outstanding, and no public deployment has been made.
 
+## Serve it for review
+
+Two ways to get the project running locally. The container is the quickest
+and matches the production image; the development servers give you hot
+reload while you work.
+
+### Option 1: the container
+
+One command. It serves the application, the API and the assets from a
+single origin on <http://127.0.0.1:8000>.
+
+**PowerShell — build and run**
+
+```powershell
+docker build -t soma-i:local .
+docker run --rm -p 8000:8000 -e SOMA_ENV=development -e DATABASE_URL=sqlite:////tmp/soma.sqlite3 -e DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1 -e DJANGO_DEBUG=false -e DJANGO_HSTS_SECONDS=0 soma-i:local
+```
+
+**PowerShell — check it came up**
+
+```powershell
+curl.exe -s http://127.0.0.1:8000/api/health/
+```
+
+The expected reply is `{"status":"ok","service":"soma.i"}`. Then open
+<http://127.0.0.1:8000/catalogue>.
+
+To use PostgreSQL instead, `docker compose up --build` starts the
+application and a database together.
+
+### Option 2: the development servers
+
+Use this when you want to change the code and see the change without
+rebuilding an image. It needs two windows.
+
+**PowerShell — window one, the backend**
+
+```powershell
+Set-Location C:\dev\soma-i
+$env:SOMA_ENV = 'development'
+$env:DJANGO_DEBUG = 'true'
+$env:DJANGO_ALLOWED_HOSTS = 'localhost,127.0.0.1'
+$env:DATABASE_URL = 'sqlite:///C:/Users/' + $env:USERNAME + '/AppData/Local/Temp/soma-dev/dev.sqlite3'
+New-Item -ItemType Directory -Force -Path "$env:TEMP\soma-dev" | Out-Null
+.\.venv\Scripts\python.exe backend\manage.py migrate --noinput
+.\.venv\Scripts\python.exe backend\manage.py seed_demo
+.\.venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8000 --noreload
+```
+
+**PowerShell — window two, the frontend**
+
+```powershell
+Set-Location C:\dev\soma-irontend
+npx --yes pnpm@12.11.2 install --frozen-lockfile
+npx --yes pnpm@12.11.2 run dev
+```
+
+Then open <http://127.0.0.1:5173/catalogue>.
+
+### If a port is already in use
+
+Port 8000 is commonly taken by another service. The frontend proxy target
+and the development port are both configurable, so point them somewhere
+free.
+
+**PowerShell — window one, the backend on another port**
+
+```powershell
+.\.venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8010 --noreload
+```
+
+**PowerShell — window two, the frontend pointed at it**
+
+```powershell
+$env:SOMAI_API_ORIGIN = 'http://127.0.0.1:8010'
+$env:SOMAI_FRONTEND_PORT = '5175'
+npx --yes pnpm@12.11.2 run dev
+```
+
+Then open <http://127.0.0.1:5175/catalogue>.
+
 ## Built with Codex
 
 Codex assisted with planning, implementation, tests, documentation, and

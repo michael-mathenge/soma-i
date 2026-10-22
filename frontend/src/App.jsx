@@ -220,16 +220,25 @@ function Catalogue({ t }) {
     /^[1-9]\d{0,5}$/.test(rawPage) || rawPage === "1000000"
       ? Number(rawPage)
       : 1;
-  const [search, setSearch] = useState(query);
   const [state, setState] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
-  // Adopt a query that arrived from the URL, but never clobber a value the
-  // learner is still typing; the form owns the input until it is submitted.
+  // The search field is uncontrolled, so what the learner typed is what the
+  // form submits. A controlled input can revert to an earlier value when a
+  // submission arrives before the state update is committed, which silently
+  // dropped the search term.
+  const searchField = useRef(null);
+  // A query that arrives from the URL, such as the browser going back, is
+  // adopted into the field, but never over a value the learner is typing.
   const lastQuery = useRef(query);
   useEffect(() => {
     if (query !== lastQuery.current) {
       lastQuery.current = query;
-      setSearch(query);
+      if (
+        searchField.current &&
+        document.activeElement !== searchField.current
+      ) {
+        searchField.current.value = query;
+      }
     }
   }, [query]);
   useEffect(() => {
@@ -283,8 +292,8 @@ function Catalogue({ t }) {
               type="search"
               name="q"
               maxLength={120}
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              defaultValue={query}
+              ref={searchField}
             />
           </label>
           <button>{en.search}</button>
@@ -292,7 +301,7 @@ function Catalogue({ t }) {
             type="button"
             className="quiet"
             onClick={() => {
-              setSearch("");
+              if (searchField.current) searchField.current.value = "";
               setParams({ page: "1" });
             }}
           >

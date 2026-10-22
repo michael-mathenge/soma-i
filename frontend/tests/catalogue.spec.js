@@ -134,6 +134,31 @@ test("catalogue search submits explicitly resets pages and handles empty results
   await expect(page.getByRole("article")).toHaveCount(12);
   await expect(search).toHaveValue("");
 });
+test("a search term submitted in quick succession is not dropped", async ({
+  page,
+}) => {
+  const served = await fixtures(page);
+  await page.goto("/catalogue?page=2");
+  const search = page.getByRole("searchbox", { name: "Search topics" });
+  // There is no wait between the fill and the submit. A controlled input can
+  // revert to the earlier value when the submission arrives before the state
+  // update is committed, which silently dropped the search term.
+  await search.fill("Topic 2");
+  await search.press("Enter");
+  await expect(page.getByRole("article")).toHaveCount(1);
+  await search.fill("missing");
+  await search.press("Enter");
+  await expect
+    .poll(() => served.filter((entry) => entry.query === "missing").length, {
+      timeout: 15000,
+    })
+    .toBe(1);
+  await expect(page.getByText(/No topics on this page/)).toBeVisible();
+  // Clearing the search empties the field and restores the full list.
+  await page.getByRole("button", { name: "Clear search" }).click();
+  await expect(search).toHaveValue("");
+  await expect(page.getByRole("article")).toHaveCount(12);
+});
 test("catalogue errors retry and loading does not expose old cards", async ({
   page,
 }) => {
