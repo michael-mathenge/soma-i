@@ -32,6 +32,8 @@ def enrollable_pathways():
                 coverage_checked_at__gte=timezone.now() - timedelta(days=1),
                 coverage_checked_at__lte=timezone.now(),
             )
+            # A curated pathway publishes links the owner checked by hand.
+            | Q(is_curated=True)
         )
         .order_by("catalogue_id", "pk")
     )

@@ -1,0 +1,788 @@
+{
+  "topics": {
+    "digital-foundations": {
+      "Computer Basics": [
+        {
+          "title": "How the web works - Learn web development | MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Web_standards/How_the_web_works",
+          "publisher": "MDN Web Docs",
+          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on MDN Web Docs for this step."
+        },
+        {
+          "title": "A Brief History of the Internet - Internet Society",
+          "url": "https://www.internetsociety.org/internet/history-internet/brief-history-internet/",
+          "publisher": "Internet Society",
+          "evidence_url": "https://www.internetsociety.org/legal/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Internet Society for this step."
+        },
+        {
+          "title": "Root Zone Management",
+          "url": "https://www.iana.org/domains/root",
+          "publisher": "IANA",
+          "evidence_url": "https://www.iana.org/help/terms",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on IANA for this step."
+        }
+      ],
+      "Internet Research": [
+        {
+          "title": "SIFT (The Four Moves) - Hapgood",
+          "url": "https://hapgood.us/2019/06/19/sift-the-four-moves/",
+          "publisher": "Hapgood (Mike Caulfield)",
+          "evidence_url": "https://hapgood.us/2019/06/19/thick-thin/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Hapgood (Mike Caulfield) for this step."
+        },
+        {
+          "title": "Using Lateral Reading & SIFT - Source Evaluation - Library Class and Subject Guides at Minnesota State University Mankato",
+          "url": "https://libguides.mnsu.edu/sourcecredibility/lateralreading",
+          "publisher": "Minnesota State University Mankato Libraries",
+          "evidence_url": "https://libguides.mnstate.edu/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Minnesota State University Mankato Libraries for this step."
+        },
+        {
+          "title": "Lateral Reading and SIFT - Online Research - Research Guides at Central Michigan University Libraries",
+          "url": "https://libguides.cmich.edu/web_research/lateral",
+          "publisher": "Central Michigan University Libraries",
+          "evidence_url": "https://www.library.cmu.edu/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Central Michigan University Libraries for this step."
+        }
+      ],
+      "Online Safety": [
+        {
+          "title": "Recognize and Report Phishing | CISA",
+          "url": "https://www.cisa.gov/secure-our-world/recognize-and-report-phishing",
+          "publisher": "CISA",
+          "evidence_url": "https://www.cisa.gov/legal",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on CISA for this step."
+        },
+        {
+          "title": "Cyber security advice for you & your family | National Cyber Security Centre",
+          "url": "https://www.ncsc.gov.uk/section/advice-guidance/you-your-family",
+          "publisher": "UK National Cyber Security Centre",
+          "evidence_url": "https://www.ncsc.gov.uk/about-us/terms-and-conditions",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on UK National Cyber Security Centre for this step."
+        },
+        {
+          "title": "Learn where to report a scam | USAGov",
+          "url": "https://www.usa.gov/where-report-scams",
+          "publisher": "USAGov",
+          "evidence_url": "https://www.usa.gov/terms",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on USAGov for this step."
+        }
+      ]
+    },
+    "full-stack-web-developer": {
+      "Web UI": [
+        {
+          "title": "CSS styling basics - Learn web development | MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics",
+          "publisher": "MDN Web Docs",
+          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on MDN Web Docs for this step."
+        },
+        {
+          "title": "Learn CSS | web.dev",
+          "url": "https://web.dev/learn/css",
+          "publisher": "web.dev (Google Developers)",
+          "evidence_url": "https://developers.google.com/terms/site-policies",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on web.dev (Google Developers) for this step."
+        },
+        {
+          "title": "Forms and buttons in HTML - Learn web development | MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_forms",
+          "publisher": "MDN Web Docs",
+          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on MDN Web Docs for this step."
+        }
+      ],
+      "Backend Routes": [
+        {
+          "title": "Express Tutorial Part 4: Routes and controllers - Learn web development | MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/Express_Nodejs/routes",
+          "publisher": "MDN Web Docs",
+          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on MDN Web Docs for this step."
+        },
+        {
+          "title": "Routing · Express.js",
+          "url": "https://expressjs.com/en/guide/routing/",
+          "publisher": "Express.js",
+          "evidence_url": "https://expressjs.com/en/guide/routing/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Express.js for this step."
+        },
+        {
+          "title": "HTTP | Node.js v26.12.1 Documentation",
+          "url": "https://nodejs.org/docs/latest/api/http.html",
+          "publisher": "Node.js Docs",
+          "evidence_url": "https://nodejs.org/en/about/legal",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Node.js Docs for this step."
+        }
+      ],
+      "Database Records": [
+        {
+          "title": "PostgreSQL: Documentation: 18: Chapter 2. The SQL Language",
+          "url": "https://www.postgresql.org/docs/current/tutorial-sql.html",
+          "publisher": "PostgreSQL Docs",
+          "evidence_url": "https://www.postgresql.org/about/licence",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on PostgreSQL Docs for this step."
+        },
+        {
+          "title": "Models | Django documentation | Django",
+          "url": "https://docs.djangoproject.com/en/5.0/topics/db/models/",
+          "publisher": "Django Docs",
+          "evidence_url": "https://www.djangoproject.com/legal/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Django Docs for this step."
+        },
+        {
+          "title": "Express Tutorial Part 3: Using a Database (with Mongoose) - Learn web development | MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/Express_Nodejs/mongoose",
+          "publisher": "MDN Web Docs",
+          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on MDN Web Docs for this step."
+        }
+      ]
+    },
+    "cloud-devops-foundations": {
+      "Environment Configuration": [
+        {
+          "title": "Settings | Django documentation | Django",
+          "url": "https://docs.djangoproject.com/en/5.0/ref/settings/",
+          "publisher": "Django Docs",
+          "evidence_url": "https://www.djangoproject.com/legal/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Django Docs for this step."
+        },
+        {
+          "title": "Environment variables in Compose | Docker Docs",
+          "url": "https://docs.docker.com/compose/how-tos/environment-variables/",
+          "publisher": "Docker Docs",
+          "evidence_url": "https://docs.docker.com/compose/how-tos/environment-variables/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Docker Docs for this step."
+        },
+        {
+          "title": "Secrets Management - OWASP Cheat Sheet Series",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html",
+          "publisher": "OWASP",
+          "evidence_url": "https://owasp.org/www-policy/operational-licensing/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on OWASP for this step."
+        }
+      ],
+      "Deployment Basics": [
+        {
+          "title": "Django Tutorial Part 11: Deploying Django to production - Learn web development | MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/Django/Deployment",
+          "publisher": "MDN Web Docs",
+          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on MDN Web Docs for this step."
+        },
+        {
+          "title": "Quickstart for GitHub Actions - GitHub Docs",
+          "url": "https://docs.github.com/en/actions/get-started/quickstart",
+          "publisher": "GitHub Docs",
+          "evidence_url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on GitHub Docs for this step."
+        },
+        {
+          "title": "What is Amazon S3? - Amazon Simple Storage Service",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
+          "publisher": "AWS Docs",
+          "evidence_url": "https://aws.amazon.com/service-terms/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on AWS Docs for this step."
+        }
+      ],
+      "Monitoring Basics": [
+        {
+          "title": "Overview | Prometheus",
+          "url": "https://prometheus.io/docs/introduction/overview/",
+          "publisher": "Prometheus Docs",
+          "evidence_url": "https://prometheus.io/docs/introduction/overview/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Prometheus Docs for this step."
+        },
+        {
+          "title": "Metrics | OpenTelemetry",
+          "url": "https://opentelemetry.io/docs/concepts/signals/metrics/",
+          "publisher": "OpenTelemetry",
+          "evidence_url": "https://opentelemetry.io/docs/community/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on OpenTelemetry for this step."
+        },
+        {
+          "title": "Google SRE - Prometheus Alerting: Turn SLOs into Alerts",
+          "url": "https://sre.google/workbook/alerting-on-slos/",
+          "publisher": "Google SRE",
+          "evidence_url": "https://landing.google.com/sre/sre-book/toc/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Google SRE for this step."
+        }
+      ]
+    },
+    "cybersecurity-foundations": {
+      "Account Security": [
+        {
+          "title": "SP 800-63B, Digital Identity Guidelines: Authentication and Lifecycle Management | CSRC",
+          "url": "https://csrc.nist.gov/pubs/sp/800/63/b/upd2/final",
+          "publisher": "NIST",
+          "evidence_url": "https://www.nist.gov/open-license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on NIST for this step."
+        },
+        {
+          "title": "Authentication - OWASP Cheat Sheet Series",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html",
+          "publisher": "OWASP",
+          "evidence_url": "https://owasp.org/www-policy/operational-licensing/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on OWASP for this step."
+        },
+        {
+          "title": "Use Strong Passwords | CISA",
+          "url": "https://www.cisa.gov/secure-our-world/use-strong-passwords",
+          "publisher": "CISA",
+          "evidence_url": "https://www.cisa.gov/legal",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on CISA for this step."
+        }
+      ],
+      "Web Request Safety": [
+        {
+          "title": "Content Security Policy (CSP) - HTTP | MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP",
+          "publisher": "MDN Web Docs",
+          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on MDN Web Docs for this step."
+        },
+        {
+          "title": "Cross-Origin Resource Sharing (CORS) - HTTP | MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS",
+          "publisher": "MDN Web Docs",
+          "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on MDN Web Docs for this step."
+        },
+        {
+          "title": "Input Validation - OWASP Cheat Sheet Series",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html",
+          "publisher": "OWASP",
+          "evidence_url": "https://owasp.org/www-policy/operational-licensing/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on OWASP for this step."
+        }
+      ],
+      "Incident Notes": [
+        {
+          "title": "SP 800-61 Rev. 2, Computer Security Incident Handling Guide | CSRC",
+          "url": "https://csrc.nist.gov/pubs/sp/800/61/r2/final",
+          "publisher": "NIST",
+          "evidence_url": "https://www.nist.gov/open-license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on NIST for this step."
+        },
+        {
+          "title": "Logging - OWASP Cheat Sheet Series",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
+          "publisher": "OWASP",
+          "evidence_url": "https://owasp.org/www-policy/operational-licensing/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on OWASP for this step."
+        },
+        {
+          "title": "Stop Ransomware | CISA",
+          "url": "https://www.cisa.gov/stopransomware",
+          "publisher": "CISA",
+          "evidence_url": "https://www.cisa.gov/legal",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on CISA for this step."
+        }
+      ]
+    },
+    "ai-data-literacy": {
+      "Data Quality": [
+        {
+          "title": "What Are Data Quality Dimensions? | IBM",
+          "url": "https://www.ibm.com/think/topics/data-quality-dimensions",
+          "publisher": "IBM",
+          "evidence_url": "https://www.ibm.com/legal/copyright",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on IBM for this step."
+        },
+        {
+          "title": "Data Quality in Microsoft Purview Unified Catalog | Microsoft Learn",
+          "url": "https://learn.microsoft.com/en-us/purview/unified-catalog-data-quality",
+          "publisher": "Microsoft Learn",
+          "evidence_url": "https://www.microsoft.com/licensing/terms/productoffering/MicrosoftAzure",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Microsoft Learn for this step."
+        },
+        {
+          "title": "DCAT-US 3.0: Quality and Governance",
+          "url": "https://resources.data.gov/standards/catalog/dcat-us-3/quality-governance/",
+          "publisher": "Resources.data.gov (Project Open Data)",
+          "evidence_url": "https://resources.data.gov/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Resources.data.gov (Project Open Data) for this step."
+        }
+      ],
+      "AI Output Review": [
+        {
+          "title": "Rubrics reference guide - Microsoft Copilot Studio | Microsoft Learn",
+          "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/kit-rubrics-reference",
+          "publisher": "Microsoft Learn",
+          "evidence_url": "https://www.microsoft.com/licensing/terms/productoffering/MicrosoftAzure",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Microsoft Learn for this step."
+        },
+        {
+          "title": "PAIR Guidebook",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "publisher": "Google PAIR",
+          "evidence_url": "https://pair.googleml.com/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Google PAIR for this step."
+        },
+        {
+          "title": "10. Overreliance on AI (Misuse & Human Factor) | Microsoft Learn",
+          "url": "https://learn.microsoft.com/en-us/security/zero-trust/catalog-ai-attack-techniques/overreliance-on-ai",
+          "publisher": "Microsoft Learn",
+          "evidence_url": "https://www.microsoft.com/licensing/terms/productoffering/MicrosoftAzure",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Microsoft Learn for this step."
+        }
+      ],
+      "Responsible Use": [
+        {
+          "title": "AI Risk Management Framework | NIST",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+          "publisher": "NIST",
+          "evidence_url": "https://www.nist.gov/open-license",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on NIST for this step."
+        },
+        {
+          "title": "Ethics of Artificial Intelligence - AI | UNESCO",
+          "url": "https://www.unesco.org/en/artificial-intelligence/recommendation-ethics",
+          "publisher": "UNESCO",
+          "evidence_url": "https://www.unesco.org/en/legal-terms",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on UNESCO for this step."
+        },
+        {
+          "title": "AI Principles — Google AI",
+          "url": "https://ai.google/principles/",
+          "publisher": "Google AI",
+          "evidence_url": "https://ai.google/terms/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Google AI for this step."
+        }
+      ]
+    },
+    "product-ux-foundations": {
+      "Problem Framing": [
+        {
+          "title": "Design Thinking 101 - NN/G",
+          "url": "https://www.nngroup.com/articles/design-thinking/",
+          "publisher": "Nielsen Norman Group",
+          "evidence_url": "https://www.nngroup.com/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Nielsen Norman Group for this step."
+        },
+        {
+          "title": "What is Design Thinking? — updated 2026 | IxDF",
+          "url": "https://ixdf.org/literature/topics/design-thinking",
+          "publisher": "Interaction Design Foundation",
+          "evidence_url": "https://ixdf.org/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Interaction Design Foundation for this step."
+        },
+        {
+          "title": "Learning about users and their needs - GOV.UK Service Manual",
+          "url": "https://www.gov.uk/service-manual/user-research/start-by-learning-user-needs",
+          "publisher": "GOV.UK Service Manual",
+          "evidence_url": "https://www.gov.uk/help/terms-conditions",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on GOV.UK Service Manual for this step."
+        }
+      ],
+      "User Flow": [
+        {
+          "title": "Journey Mapping 101 - NN/G",
+          "url": "https://www.nngroup.com/articles/journey-mapping-101/",
+          "publisher": "Nielsen Norman Group",
+          "evidence_url": "https://www.nngroup.com/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Nielsen Norman Group for this step."
+        },
+        {
+          "title": "What is Navigation in UX Design? — updated 2026 | IxDF",
+          "url": "https://ixdf.org/literature/topics/navigation",
+          "publisher": "Interaction Design Foundation",
+          "evidence_url": "https://ixdf.org/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Interaction Design Foundation for this step."
+        },
+        {
+          "title": "Mental Models and User Experience Design - NN/G",
+          "url": "https://www.nngroup.com/articles/mental-models/",
+          "publisher": "Nielsen Norman Group",
+          "evidence_url": "https://www.nngroup.com/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Nielsen Norman Group for this step."
+        }
+      ],
+      "Usability Check": [
+        {
+          "title": "Usability (User) Testing 101 - NN/G",
+          "url": "https://www.nngroup.com/articles/usability-testing-101/",
+          "publisher": "Nielsen Norman Group",
+          "evidence_url": "https://www.nngroup.com/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Nielsen Norman Group for this step."
+        },
+        {
+          "title": "Usability Testing: The Key to Designing With Confidence | Figma",
+          "url": "https://www.figma.com/resource-library/usability-testing/",
+          "publisher": "Figma",
+          "evidence_url": "https://www.figma.com/legal/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Figma for this step."
+        },
+        {
+          "title": "Usability | Digital.gov",
+          "url": "https://digital.gov/topics/usability/",
+          "publisher": "Digital.gov",
+          "evidence_url": "https://digital.gov/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Digital.gov for this step."
+        }
+      ]
+    },
+    "career-readiness": {
+      "Portfolio Evidence": [
+        {
+          "title": "About the repository README file - GitHub Docs",
+          "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes",
+          "publisher": "GitHub Docs",
+          "evidence_url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on GitHub Docs for this step."
+        },
+        {
+          "title": "GitHub Skills · GitHub",
+          "url": "https://github.com/skills",
+          "publisher": "GitHub Skills",
+          "evidence_url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on GitHub Skills for this step."
+        },
+        {
+          "title": "Developer Roadmaps - roadmap.sh",
+          "url": "https://roadmap.sh/",
+          "publisher": "roadmap.sh",
+          "evidence_url": "https://roadmap.sh/about",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on roadmap.sh for this step."
+        }
+      ],
+      "Application Materials": [
+        {
+          "title": "How to Write a Developer Résumé Hiring Managers Will Actually Read",
+          "url": "https://www.freecodecamp.org/news/how-to-write-a-resume-that-works/",
+          "publisher": "freeCodeCamp",
+          "evidence_url": "https://www.freecodecamp.org/copyright-policy/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on freeCodeCamp for this step."
+        },
+        {
+          "title": "Harvard FAS | Mignone Center for Career Success",
+          "url": "https://careerservices.fas.harvard.edu/",
+          "publisher": "Harvard FAS Career Services",
+          "evidence_url": "https://careerservices.fas.harvard.edu/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Harvard FAS Career Services for this step."
+        },
+        {
+          "title": "Growing in Your UX Career: Study Guide - NN/G",
+          "url": "https://www.nngroup.com/articles/growing-your-ux-career-study-guide/",
+          "publisher": "Nielsen Norman Group",
+          "evidence_url": "https://www.nngroup.com/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Nielsen Norman Group for this step."
+        }
+      ],
+      "Interview Practice": [
+        {
+          "title": "Interview tips that will give you confidence and help you land a dev job",
+          "url": "https://www.freecodecamp.org/news/interview-tips-that-will-give-you-confidence-and-help-you-land-a-dev-job-5ef43c1ae422/",
+          "publisher": "freeCodeCamp",
+          "evidence_url": "https://www.freecodecamp.org/copyright-policy/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on freeCodeCamp for this step."
+        },
+        {
+          "title": "Advice for Approaching a UX Job Search - NN/G",
+          "url": "https://www.nngroup.com/articles/advice-ux-job-search/",
+          "publisher": "Nielsen Norman Group",
+          "evidence_url": "https://www.nngroup.com/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Nielsen Norman Group for this step."
+        },
+        {
+          "title": "Exercism",
+          "url": "https://exercism.org/",
+          "publisher": "Exercism",
+          "evidence_url": "https://exercism.org/about",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Exercism for this step."
+        }
+      ]
+    },
+    "entrepreneurship-freelance": {
+      "Service Offer": [
+        {
+          "title": "Plan your business - Small Business Administration",
+          "url": "https://www.sba.gov/business-guide/plan-your-business/",
+          "publisher": "U.S. Small Business Administration",
+          "evidence_url": "https://www.sba.gov/business-guide",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on U.S. Small Business Administration for this step."
+        },
+        {
+          "title": "Business Plan Resources",
+          "url": "https://www.bplans.com/",
+          "publisher": "Bplans",
+          "evidence_url": "https://www.bplans.com/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Bplans for this step."
+        },
+        {
+          "title": "How To Start a Graphic Design Business: Key Steps for Success (2026) - Shopify",
+          "url": "https://www.shopify.com/blog/graphic-design-business",
+          "publisher": "Shopify",
+          "evidence_url": "https://www.shopify.com/blog",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Shopify for this step."
+        }
+      ],
+      "Pricing Basics": [
+        {
+          "title": "How Much Should I Charge? | CO- by US Chamber of Commerce",
+          "url": "https://www.uschamber.com/co/start/strategy/product-pricing-overview",
+          "publisher": "U.S. Chamber of Commerce",
+          "evidence_url": "https://www.uschamber.com/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on U.S. Chamber of Commerce for this step."
+        },
+        {
+          "title": "How to Price Freelance Work Without Accidentally Buying Yourself a Worse Job | OwnerMath",
+          "url": "https://www.ownermath.com/guides/how-to-price-freelance-work/",
+          "publisher": "OwnerMath",
+          "evidence_url": "https://ownermath.com/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on OwnerMath for this step."
+        },
+        {
+          "title": "Freelance Pricing Guide 2025 | The Freelancer Club",
+          "url": "https://freelancerclub.net/resources/blog/post/freelance-pricing-guide-2025",
+          "publisher": "The Freelancer Club",
+          "evidence_url": "https://www.thefreelancerclub.com/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on The Freelancer Club for this step."
+        }
+      ],
+      "Client Communication": [
+        {
+          "title": "How to Work With Clients and Customers",
+          "url": "https://www.gov.uk/service-manual/design",
+          "publisher": "GOV.UK Service Manual",
+          "evidence_url": "https://www.gov.uk/help/terms-conditions",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on GOV.UK Service Manual for this step."
+        },
+        {
+          "title": "Practical Advice on Working With Clients",
+          "url": "https://www.nngroup.com/articles/",
+          "publisher": "Nielsen Norman Group",
+          "evidence_url": "https://www.nngroup.com/about/",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on Nielsen Norman Group for this step."
+        },
+        {
+          "title": "Plan Your Business: Start-Up Guide",
+          "url": "https://www.sba.gov/business-guide/plan-your-business",
+          "publisher": "U.S. Small Business Administration",
+          "evidence_url": "https://www.sba.gov/business-guide",
+          "reviewed_by": "Owner",
+          "reviewed_on": "2026-10-22",
+          "expires_on": "2027-01-20",
+          "rationale": "Openly readable material on U.S. Small Business Administration for this step."
+        }
+      ]
+    }
+  }
+}

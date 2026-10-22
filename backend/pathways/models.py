@@ -71,6 +71,9 @@ class Pathway(models.Model):
     enrollment_open = models.BooleanField(default=False)
     is_demo = models.BooleanField(default=False)
     discovery_managed = models.BooleanField(default=False)
+    # A curated pathway publishes reading links an owner checked by hand
+    # rather than material discovered from a feed.
+    is_curated = models.BooleanField(default=False)
     publication_key = models.CharField(max_length=64, blank=True, default="")
     coverage_checked_at = models.DateTimeField(null=True, blank=True)
     coverage_failed_since = models.DateTimeField(null=True, blank=True)
@@ -121,6 +124,7 @@ class Pathway(models.Model):
                 "locale",
                 "is_demo",
                 "discovery_managed",
+                "is_curated",
                 "publication_key",
             )
             if any(
@@ -270,6 +274,55 @@ class PathwayResource(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["pathway_skill", "item"], name="unique_step_resource"
+            )
+        ]
+
+
+class CuratedResource(models.Model):
+    """A reading link an owner checked and attached to a step by hand.
+
+    A curated resource is not ingested material. It is a link to a freely
+    available page that the owner confirmed is free to read, is written in
+    English, and is covered by the review evidence recorded here. Only the
+    title, the publisher and the link are published, so no publisher text is
+    reproduced. The owner is the reviewer, which is why a curated resource
+    carries its own evidence rather than a feed permission.
+    """
+
+    pathway_skill = models.ForeignKey(
+        PathwaySkill, on_delete=models.CASCADE, related_name="curated_resources"
+    )
+    title = models.CharField(max_length=300)
+    url = models.URLField()
+    publisher = models.CharField(max_length=120)
+    # The publisher's own terms or licence page, which is the evidence that
+    # the linked material may be read and linked to.
+    evidence_url = models.URLField(max_length=2048)
+    # The owner who checked this link and the dates of that check.
+    reviewed_by = models.CharField(max_length=120)
+    reviewed_on = models.DateField()
+    expires_on = models.DateField()
+    order = models.PositiveSmallIntegerField(default=0)
+    # A short owner note on why this link was chosen.
+    rationale = models.TextField(blank=True)
+
+    def save(self, *args, **kwargs):
+        saved_ids = (
+            type(self)
+            .objects.filter(pk=self.pk)
+            .values_list("pathway_skill__pathway_id", flat=True)
+        )
+        require_draft([self.pathway_skill.pathway_id, *saved_ids])
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return type(self).objects.filter(pk=self.pk).delete()
+
+    class Meta:
+        ordering = ["order", "pk"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["pathway_skill", "url"], name="unique_curated_step_link"
             )
         ]
 

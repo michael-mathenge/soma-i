@@ -89,7 +89,61 @@ def checkpoint_json(checkpoint):
 def pathway_picks(learner, skill, limit):
     if learner.chosen_pathway and learner.chosen_pathway.is_demo:
         return recommendations(skill, limit)
-    return reviewed_pathway_recommendations(learner.chosen_pathway, skill, limit)
+    picks = list(reviewed_pathway_recommendations(learner.chosen_pathway, skill, limit))
+    # A curated pathway publishes links the owner checked by hand. They are
+    # the reading list for the step, and they come first.
+    curated = curated_picks(learner, skill, limit)
+    return curated + picks[: max(0, limit - len(curated))]
+
+
+def curated_picks(learner, skill, limit):
+    """Return the curated reading links for a step of the chosen pathway.
+
+    A curated pathway publishes links an owner checked by hand, so they
+    are not stored reading material and carry their own review evidence.
+    """
+    pathway = learner.chosen_pathway
+    if pathway is None:
+        return []
+    from pathways.curated import curated_links
+
+    links = []
+    for step in pathway.steps.filter(skill=skill):
+        links.extend(curated_links(step))
+    return links[:limit]
+
+
+def reading_key(reading):
+    """A unique key for a reading, so feed items and curated links never collide."""
+    if isinstance(reading, Item):
+        return f"item-{reading.pk}"
+    return f"curated-{reading.pk}"
+
+
+def reading_json(reading, done_ids=None):
+    """Serialize a feed item or a curated link for the learner.
+
+    A curated link is published as its title, its publisher and its
+    address, with the review that cleared it. No publisher text is
+    reproduced, so there is no excerpt to return.
+    """
+    if isinstance(reading, Item):
+        return item_json(reading, done_ids)
+    return curated_json(reading)
+
+
+def curated_json(link):
+    return {
+        "id": f"curated-{link.pk}",
+        "kind": "curated",
+        "title": link.title,
+        "url": link.url,
+        "publisher": link.publisher,
+        "rationale": link.rationale,
+        "reviewed_on": link.reviewed_on.isoformat(),
+        "expires_on": link.expires_on.isoformat(),
+        "evidence_url": link.evidence_url,
+    }
 
 
 def current_learner(request):
@@ -337,7 +391,9 @@ def dashboard(request):
         )
     seen = set()
     recommended = [
-        item for item in recommended if not (item.pk in seen or seen.add(item.pk))
+        item
+        for item in recommended
+        if not (reading_key(item) in seen or seen.add(reading_key(item)))
     ][:8]
     steps = []
     if state["pathway"]:
@@ -372,7 +428,7 @@ def dashboard(request):
                 if state["next_checkpoint"]
                 else None
             ),
-            "items": [item_json(item, done_ids) for item in recommended],
+            "items": [reading_json(item, done_ids) for item in recommended],
         }
     )
 
@@ -387,10 +443,11 @@ def items_list(request):
     items, seen = [], set()
     for skill in state["remaining"]:
         for item in pathway_picks(learner, skill, 10):
-            if item.pk not in seen:
+            key = reading_key(item)
+            if key not in seen:
                 items.append(item)
-                seen.add(item.pk)
-    return Response([item_json(item, done_ids) for item in items[:40]])
+                seen.add(key)
+    return Response([reading_json(item, done_ids) for item in items[:40]])
 
 
 @api_view(["POST"])
@@ -466,18 +523,20 @@ def what_next(learner, checkpoint):
     seen_items = set()
     for skill in state["remaining"]:
         for item in pathway_picks(learner, skill, 3):
-            if item.pk not in seen_items:
+            key = reading_key(item)
+            if key not in seen_items:
                 recommended.append(item)
-                seen_items.add(item.pk)
+                seen_items.add(key)
             if len(recommended) == 3:
                 break
         if len(recommended) == 3:
             break
     if len(recommended) < 2:
         for item in pathway_picks(learner, unlocked, 3):
-            if item.pk not in seen_items:
+            key = reading_key(item)
+            if key not in seen_items:
                 recommended.append(item)
-                seen_items.add(item.pk)
+                seen_items.add(key)
             if len(recommended) == 3:
                 break
     matched = []
@@ -494,7 +553,7 @@ def what_next(learner, checkpoint):
             if state["next_checkpoint"]
             else None
         ),
-        "items": [item_json(item, completed_items(learner)) for item in recommended],
+        "items": [reading_json(item, completed_items(learner)) for item in recommended],
         "opportunities": [
             {
                 "id": op.pk,

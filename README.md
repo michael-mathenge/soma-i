@@ -347,6 +347,67 @@ Read the [AI-use disclosure](docs/AI-usage.md) for the owner’s account of AI c
 | Multilingual | English/Kiswahili interface and reminder strings; bilingual test definitions | Pathway-specific translation is limited to Data Analyst; native-speaker review **not done** |
 | Local relevance | Kenya-labelled sample opportunities and the assumed Nakuru learner | Locally African RSS sources and verified local vacancies: **not done** |
 
+## Publishing a curated curriculum
+
+The automatic route needs two independent publishers whose reuse permission
+is verified. A small learning site often has one publisher with generous
+terms rather than two with narrow ones, so there is a second route: a
+**curated curriculum**, where the owner checks each reading link by hand and
+records the check.
+
+The rules are deliberately strict even though the owner selects the links.
+Every link is reviewed, dated and expires, and a link whose review has
+expired is not served. A step needs at least three links and a topic needs
+at least two independent publishers, so no single publisher can carry a
+curriculum. Publication creates a new revision; a published curriculum is
+frozen, and a later change creates a new version and leaves the old one
+intact for the learners who selected it.
+
+A curated link is published as its title, its publisher and its address.
+No publisher text is reproduced, so there is no excerpt to republish. The
+review records the publisher's own terms page, which is the evidence that
+the material may be read and linked to.
+
+The reviewed curricula live in
+[backend/pathways/curricula.json](backend/pathways/curricula.json), beside
+the reviewed discovery rules, so the whole curriculum is reviewed in one
+place. Each entry records the link, the publisher, the publisher's own
+terms page as the evidence, who checked it, the dates, and why it was
+chosen:
+
+```json
+{
+  "title": "How the web works",
+  "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+  "publisher": "MDN Web Docs",
+  "evidence_url": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines",
+  "reviewed_by": "Your name",
+  "reviewed_on": "2026-10-21",
+  "expires_on": "2026-12-20",
+  "rationale": "Explains the request and response cycle."
+}
+```
+
+Each step needs at least three links and each topic needs links from at
+least two publishers. The learning sequence, the checkpoint criteria and
+the check-in questions come from the reviewed discovery rules, so a curated
+topic is the same kind of learning sequence as every other pathway. Only
+the reading list comes from the curricula file.
+
+**PowerShell — publish it**
+
+```powershell
+$env:SOMA_ENV = 'development'
+$env:DATABASE_URL = 'sqlite:///C:/Users/' + $env:USERNAME + '/AppData/Local/Temp/soma-curated/curated.sqlite3'
+New-Item -ItemType Directory -Force -Path "$env:TEMP\soma-curated" | Out-Null
+.\.venv\Scripts\python.exe backend\manage.py migrate --noinput
+.\.venv\Scripts\python.exe backend\manage.py publish_curriculum --dry-run
+.\.venv\Scripts\python.exe backend\manage.py publish_curriculum
+```
+
+A dry run validates every link and reports what would be published without
+writing anything. Pass a path to publish a different file.
+
 ## Recording review evidence
 
 A pathway can only be published when the owner has confirmed, in writing and

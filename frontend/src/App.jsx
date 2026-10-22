@@ -739,6 +739,60 @@ function Dashboard({ learner, pathways = [], refresh, t }) {
   );
 }
 
+function CuratedCard({ item, t }) {
+  const text = (key) => t[key] || en[key];
+  return (
+    <article className="panel item-card curated-card">
+      <p className="eyebrow">{text("curatedReading")}</p>
+      <h3>
+        {item.url ? (
+          <a href={item.url} target="_blank" rel="noreferrer">
+            {item.title}
+          </a>
+        ) : (
+          item.title
+        )}
+      </h3>
+      {item.rationale && <p className="item-summary">{item.rationale}</p>}
+      <p className="meta">
+        {[item.publisher, text("curatedChecked")].filter(Boolean).join(" · ")}
+      </p>
+      {item.url && (
+        <p className="item-read">
+          <a href={item.url} target="_blank" rel="noreferrer">
+            {t.readAtPublisher}
+          </a>
+        </p>
+      )}
+      <details className="item-provenance" lang={t === sw ? "en" : undefined}>
+        <summary>{text("sourceDetails")}</summary>
+        <dl>
+          <dt>{text("attribution")}</dt>
+          <dd>{item.publisher}</dd>
+          <dt>{text("curatedCheckedOn")}</dt>
+          <dd>
+            <time dateTime={item.reviewed_on}>{item.reviewed_on}</time>
+          </dd>
+          <dt>{text("curatedReviewExpires")}</dt>
+          <dd>
+            <time dateTime={item.expires_on}>{item.expires_on}</time>
+          </dd>
+          {item.evidence_url && (
+            <>
+              <dt>{text("curatedEvidence")}</dt>
+              <dd>
+                <a href={item.evidence_url} target="_blank" rel="noreferrer">
+                  {text("curatedTermsAtPublisher")}
+                </a>
+              </dd>
+            </>
+          )}
+        </dl>
+      </details>
+    </article>
+  );
+}
+
 function ItemProvenance({ item, t }) {
   const text = (key) => t[key] || en[key];
   const dateOnly = (value) => {
@@ -796,48 +850,52 @@ function Cards({ items = [], t, doneCallback, disabled = false }) {
     <>
       <ActionFeedback action={action} t={t} />
       <div className="cards" aria-busy={action.pending}>
-        {items.map((item) => (
-          <article className="panel item-card" key={item.id}>
-            <h3>
-              {item.url ? (
-                <a href={item.url} target="_blank" rel="noreferrer">
-                  {item.title}
-                </a>
-              ) : (
-                item.title
-              )}
-            </h3>
-            {item.excerpt && <p className="item-summary">{item.excerpt}</p>}
-            <p className="meta">
-              {[item.source, item.is_low_data && t.lowData]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-            {item.url && (
-              <p className="item-read">
-                <a href={item.url} target="_blank" rel="noreferrer">
-                  {t.readAtPublisher}
-                </a>
+        {items.map((item) =>
+          item.kind === "curated" ? (
+            <CuratedCard key={item.id} item={item} t={t} />
+          ) : (
+            <article className="panel item-card" key={item.id}>
+              <h3>
+                {item.url ? (
+                  <a href={item.url} target="_blank" rel="noreferrer">
+                    {item.title}
+                  </a>
+                ) : (
+                  item.title
+                )}
+              </h3>
+              {item.excerpt && <p className="item-summary">{item.excerpt}</p>}
+              <p className="meta">
+                {[item.source, item.is_low_data && t.lowData]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
-            )}
-            <ItemProvenance item={item} t={t} />
-            <p>{item.skills.join(" · ")}</p>
-            {!item.done && doneCallback && (
-              <button
-                disabled={disabled || action.pending}
-                onClick={() =>
-                  action.run(async () => {
-                    await api.post(`/items/${item.id}/done/`);
-                    doneCallback(item.id);
-                  })
-                }
-              >
-                {t.markDone}
-              </button>
-            )}
-            {item.done && <span>✓ {t.done}</span>}
-          </article>
-        ))}
+              {item.url && (
+                <p className="item-read">
+                  <a href={item.url} target="_blank" rel="noreferrer">
+                    {t.readAtPublisher}
+                  </a>
+                </p>
+              )}
+              <ItemProvenance item={item} t={t} />
+              <p>{item.skills.join(" · ")}</p>
+              {!item.done && doneCallback && (
+                <button
+                  disabled={disabled || action.pending}
+                  onClick={() =>
+                    action.run(async () => {
+                      await api.post(`/items/${item.id}/done/`);
+                      doneCallback(item.id);
+                    })
+                  }
+                >
+                  {t.markDone}
+                </button>
+              )}
+              {item.done && <span>✓ {t.done}</span>}
+            </article>
+          ),
+        )}
       </div>
     </>
   );
