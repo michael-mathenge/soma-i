@@ -265,8 +265,14 @@ function Catalogue({ t }) {
           className="toolbar"
           onSubmit={(event) => {
             event.preventDefault();
+            // The submitted term is read from the form itself rather than
+            // from the component state, so a term that was typed and
+            // submitted in quick succession is never dropped.
+            const term = (
+              event.currentTarget.elements.namedItem("q")?.value ?? ""
+            ).trim();
             setParams({
-              ...(search.trim() ? { q: search.trim() } : {}),
+              ...(term ? { q: term } : {}),
               page: "1",
             });
           }}
@@ -275,6 +281,7 @@ function Catalogue({ t }) {
             {en.searchTopics}
             <input
               type="search"
+              name="q"
               maxLength={120}
               value={search}
               onChange={(event) => setSearch(event.target.value)}

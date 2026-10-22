@@ -13,8 +13,10 @@ const candidateDatabaseUrl = `sqlite:///${candidateDatabasePath.replaceAll("\\",
 const databasePath = assertIsolatedDatabase(candidateDatabaseUrl);
 const databaseDirectory = dirname(databasePath);
 const databaseUrl = `sqlite:///${databasePath.replaceAll("\\", "/")}`;
-const apiPort = "8127";
-const uiPort = "4177";
+// The test ports are configurable so a developer whose machine already uses
+// them can run the suite without stopping an unrelated service.
+const apiPort = process.env.SOMAI_E2E_API_PORT || "8127";
+const uiPort = process.env.SOMAI_E2E_UI_PORT || "4177";
 const e2eEnv = {
   ...process.env,
   DATABASE_URL: databaseUrl,
