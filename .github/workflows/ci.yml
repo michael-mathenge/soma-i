@@ -21,7 +21,7 @@ env:
 
 jobs:
   backend:
-    name: Backend tests
+    name: backend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -100,7 +100,7 @@ jobs:
         run: python -m pytest backend -q
 
   frontend:
-    name: Frontend checks
+    name: frontend
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -143,7 +143,7 @@ jobs:
         run: npx --yes pnpm@${{ env.PNPM_VERSION }} run test:e2e:robustness
 
   browser:
-    name: Browser journey
+    name: browser
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -207,7 +207,7 @@ jobs:
           if-no-files-found: ignore
 
   container:
-    name: Container image
+    name: container
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
