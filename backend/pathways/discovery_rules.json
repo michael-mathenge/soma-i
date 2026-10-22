@@ -7,6 +7,11 @@
       "title": "Data analysis foundations",
       "description": "Build practical foundations through linked English resources and original practice.",
       "target_outcome": "Complete and explain the listed practice tasks.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=960&q=80",
+        "alt": "Analytics dashboard on a laptop screen.",
+        "credit": "Unsplash"
+      },
       "aliases": [
         "data analysis",
         "data analytics",
@@ -124,6 +129,11 @@
       "title": "Accessible web foundations",
       "description": "Build practical foundations through linked English resources and original practice.",
       "target_outcome": "Complete and explain the listed practice tasks.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=960&q=80",
+        "alt": "Code editor and web design workspace.",
+        "credit": "Unsplash"
+      },
       "aliases": [
         "frontend",
         "front-end",
@@ -242,6 +252,11 @@
       "title": "Python service foundations",
       "description": "Build practical foundations through linked English resources and original practice.",
       "target_outcome": "Complete and explain the listed practice tasks.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=960&q=80",
+        "alt": "Developer working with code on a laptop.",
+        "credit": "Unsplash"
+      },
       "aliases": ["backend", "python", "rest api", "api development", "pytest"],
       "steps": [
         {
@@ -352,6 +367,718 @@
                 "An example, its result and a remaining limitation.",
                 "An unsupported claim of job readiness."
               ],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "digital-foundations",
+      "title": "Digital foundations",
+      "description": "Build confident computer, internet, collaboration and online safety habits before choosing a specialist track.",
+      "target_outcome": "Use essential digital tools responsibly and explain your workflow.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=960&q=80",
+        "alt": "Learner using a laptop for online study.",
+        "credit": "Unsplash"
+      },
+      "aliases": ["digital skills", "computer basics", "internet basics", "online safety"],
+      "steps": [
+        {
+          "skill": "Computer Basics",
+          "aliases": ["computer basics", "files", "folders", "operating system"],
+          "requires": [],
+          "title": "Computer Basics practice",
+          "criteria": "Create a folder structure for a learning project, save two files and explain how you would find them again.",
+          "unlocks_text": "Explain how files, folders and search support organized work.",
+          "quiz_json": [
+            {
+              "question": "Which action supports organized computer use?",
+              "options": ["Name folders clearly and save files where they belong.", "Save every file with the same name."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Open the file from its folder and describe the path.", "Assume the file is saved without checking."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One example, its result and a remaining limitation.", "A claim that no more practice is needed."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Internet Research",
+          "aliases": ["internet research", "search", "web search", "source evaluation"],
+          "requires": ["Computer Basics"],
+          "title": "Internet Research practice",
+          "criteria": "Compare two web pages about the same topic. Record publisher, date, purpose and one reason you trust or question each page.",
+          "unlocks_text": "Explain why source context matters before using information.",
+          "quiz_json": [
+            {
+              "question": "Which clue helps evaluate a web source?",
+              "options": ["Publisher, date and purpose.", "Only the first search result position."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Compare evidence across more than one source.", "Copy a claim without reading the page."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["A source you accepted and a source you questioned.", "A list of links without notes."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Online Safety",
+          "aliases": ["online safety", "privacy", "passwords", "phishing"],
+          "requires": ["Internet Research"],
+          "title": "Online Safety practice",
+          "criteria": "Create a checklist for recognizing a suspicious message. Include sender, link destination, urgency and requested information.",
+          "unlocks_text": "Identify one sign of a risky message and a safer next action.",
+          "quiz_json": [
+            {
+              "question": "Which request deserves caution?",
+              "options": ["A message demanding passwords or urgent payment.", "A message that asks you to verify through a known official channel."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Inspect sender and link destination before acting.", "Click first and decide later."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One risky signal and a safer response.", "Private passwords or secret codes."],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "full-stack-web-developer",
+      "title": "Full-stack web foundations",
+      "description": "Connect frontend, backend, databases and deployment concepts through small practical builds.",
+      "target_outcome": "Build and explain a small data-backed web feature.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=960&q=80",
+        "alt": "Web application code on a monitor.",
+        "credit": "Unsplash"
+      },
+      "aliases": ["full stack", "full-stack", "web app", "javascript", "backend"],
+      "steps": [
+        {
+          "skill": "Web UI",
+          "aliases": ["web ui", "html", "css", "javascript", "frontend"],
+          "requires": [],
+          "title": "Web UI practice",
+          "criteria": "Build a small form with labels, validation help text and a responsive layout.",
+          "unlocks_text": "Explain how the interface guides a user through the task.",
+          "quiz_json": [
+            {
+              "question": "What makes a form easier to use?",
+              "options": ["Clear labels and validation feedback.", "Hidden inputs with no explanation."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Use the form at narrow and wide widths.", "Only view it on one desktop size."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["A usability issue found and fixed.", "A screenshot without explanation."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Backend Routes",
+          "aliases": ["backend route", "server route", "api endpoint", "http"],
+          "requires": ["Web UI"],
+          "title": "Backend Routes practice",
+          "criteria": "Design GET and POST routes for the form. Include success and validation-error examples.",
+          "unlocks_text": "Explain how the client and server divide responsibilities.",
+          "quiz_json": [
+            {
+              "question": "What should a validation error do?",
+              "options": ["Tell the client what must be corrected.", "Expose unrelated server details."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Test both valid and invalid requests.", "Test only the happy path."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One request, one response and one limitation.", "A claim that every API works the same way."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Database Records",
+          "aliases": ["database records", "database", "model", "sql"],
+          "requires": ["Backend Routes"],
+          "title": "Database Records practice",
+          "criteria": "Sketch a table or model for the form data, including required fields and one uniqueness or validation rule.",
+          "unlocks_text": "Explain how stored data differs from temporary screen state.",
+          "quiz_json": [
+            {
+              "question": "What belongs in a database design note?",
+              "options": ["Fields, required rules and relationships.", "Only the button color."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Try duplicate or missing data examples.", "Assume every row is valid."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["A rule that protects data quality.", "Private learner information."],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "cloud-devops-foundations",
+      "title": "Cloud and DevOps foundations",
+      "description": "Learn deployment, environment configuration, monitoring and repeatable operations without paid infrastructure assumptions.",
+      "target_outcome": "Explain a small application's runtime, release and recovery path.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=960&q=80",
+        "alt": "Networked earth and cloud infrastructure concept.",
+        "credit": "Unsplash"
+      },
+      "aliases": ["cloud", "devops", "deployment", "operations", "monitoring"],
+      "steps": [
+        {
+          "skill": "Environment Configuration",
+          "aliases": ["environment configuration", "environment variables", "settings"],
+          "requires": [],
+          "title": "Environment Configuration practice",
+          "criteria": "List local, test and deployed settings for a small app. Mark which values are secrets and which are public.",
+          "unlocks_text": "Explain why configuration should not be hard-coded.",
+          "quiz_json": [
+            {
+              "question": "Which value should be treated as a secret?",
+              "options": ["A production signing key.", "A public app name."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Confirm required settings fail closed when missing.", "Let the app guess production defaults."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One configuration risk and mitigation.", "The secret value itself."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Deployment Basics",
+          "aliases": ["deployment", "release", "build", "hosting"],
+          "requires": ["Environment Configuration"],
+          "title": "Deployment Basics practice",
+          "criteria": "Write a release checklist covering build, migrations, health check and rollback note.",
+          "unlocks_text": "Explain the difference between code passing tests and a deployed service working.",
+          "quiz_json": [
+            {
+              "question": "What belongs in a release checklist?",
+              "options": ["Build, migration and health-check evidence.", "Only a commit message."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Record actual command results.", "Assume deployment succeeded."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["A rollback or recovery note.", "A promise of guaranteed uptime."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Monitoring Basics",
+          "aliases": ["monitoring", "logs", "alerts", "observability"],
+          "requires": ["Deployment Basics"],
+          "title": "Monitoring Basics practice",
+          "criteria": "Define one health signal, one error signal and one stale-job signal for a small learning app.",
+          "unlocks_text": "Explain why a silent failed job needs separate evidence.",
+          "quiz_json": [
+            {
+              "question": "Which signal helps detect a stale schedule?",
+              "options": ["A recorded last-success time.", "A note that the job should run."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Describe expected and failed states.", "Watch only successful logs."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One alert limit to avoid noise.", "Learner secrets in logs."],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "cybersecurity-foundations",
+      "title": "Cybersecurity foundations",
+      "description": "Practice defensive security basics for accounts, web requests, privacy and incident response.",
+      "target_outcome": "Recognize common risks and document safe handling steps.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=960&q=80",
+        "alt": "Security monitoring screens in a dark operations room.",
+        "credit": "Unsplash"
+      },
+      "aliases": ["cybersecurity", "security", "privacy", "web security"],
+      "steps": [
+        {
+          "skill": "Account Security",
+          "aliases": ["account security", "passwords", "authentication"],
+          "requires": [],
+          "title": "Account Security practice",
+          "criteria": "Compare password, session and recovery risks for a small account feature. List one safer control for each.",
+          "unlocks_text": "Explain why recovery flows need the same care as login.",
+          "quiz_json": [
+            {
+              "question": "Which control supports account security?",
+              "options": ["Hashing passwords and rotating sessions.", "Storing passwords in readable text."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Review login, logout and recovery behavior.", "Only test registration."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["A risk and a control.", "A real password."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Web Request Safety",
+          "aliases": ["web request safety", "csrf", "ssrf", "input validation"],
+          "requires": ["Account Security"],
+          "title": "Web Request Safety practice",
+          "criteria": "Map one unsafe write request and one unsafe fetch request. Explain how validation changes the risk.",
+          "unlocks_text": "Identify a boundary where untrusted input must be checked.",
+          "quiz_json": [
+            {
+              "question": "Which input should be treated as untrusted?",
+              "options": ["A URL supplied by a feed or user.", "Only text typed into a password field."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Try allowed and rejected examples.", "Accept every remote destination."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One validation rule and why it exists.", "Remote response body secrets."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Incident Notes",
+          "aliases": ["incident response", "incident notes", "recovery"],
+          "requires": ["Web Request Safety"],
+          "title": "Incident Notes practice",
+          "criteria": "Write a short incident note with timeline, impact, fix, validation and remaining risk.",
+          "unlocks_text": "Explain how evidence-based notes support safer follow-up.",
+          "quiz_json": [
+            {
+              "question": "What belongs in an incident note?",
+              "options": ["Timeline, impact, fix and validation.", "Blame without evidence."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Tie each claim to an observation.", "Write only assumptions."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["A remaining risk or follow-up.", "Unredacted secrets."],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "ai-data-literacy",
+      "title": "AI and data literacy",
+      "description": "Learn practical AI concepts, data quality habits and responsible evaluation without paid AI dependencies.",
+      "target_outcome": "Evaluate AI-assisted output and explain its limits.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=960&q=80",
+        "alt": "Abstract artificial intelligence visualization.",
+        "credit": "Unsplash"
+      },
+      "aliases": ["ai literacy", "artificial intelligence", "machine learning", "data literacy"],
+      "steps": [
+        {
+          "skill": "Data Quality",
+          "aliases": ["data quality", "clean data", "dataset", "bias"],
+          "requires": [],
+          "title": "Data Quality practice",
+          "criteria": "Inspect a tiny dataset for missing, duplicated or confusing values. Record one cleaning decision and one uncertainty.",
+          "unlocks_text": "Explain how data quality affects conclusions.",
+          "quiz_json": [
+            {
+              "question": "Which issue can affect analysis quality?",
+              "options": ["Missing or duplicated values.", "Clear column names."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Record what changed and why.", "Silently edit data."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One uncertainty you could not resolve.", "A guarantee that the dataset is perfect."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "AI Output Review",
+          "aliases": ["ai output", "prompting", "model evaluation", "hallucination"],
+          "requires": ["Data Quality"],
+          "title": "AI Output Review practice",
+          "criteria": "Compare an AI-assisted answer with two trusted sources. Mark one useful part and one unsupported claim.",
+          "unlocks_text": "Explain why AI output needs independent verification.",
+          "quiz_json": [
+            {
+              "question": "What should you do with an unsupported AI claim?",
+              "options": ["Verify it before relying on it.", "Treat it as automatically true."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Compare against trusted sources.", "Ask the same tool to agree with itself."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["A useful part and an unsupported part.", "Private or sensitive prompts."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Responsible Use",
+          "aliases": ["responsible ai", "privacy", "fairness", "ai safety"],
+          "requires": ["AI Output Review"],
+          "title": "Responsible Use practice",
+          "criteria": "Write rules for when not to enter personal data into an AI tool and when to seek human review.",
+          "unlocks_text": "Explain one boundary for safe AI assistance.",
+          "quiz_json": [
+            {
+              "question": "Which boundary supports responsible AI use?",
+              "options": ["Do not enter private data into unapproved tools.", "Paste every learner record for convenience."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Identify sensitive data before using a tool.", "Decide after sharing it."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["A review boundary and reason.", "A copied private dataset."],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "product-ux-foundations",
+      "title": "Product and UX foundations",
+      "description": "Practice user-centered problem framing, simple flows, usability checks and product evidence.",
+      "target_outcome": "Design and test a small user workflow with clear evidence.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=960&q=80",
+        "alt": "Design notes and interface sketches on a desk.",
+        "credit": "Unsplash"
+      },
+      "aliases": ["product", "ux", "user experience", "design", "usability"],
+      "steps": [
+        {
+          "skill": "Problem Framing",
+          "aliases": ["problem framing", "user problem", "product brief"],
+          "requires": [],
+          "title": "Problem Framing practice",
+          "criteria": "Write a one-person problem statement with assumptions separated from evidence.",
+          "unlocks_text": "Explain why assumptions need validation.",
+          "quiz_json": [
+            {
+              "question": "What should be separated in a product brief?",
+              "options": ["Assumptions and verified evidence.", "Every idea and every fact mixed together."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Label which claims are assumptions.", "Present assumptions as research."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One assumption to validate.", "A claim of measured impact without data."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "User Flow",
+          "aliases": ["user flow", "journey map", "workflow", "wireframe"],
+          "requires": ["Problem Framing"],
+          "title": "User Flow practice",
+          "criteria": "Sketch the steps a learner takes from choosing a pathway to completing one checkpoint.",
+          "unlocks_text": "Explain where a user might get stuck.",
+          "quiz_json": [
+            {
+              "question": "What does a user flow show?",
+              "options": ["Steps, choices and possible blockers.", "Only the final screen color."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Walk through the flow with a scenario.", "Skip the first and last steps."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One place to simplify the flow.", "A hidden instruction users cannot see."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Usability Check",
+          "aliases": ["usability", "accessibility", "user testing"],
+          "requires": ["User Flow"],
+          "title": "Usability Check practice",
+          "criteria": "Ask one person to complete a small task or rehearse it yourself with a checklist. Record one issue and one change.",
+          "unlocks_text": "Explain how observation changed the design.",
+          "quiz_json": [
+            {
+              "question": "What should a usability note include?",
+              "options": ["Task, observation, issue and change.", "Only a personal preference."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Observe the task from start to finish.", "Only ask whether the app looks nice."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One design change tied to evidence.", "A guarantee all users will succeed."],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "career-readiness",
+      "title": "Career readiness",
+      "description": "Prepare honest portfolios, applications and interview practice around demonstrated skills.",
+      "target_outcome": "Present one learning project and a credible next-step plan.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=960&q=80",
+        "alt": "People reviewing work together at a table.",
+        "credit": "Unsplash"
+      },
+      "aliases": ["career readiness", "portfolio", "interview", "job search"],
+      "steps": [
+        {
+          "skill": "Portfolio Evidence",
+          "aliases": ["portfolio", "project evidence", "work sample"],
+          "requires": [],
+          "title": "Portfolio Evidence practice",
+          "criteria": "Write a short project note with goal, your contribution, result, evidence and limitation.",
+          "unlocks_text": "Explain a project honestly without overstating readiness.",
+          "quiz_json": [
+            {
+              "question": "What makes portfolio evidence credible?",
+              "options": ["Specific work, result and limitation.", "A vague claim of expertise."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Link each claim to an artifact or result.", "Add claims you cannot support."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One improvement you would make next.", "A false job title."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Application Materials",
+          "aliases": ["application", "cv", "resume", "cover letter"],
+          "requires": ["Portfolio Evidence"],
+          "title": "Application Materials practice",
+          "criteria": "Draft a short CV or profile summary that connects one project to one target opportunity.",
+          "unlocks_text": "Explain the match between a skill and an opportunity requirement.",
+          "quiz_json": [
+            {
+              "question": "What should an application summary connect?",
+              "options": ["A demonstrated skill and a target requirement.", "Every unrelated interest."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Compare your summary with the opportunity wording.", "Send the same text everywhere without review."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One gap you still need to address.", "A hiring guarantee."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Interview Practice",
+          "aliases": ["interview", "STAR", "practice answer"],
+          "requires": ["Application Materials"],
+          "title": "Interview Practice practice",
+          "criteria": "Answer one behavioral or project question using situation, action, result and lesson learned.",
+          "unlocks_text": "Explain a real example clearly and briefly.",
+          "quiz_json": [
+            {
+              "question": "What should a project answer include?",
+              "options": ["Situation, action, result and lesson.", "Only tools you have heard of."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Practice aloud and time the answer.", "Read silently once and stop."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One clearer way to explain your work.", "Confidential employer information."],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "entrepreneurship-freelance",
+      "title": "Entrepreneurship and freelance readiness",
+      "description": "Practice validating a small service idea, pricing work and communicating scope responsibly.",
+      "target_outcome": "Describe a small paid or volunteer service offer with clear scope and evidence.",
+      "image": {
+        "url": "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=960&q=80",
+        "alt": "Small team planning business work around a laptop.",
+        "credit": "Unsplash"
+      },
+      "aliases": ["entrepreneurship", "freelance", "client work", "small business"],
+      "steps": [
+        {
+          "skill": "Service Offer",
+          "aliases": ["service offer", "freelance service", "client problem"],
+          "requires": [],
+          "title": "Service Offer practice",
+          "criteria": "Write one narrow service offer for a real type of client, including what is included and excluded.",
+          "unlocks_text": "Explain why narrow scope is easier to deliver well.",
+          "quiz_json": [
+            {
+              "question": "What makes a service offer clearer?",
+              "options": ["Included and excluded work.", "A promise to do everything."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Ask whether the result and boundary are clear.", "Avoid defining the deliverable."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One risk in the scope.", "A guaranteed income claim."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Pricing Basics",
+          "aliases": ["pricing", "estimate", "budget", "freelance pricing"],
+          "requires": ["Service Offer"],
+          "title": "Pricing Basics practice",
+          "criteria": "Estimate time, costs and a simple price range for the service. State what would change the estimate.",
+          "unlocks_text": "Explain why assumptions affect price.",
+          "quiz_json": [
+            {
+              "question": "What should a basic estimate include?",
+              "options": ["Time, costs and assumptions.", "Only a random final number."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["List what could change the estimate.", "Hide uncertainty from the client."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One assumption to confirm.", "A promise of profit."],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "skill": "Client Communication",
+          "aliases": ["client communication", "proposal", "scope", "handoff"],
+          "requires": ["Pricing Basics"],
+          "title": "Client Communication practice",
+          "criteria": "Draft a short message that confirms the deliverable, timeline, next step and one open question.",
+          "unlocks_text": "Explain how clear communication reduces rework.",
+          "quiz_json": [
+            {
+              "question": "What should a client confirmation include?",
+              "options": ["Deliverable, timeline, next step and open question.", "Only a greeting."],
+              "answer": 0
+            },
+            {
+              "question": "How should you check this skill?",
+              "options": ["Verify the client can see what happens next.", "Leave all decisions implied."],
+              "answer": 0
+            },
+            {
+              "question": "What should your reflection include?",
+              "options": ["One possible misunderstanding to prevent.", "Private client data."],
               "answer": 0
             }
           ]
